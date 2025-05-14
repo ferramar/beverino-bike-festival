@@ -5,13 +5,14 @@ import { createTheme } from '@mui/material/styles';
 const theme = createTheme({
   palette: {
     text: {
-      primary: "#000"
+      primary: "#000",
+      secondary: "#fff"
     },
     primary: {
       main: '#1976d2',
     },
     secondary: {
-      main: '#ac145a',
+      main: '#fff',
     },
     background: {
       default: '#f5f5f5',
@@ -31,7 +32,9 @@ const theme = createTheme({
       defaultProps: { disableElevation: true },
       styleOverrides: {
         root: {
-          background: "orange"
+          background: "#BF360C",
+          color: "white",
+          fontWeight: "600"
         }
       }
     },

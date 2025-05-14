@@ -58,7 +58,9 @@ export default function Header() {
       }}
     >
       <Container maxWidth="lg">
-        <StyledToolbar variant="dense" disableGutters>
+        <StyledToolbar variant="dense" disableGutters sx={{
+          background: theme.palette.background.paper
+        }}>
           <Box sx={{
             flexGrow: 1,
             display: 'flex',
@@ -101,7 +103,7 @@ export default function Header() {
               display: { xs: 'none', md: 'flex' },
               alignItems: "center",
               gap: 4,
-              "& > a": {
+              "& > .nav-link": {
                 color: theme.palette.text.primary,
               }
             }}>
@@ -109,11 +111,12 @@ export default function Header() {
                 <Link
                   key={item.href}
                   href={item.href}
+                  className="nav-link"
                 >
                   {item.label}
                 </Link>
               ))}
-              <Button color="primary" variant="contained" size="small" sx={{
+              <Button LinkComponent={Link} href='/iscriviti' color="primary" variant="contained" size="medium" sx={{
                 display: { xs: 'none', md: 'flex' },
               }}>
                 Iscriviti
@@ -145,15 +148,20 @@ export default function Header() {
                     <CloseRoundedIcon />
                   </IconButton>
                 </Box>
-                <MenuItem>Features</MenuItem>
-                <MenuItem>Testimonials</MenuItem>
-                <MenuItem>Highlights</MenuItem>
-                <MenuItem>Pricing</MenuItem>
-                <MenuItem>FAQ</MenuItem>
-                <MenuItem>Blog</MenuItem>
+                {navItems.map((item) => (
+                  <MenuItem>
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                    >
+                      {item.label}
+                    </Link></MenuItem>
+                ))}
                 <Divider sx={{ my: 3 }} />
                 <MenuItem>
-                  <Button color="primary" variant="contained" fullWidth>
+                  <Button LinkComponent={Link} href='/iscriviti' color="primary" variant="contained" size="small" sx={{
+                    width: {xs: "100%"}
+                  }}>
                     Iscriviti
                   </Button>
                 </MenuItem>
