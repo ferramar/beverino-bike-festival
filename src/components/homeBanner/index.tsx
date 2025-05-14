@@ -5,7 +5,9 @@ import Link from "next/link";
 export default function HomeBanner() {
   return (
     <Box sx={{
-      height: {xs: "70svh", lg: "80svh"},
+      minHeight: "500px",
+      height: {xs: "80svh", lg: "80svh"},
+      maxHeight: "700px",
       position: "relative",
     }}>
       <Box sx={{

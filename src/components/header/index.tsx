@@ -119,7 +119,7 @@ export default function Header() {
               <Button LinkComponent={Link} href='/iscriviti' color="primary" variant="contained" size="medium" sx={{
                 display: { xs: 'none', md: 'flex' },
               }}>
-                Iscriviti
+                Iscriviti ora
               </Button>
             </Box>
           </Box>
@@ -161,7 +161,7 @@ export default function Header() {
                   <Button LinkComponent={Link} href='/iscriviti' color="primary" variant="contained" size="small" sx={{
                     width: {xs: "100%"}
                   }}>
-                    Iscriviti
+                    Iscriviti ora
                   </Button>
                 </MenuItem>
               </Box>
