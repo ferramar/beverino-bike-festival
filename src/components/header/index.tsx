@@ -149,9 +149,8 @@ export default function Header() {
                   </IconButton>
                 </Box>
                 {navItems.map((item) => (
-                  <MenuItem>
+                  <MenuItem key={item.href}>
                     <Link
-                      key={item.href}
                       href={item.href}
                     >
                       {item.label}
