@@ -1,5 +1,4 @@
 // src/theme.ts
-
 import { createTheme } from '@mui/material/styles';
 
 const theme = createTheme({
@@ -53,6 +52,15 @@ const theme = createTheme({
         }
       }
     },
+    MuiFormControl: {
+      styleOverrides: {
+        root: {
+          "& > .MuiInputLabel-root": {
+            color: "#000"
+          }
+        }
+      }
+    }
   },
 });
 

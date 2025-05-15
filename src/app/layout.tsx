@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import Header from "../components/header";
 import Footer from "../components/footer";
+import { Box } from "@mui/material";
 
 const roboto = Roboto({
   weight: ['300','400','500','700'],
@@ -23,13 +24,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="it">
-      <body className={roboto.className}>
+      <Box component={'body'} className={roboto.className} sx={{
+        minHeight: "100svh",
+        display: "flex",
+        flexDirection: "column",
+      }}>
         <Providers>
           <Header />
           {children}
           <Footer />
         </Providers>
-      </body>
+      </Box>
     </html>
   );
 }
