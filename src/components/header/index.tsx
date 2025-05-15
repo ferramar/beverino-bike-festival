@@ -15,6 +15,7 @@ import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import { CalendarMonth, Collections, Handshake, Timeline } from '@mui/icons-material';
 import Link from 'next/link';
 import theme from '../../theme';
+import { useState } from 'react';
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   display: 'flex',
@@ -33,14 +34,14 @@ const StyledToolbar = styled(Toolbar)(({ theme }) => ({
 }));
 
 export default function Header() {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
 
   const toggleDrawer = (newOpen: boolean) => () => {
     setOpen(newOpen);
   };
 
   const navItems = [
-    { href: "/percorsi", label: "Percorsi GPX", icon: <Timeline /> },
+    { href: "/percorsi", label: "Percorsi", icon: <Timeline /> },
     { href: "/programma", label: "Programma", icon: <CalendarMonth /> },
     { href: "/galleria", label: "Galleria", icon: <Collections /> },
     { href: "/sponsor", label: "Sponsor", icon: <Handshake /> },

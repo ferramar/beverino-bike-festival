@@ -10,6 +10,7 @@ const theme = createTheme({
     },
     primary: {
       main: '#1976d2',
+      dark: "#BF360C"
     },
     secondary: {
       main: '#fff',
@@ -34,7 +35,21 @@ const theme = createTheme({
         root: {
           background: "#BF360C",
           color: "white",
-          fontWeight: "600"
+          fontWeight: "600",
+          variants: [
+            {
+              props: { variant: "outlined"},
+              style: {
+                background: "transparent",
+                border: "2px solid #BF360C",
+                color: "#BF360C",
+                ":hover": {
+                  background: "#BF360C",
+                  color: "#fff"
+                }
+              }
+            }
+          ]
         }
       }
     },
