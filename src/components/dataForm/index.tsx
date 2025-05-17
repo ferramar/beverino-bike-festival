@@ -1,6 +1,8 @@
+/* eslint-disable */
 import React, { useMemo, useState } from 'react';
-import { useForm, SubmitHandler, useWatch } from 'react-hook-form';
-import { Box, Button, FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, Typography } from '@mui/material';
+import { useWatch, useFormContext } from 'react-hook-form';
+import { Box, Grid, SelectChangeEvent, TextField, Typography } from '@mui/material';
+import { visuallyHidden } from '@mui/utils';
 
 interface FormData {
   nome: string;
@@ -26,12 +28,9 @@ interface FormData {
 export default function DataForm() {
   const {
     register,
-    handleSubmit,
     control,
     formState: { errors },
-  } = useForm<FormData>({
-    mode: "onSubmit",
-  });
+  } = useFormContext<FormData>();
 
   const [documentType, setDocumentType] = useState('');
   const birthDateValue = useWatch({ control, name: 'dataNascita' });
@@ -52,16 +51,9 @@ export default function DataForm() {
     return age < 18;
   }, [birthDateValue]);
 
-  const onSubmit: SubmitHandler<FormData> = (data: FormData) => {
-    console.log('Dati inviati:', data);
-    // Qui puoi gestire l'invio dei dati all'API
-  };
-
   return (
-    <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ my: 2 }}>
-      <Typography variant="h6" gutterBottom>
-        Dati Personali
-      </Typography>
+    <Box component="form" noValidate sx={{ mt: 6, mb: 4 }}>
+      <Typography sx={visuallyHidden}>Inserisci i dati personali</Typography>
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
           <TextField
@@ -81,7 +73,7 @@ export default function DataForm() {
             helperText={errors.cognome?.message}
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
+        {/* <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
           <TextField
             label="Città di nascita*"
             fullWidth
@@ -270,14 +262,7 @@ export default function DataForm() {
               />
             </Grid>
           </>
-        )}
-        <Grid size={12} sx={{
-          textAlign: "right"
-        }}>
-          <Button type="submit" variant="contained" color="primary" size="large">
-            Prosegui
-          </Button>
-        </Grid>
+        )} */}
       </Grid>
     </Box>
   )

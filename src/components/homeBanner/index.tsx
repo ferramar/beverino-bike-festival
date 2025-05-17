@@ -51,12 +51,12 @@ export default function HomeBanner() {
         alignItems: "center"
       }}>
         <Container maxWidth="lg">
-          <Typography variant="h1" color="text.secondary" sx={{
+          <Typography variant="h1" color="secondary.main" sx={{
             maxWidth: "600px",
             fontSize: { xs: "3rem", lg: "4rem" },
             mb: 3
           }}>Beverino Bike Festival</Typography>
-          <Typography variant="body1" color="text.secondary" sx={{
+          <Typography variant="body1" color="secondary.main" sx={{
             maxWidth: "600px",
             fontSize: { xs: "1.25rem", lg: "1.5rem" },
             mb: 3

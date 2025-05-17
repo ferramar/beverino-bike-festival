@@ -1,17 +1,13 @@
-"use client"
-
-import { Box, Container } from "@mui/material";
-import DataForm from "../../components/dataForm";
+import { Box } from "@mui/material";
+import IscrizioneWizard from "../../components/IscrizioneWizard";
 
 export default function Iscriviti() {
-
   return (
     <Box component="main" sx={{
       pt: "8rem",
+      pb: 4
     }}>
-      <Container maxWidth="lg">
-        <DataForm />
-      </Container>
+      <IscrizioneWizard />
     </Box>
   );
 }
