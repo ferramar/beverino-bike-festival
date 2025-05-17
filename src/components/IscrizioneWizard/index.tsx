@@ -70,8 +70,6 @@ export default function IscrizioneWizard() {
     }
     // Salva ogni cambiamento
     const subscription = watch((value) => {
-      console.log("nooooo", value);
-
       localStorage.setItem('iscrizione', JSON.stringify(value));
     });
     return () => subscription.unsubscribe();
