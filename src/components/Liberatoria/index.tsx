@@ -15,18 +15,25 @@ import {
 } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
 
-
+/**
+ * Liberatoria Step:
+ * - Embed PDF con <object> su desktop
+ * - Fallback pulsante su dispositivi touch o viewport <= lg
+ * - Checkbox abilitata dopo scroll (desktop) o click pulsante (touch)
+ */
 export default function Liberatoria() {
   const {
     control,
     formState: { errors },
   } = useFormContext();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTouch = useMediaQuery('(pointer: coarse)');
+  const isBelowLg = useMediaQuery(theme.breakpoints.down('lg'));
+  const useButtonFlow = isTouch || isBelowLg;
+
   const [canAccept, setCanAccept] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // Scroll handler per desktop
   const handleScroll = (e: UIEvent<HTMLDivElement>) => {
     const el = e.currentTarget;
     if (el.scrollTop + el.clientHeight >= el.scrollHeight) {
@@ -35,26 +42,19 @@ export default function Liberatoria() {
   };
 
   const handleOpenLiberatoria = () => {
-    // Apri il PDF in una nuova scheda
     window.open('/liberatoria.pdf', '_blank', 'noopener,noreferrer');
-    // Sblocca subito la checkbox
     setCanAccept(true);
   };
 
   return (
     <>
-      {/* Label accessibile */}
       <Typography sx={visuallyHidden} component="span">
-        Visualizza ed accetta la liberatoria
+        Procedura di visualizzazione e accettazione liberatoria
       </Typography>
 
-      {/* Viewer differenziato desktop/mobile */}
-      {isMobile ? (
+      {useButtonFlow ? (
         <Box textAlign="center" sx={{ my: 4 }}>
-          <Button
-            variant="contained"
-            onClick={handleOpenLiberatoria}
-          >
+          <Button variant="contained" onClick={handleOpenLiberatoria}>
             Visualizza liberatoria
           </Button>
         </Box>
@@ -63,13 +63,7 @@ export default function Liberatoria() {
           ref={containerRef}
           onScroll={handleScroll}
           variant="outlined"
-          sx={{
-            height: 600,
-            overflowY: 'auto',
-            p: 1,
-            mt: 4,
-            mb: 2,
-          }}
+          sx={{ height: 600, overflowY: 'auto', p: 2, mt: 4, mb: 3 }}
         >
           <object
             data="/liberatoria.pdf"
@@ -78,16 +72,15 @@ export default function Liberatoria() {
             height="100%"
           >
             <Typography>
-              Il tuo browser non supporta i PDF; 
+              Il tuo browser non supporta PDF.
               <a href="/liberatoria.pdf" target="_blank" rel="noopener noreferrer">
-                scarica la liberatoria
+                Scarica liberatoria
               </a>.
             </Typography>
           </object>
         </Paper>
       )}
 
-      {/* Checkbox di accettazione */}
       <Controller
         name="liberatoriaAccettata"
         control={control}
@@ -95,20 +88,14 @@ export default function Liberatoria() {
         render={({ field }) => (
           <Box>
             <FormControlLabel
-              control={
-                <Checkbox
-                  {...field}
-                  checked={field.value || false}
-                  disabled={!canAccept}
-                />
-              }
+              control={<Checkbox {...field} checked={field.value || false} disabled={!canAccept} />}
               label="Ho letto e accetto la liberatoria"
             />
-            {!canAccept && !field.value && (
+            {!canAccept && (
               <FormHelperText>
-                {isMobile
+                {useButtonFlow
                   ? 'Apri la liberatoria per poter accettare.'
-                  : "Scorri fino in fondo per abilitare l'accettazione."}
+                  : 'Scorri fino in fondo per abilitare.'}
               </FormHelperText>
             )}
             {field.value && errors.liberatoriaAccettata?.message && (
