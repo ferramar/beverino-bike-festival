@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import DataForm from '../dataForm';
 import Liberatoria from '../Liberatoria';
+import FinalRegistrationStep from '../FinalRegistrationStep';
 
 
 // Definizione tipi dati del wizard
@@ -38,7 +39,7 @@ interface WizardData {
   cenaInclusa: boolean;
 }
 
-const steps = ['Dati Personali', 'Liberatoria', 'Opzioni'];
+const steps = ['Dati Personali', 'Liberatoria', 'Pagamento'];
 
 export default function IscrizioneWizard() {
   const theme = useTheme();
@@ -121,7 +122,7 @@ export default function IscrizioneWizard() {
         <Box sx={{ mb: 4 }}>
           {activeStep === 0 && <DataForm />}
           {activeStep === 1 && <Liberatoria />}
-          {activeStep === 2 && <p>step di riepilogo e pagamento</p>}
+          {activeStep === 2 && <FinalRegistrationStep />}
         </Box>
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: "center" }}>
