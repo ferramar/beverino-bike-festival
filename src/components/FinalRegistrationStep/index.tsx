@@ -15,7 +15,7 @@ const PASTA_PRICE = 20;
  * integrato nello stesso form di React Hook Form usato negli step precedenti.
  */
 export default function FinalRegistrationStep() {
-  const { control, watch, setValue } = useFormContext();
+  const { watch, setValue } = useFormContext();
 
   // Valori dal form
   const option = watch('paymentOption', 'race-only');
