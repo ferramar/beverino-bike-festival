@@ -56,6 +56,7 @@ export default function Header() {
         bgcolor: 'transparent',
         backgroundImage: 'none',
         mt: 'calc(var(--template-frame-height, 0px) + 28px)',
+        zIndex: "1000"
       }}
     >
       <Container maxWidth="lg">

@@ -17,6 +17,7 @@
     "axios": "^1.9.0",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
+    "lightgallery": "^2.8.3",
     "next": "15.3.2",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^5.2.133",

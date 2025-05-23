@@ -36,14 +36,14 @@ const Footer: React.FC = () => {
             <Link href="/" color="inherit" display="block">
               Home
             </Link>
-            <Link href="/eventi" color="inherit" display="block">
-              Eventi
+            <Link href="/programma" color="inherit" display="block">
+              Programma
             </Link>
-            <Link href="/biglietti" color="inherit" display="block">
-              Biglietti
+            <Link href="/galleria" color="inherit" display="block">
+              Galleria
             </Link>
-            <Link href="/contatti" color="inherit" display="block">
-              Contatti
+            <Link href="/sponsor" color="inherit" display="block">
+              Sponsor
             </Link>
           </Grid>
           <Grid size={{xs: 12, sm: 4}}>
