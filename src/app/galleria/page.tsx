@@ -71,7 +71,7 @@ const GalleryPage: React.FC = () => {
     (filterYear === 'all' || item.editionYear === filterYear) &&
     (viewMode === 'images' ? item.type === 'image' : item.type === 'video')
   );
-  
+
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const onInit = (detail: any) => { lg.current = detail.instance; };
 
@@ -140,6 +140,7 @@ const GalleryPage: React.FC = () => {
           onInit={onInit}
           dynamic
           slideDelay={400}
+          fullScreen={true}
           download={false}
           plugins={viewMode === 'images' ? [lgZoom, lgThumbnail] : [lgVideo, lgThumbnail]}
           dynamicEl={dynamicEl}

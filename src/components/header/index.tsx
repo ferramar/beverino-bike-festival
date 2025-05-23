@@ -143,25 +143,86 @@ export default function Header() {
                 <Box
                   sx={{
                     display: 'flex',
-                    justifyContent: 'flex-end',
+                    justifyContent: 'space-between',
                   }}
                 >
+                  <Box sx={{
+                    flexGrow: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: "space-between",
+                    px: 2,
+                    "& > a": {
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 2,
+                      color: theme.palette.text.primary,
+                      "& > svg": {
+                        width: "20px",
+                        height: "20px",
+                        color: theme.palette.text.primary
+                      }
+                    }
+                  }}>
+                    <Link href="/" onClick={toggleDrawer(false)}>
+                      <Box
+                        component={'svg'}
+                        sx={{
+                          color: "red"
+                        }}
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 12l2-2m0 0l7-7 7 7M13 5v6h6"
+                        />
+                      </Box>
+                      <span>Logo</span>
+                    </Link>
+                    <Box sx={{
+                      display: { xs: 'none', md: 'flex' },
+                      alignItems: "center",
+                      gap: 4,
+                      "& > .nav-link": {
+                        color: theme.palette.text.primary,
+                      }
+                    }}>
+                      {navItems.map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          className="nav-link"
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                      <Button LinkComponent={Link} href='/iscriviti' color="primary" variant="contained" size="medium" sx={{
+                        display: { xs: 'none', md: 'flex' },
+                      }}>
+                        Iscriviti ora
+                      </Button>
+                    </Box>
+                  </Box>
                   <IconButton onClick={toggleDrawer(false)}>
                     <CloseRoundedIcon />
                   </IconButton>
                 </Box>
                 {navItems.map((item) => (
-                  <MenuItem key={item.href}>
-                    <Link
-                      href={item.href}
-                    >
+                  <MenuItem key={item.href} onClick={toggleDrawer(false)}>
+                    <Link href={item.href}>
                       {item.label}
-                    </Link></MenuItem>
+                    </Link>
+                  </MenuItem>
                 ))}
                 <Divider sx={{ my: 3 }} />
-                <MenuItem>
+                <MenuItem onClick={toggleDrawer(false)}>
                   <Button LinkComponent={Link} href='/iscriviti' color="primary" variant="contained" size="small" sx={{
-                    width: {xs: "100%"}
+                    width: { xs: "100%" }
                   }}>
                     Iscriviti ora
                   </Button>
