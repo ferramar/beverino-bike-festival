@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
       'picsum.photos',
       'via.placeholder.com',
       'sample-videos.com', // se usi anche le thumbnail video di sample-videos
-      // aggiungi qui altri host esterni che utilizzi
+      'localhost'
     ],
   },
 };
