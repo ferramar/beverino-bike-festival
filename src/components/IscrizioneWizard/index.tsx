@@ -18,9 +18,9 @@ import {
 import DataForm from '../dataForm';
 import Liberatoria from '../Liberatoria';
 import FinalRegistrationStep from '../FinalRegistrationStep';
+import { customAlphabet } from 'nanoid';
+import strapi from '../../utils/strapi';
 
-
-// Definizione tipi dati del wizard
 interface WizardData {
   nome: string;
   cognome: string;
@@ -35,13 +35,15 @@ interface WizardData {
   cittaRilascio: string;
   dataRilascioDocumento: string;
   liberatoriaAccettata: boolean;
-  partecipoSoloGara: boolean;
-  cenaInclusa: boolean;
+  liberatoriaPdfBlob?: Blob;
+  conteggio_pastaparty: number;
 }
 
 const steps = ['Dati Personali', 'Liberatoria', 'Pagamento'];
 
 export default function IscrizioneWizard() {
+  const alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const nanoid = customAlphabet(alphabet, 10);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const methods = useForm<WizardData>({
@@ -51,12 +53,19 @@ export default function IscrizioneWizard() {
   const { watch, trigger, handleSubmit, reset } = methods;
   const [activeStep, setActiveStep] = useState(0);
   const router = useRouter();
+  const [userAgent, setUserAgent] = useState('');
 
   // Persistenza su localStorage
   // useEffect(() => {
   //   const sub = watch((v) => localStorage.setItem('iscrizione', JSON.stringify(v)));
   //   return () => sub.unsubscribe();
   // }, [watch]);
+
+  useEffect(() => {
+    if (typeof navigator !== 'undefined') {
+      setUserAgent(navigator.userAgent);
+    }
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -84,7 +93,7 @@ export default function IscrizioneWizard() {
       'tipoDocumento', 'numeroDocumento', 'cittaRilascio', 'dataRilascioDocumento'
     ],
     1: ['liberatoriaAccettata'],
-    2: ['partecipoSoloGara', 'cenaInclusa'],
+    2: ['conteggio_pastaparty'],
   };
 
   const onNext = async () => {
@@ -94,13 +103,47 @@ export default function IscrizioneWizard() {
 
   const onBack = () => setActiveStep(s => s - 1);
 
-  const onSubmit = (data: WizardData) => {
-    console.log('Invio finale:', data);
-    // TODO: POST su Strapi
-    setTimeout(() => {
-      localStorage.removeItem('iscrizione');
+  const onSubmit = async (data: WizardData) => {
+    const codice_registrazione = nanoid();
+    if (!data.liberatoriaPdfBlob) {
+      alert('Errore: PDF non generato');
+      return;
+    }
+    const ipRes = await fetch('https://api.ipify.org?format=json');
+    const { ip: userIp } = await ipRes.json();
+
+    const formData = new FormData();
+    const fileName = "liberatoria_" + data.nome + "_" + data.cognome + ".pdf"
+    formData.append('files', data.liberatoriaPdfBlob, fileName);
+    const uploadRes = await strapi.post('/api/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    const pdfId = uploadRes.data[0].id;
+
+    const log_firma_liberatoria = {
+      orario_firmatario: new Date().toISOString(),
+      ip_firmatario: userIp,
+      user_agent_firmatario: userAgent
+    }
+
+    const payload = {
+      ...data,
+      codice_registrazione,
+      log_firma_liberatoria,
+      pasta_party: data.conteggio_pastaparty > 0 ? true : false,
+      liberatoriaPdf: pdfId
+    }
+
+    delete payload.liberatoriaPdfBlob
+
+    try {
+      await strapi.post('/api/iscrizionis', {
+        data: payload
+      });
       router.push('/iscrizione-successo')
-    }, 100);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (

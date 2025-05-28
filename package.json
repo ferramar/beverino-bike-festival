@@ -18,6 +18,7 @@
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "lightgallery": "^2.8.3",
+    "nanoid": "^5.1.5",
     "next": "15.3.2",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^5.2.133",
@@ -25,7 +26,8 @@
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.56.3",
     "react-pdf": "^9.2.1",
-    "swr": "^2.3.3"
+    "swr": "^2.3.3",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

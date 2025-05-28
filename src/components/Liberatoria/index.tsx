@@ -27,6 +27,7 @@ export default function Liberatoria() {
   const {
     watch,
     control,
+    setValue,
     formState: { errors },
   } = useFormContext();
 
@@ -69,6 +70,7 @@ export default function Liberatoria() {
       // Genera blob URL
       const pdfBytes = await pdfDoc.save();
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      setValue('liberatoriaPdfBlob', blob, { shouldValidate: false });
       const url = URL.createObjectURL(blob);
       setPdfUrl(url);
     })();

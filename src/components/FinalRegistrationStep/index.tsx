@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
@@ -17,9 +18,11 @@ const PASTA_PRICE = 20;
 export default function FinalRegistrationStep() {
   const { watch, setValue } = useFormContext();
 
-  // Valori dal form
-  const option = watch('paymentOption', 'race-only');
-  const pastaCount = watch('pastaPartyCount', 1);
+  // Stato locale per l'opzione di pagamento (non registrata nel form)
+  const [option, setOption] = useState<'race-only' | 'race-pasta'>('race-only');
+
+  // Conteggio persone per il Pasta Party dal form
+  const pastaCount = watch('conteggio_pastaparty', 1);
 
   // Calcolo prezzo totale
   const totalPrice =
@@ -34,7 +37,7 @@ export default function FinalRegistrationStep() {
       </Typography>
       <Grid container spacing={2}>
         {/** Opzione Solo Gara */}
-        <Grid size={{xs: 12, sm: 6}}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Card
             sx={theme => ({
               border:
@@ -43,7 +46,7 @@ export default function FinalRegistrationStep() {
                   : '1px solid rgba(0,0,0,0.12)',
             })}
           >
-            <CardActionArea onClick={() => setValue('paymentOption', 'race-only')}>
+            <CardActionArea onClick={() => setOption('race-only')}>
               <CardContent>
                 <Typography variant="h6">Solo Gara</Typography>
                 <Typography>€{RACE_PRICE}</Typography>
@@ -53,7 +56,7 @@ export default function FinalRegistrationStep() {
         </Grid>
 
         {/** Opzione Gara + Pasta Party */}
-        <Grid size={{xs: 12, sm: 6}}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Card
             sx={theme => ({
               border:
@@ -62,10 +65,12 @@ export default function FinalRegistrationStep() {
                   : '1px solid rgba(0,0,0,0.12)',
             })}
           >
-            <CardActionArea onClick={() => setValue('paymentOption', 'race-pasta')}>
+            <CardActionArea onClick={() => setOption('race-pasta')}>
               <CardContent>
                 <Typography variant="h6">Gara + Pasta Party</Typography>
-                <Typography>€{RACE_PRICE} + €{PASTA_PRICE}/pax</Typography>
+                <Typography>
+                  €{RACE_PRICE} + €{PASTA_PRICE}/pax
+                </Typography>
               </CardContent>
             </CardActionArea>
           </Card>
@@ -78,7 +83,7 @@ export default function FinalRegistrationStep() {
             label="Numero persone Pasta Party"
             type="number"
             value={pastaCount}
-            onChange={(e) => setValue('pastaPartyCount', Math.max(1, parseInt(e.target.value, 10) || 1))}
+            onChange={e => setValue('conteggio_pastaparty', Math.max(1, parseInt(e.target.value, 10) || 1))}
             inputProps={{ min: 1 }}
             fullWidth
           />

@@ -3,8 +3,13 @@
 import { CheckCircleOutline } from "@mui/icons-material";
 import { Box, Button, Container, Typography } from "@mui/material";
 import Link from "next/link";
+import { useEffect } from "react";
 
 export default function IscrizioneSuccesso() {
+  useEffect(() => {
+    localStorage.removeItem('iscrizione');
+  })
+
   return (
     <Box component="main" sx={{
       pt: "8rem",
