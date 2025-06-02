@@ -16,6 +16,7 @@ import { CalendarMonth, Collections, Handshake, Timeline } from '@mui/icons-mate
 import Link from 'next/link';
 import theme from '../../theme';
 import { useState } from 'react';
+import Image from "next/image";
 
 const StyledToolbar = styled(Toolbar)(({ theme }) => ({
   display: 'flex',
@@ -82,24 +83,13 @@ export default function Header() {
             }
           }}>
             <Link href="/">
-              <Box
-                component={'svg'}
-                sx={{
-                  color: "red"
-                }}
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 12l2-2m0 0l7-7 7 7M13 5v6h6"
-                />
-              </Box>
-              <span>Logo</span>
+              <Image
+                src={"/logo.png"}
+                alt="Banner Background"
+                width={40}
+                height={40}
+              />
+              <span>Beverino Bike Festival</span>
             </Link>
             <Box sx={{
               display: { xs: 'none', md: 'flex' },
@@ -165,24 +155,13 @@ export default function Header() {
                     }
                   }}>
                     <Link href="/" onClick={toggleDrawer(false)}>
-                      <Box
-                        component={'svg'}
-                        sx={{
-                          color: "red"
-                        }}
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M3 12l2-2m0 0l7-7 7 7M13 5v6h6"
-                        />
-                      </Box>
-                      <span>Logo</span>
+                      <Image
+                        src={"/logo.png"}
+                        alt="Banner Background"
+                        width={40}
+                        height={40}
+                      />
+                      <span>Beverino Bike Festival</span>
                     </Link>
                     <Box sx={{
                       display: { xs: 'none', md: 'flex' },
