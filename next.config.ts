@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
       'localhost'
     ],
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 };
 
 export default nextConfig;

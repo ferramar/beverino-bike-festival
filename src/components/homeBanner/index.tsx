@@ -6,7 +6,7 @@ export default function HomeBanner() {
   return (
     <Box sx={{
       minHeight: "500px",
-      height: {xs: "80svh", lg: "80svh"},
+      height: { xs: "80svh", lg: "80svh" },
       maxHeight: "700px",
       position: "relative",
     }}>
@@ -48,21 +48,32 @@ export default function HomeBanner() {
         zIndex: 2,
         pt: "8rem",
         display: "flex",
-        alignItems: "center"
+        alignItems: "center",
       }}>
         <Container maxWidth="lg">
+          <Typography
+            variant="h5"
+            component="p"
+            sx={{
+              mb: 3,
+              fontWeight: 500,
+              color: 'secondary.light',
+            }}
+          >
+            21 Settembre 2025
+          </Typography>
           <Typography variant="h1" color="secondary.main" sx={{
             maxWidth: "600px",
             fontSize: { xs: "3rem", lg: "4rem" },
-            mb: 3
+            mb: 2
           }}>Beverino Bike Festival</Typography>
           <Typography variant="body1" color="secondary.main" sx={{
             maxWidth: "600px",
             fontSize: { xs: "1.25rem", lg: "1.5rem" },
-            mb: 3
+            mb: 2
           }}>Partecipa alla nostra epica gara ciclistica attraverso paesaggi mozzafiato e sfida te stesso sui percorsi che abbiamo creato.</Typography>
           <Button LinkComponent={Link} href='/iscriviti' variant="contained" size="large" sx={{
-            width: {xs: "100%", sm: "auto"}
+            width: { xs: "100%", sm: "auto" }
           }}>Iscriviti ora</Button>
         </Container>
       </Box>

@@ -16,6 +16,7 @@ import { getAllMedia } from '../../utils/api';
 import { PhotoGallery, PhotoItem } from '../../components/PhotoGallery';
 import { VideoCard, VideoItem } from '../../components/VideoCard';
 import { VideoDialog } from '../../components/VideoDialog';
+import Head from 'next/head';
 
 export default function GalleryPage() {
   const [mode, setMode] = useState<'photos' | 'videos'>('photos');
@@ -42,6 +43,10 @@ export default function GalleryPage() {
 
   return (
     <Box component="main" sx={{ pt: '8rem', pb: 4 }}>
+      <Head>
+        <title>Galleria | Beverin Bike Festival</title>
+        <meta name="description" content="Galleria fotografica Beverino Bike Festival" />
+      </Head>
       <Container maxWidth="lg">
         <Box sx={{
           mb: 4,
