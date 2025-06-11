@@ -1,98 +1,263 @@
-import React, { useState } from 'react';
-import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
-import Card from '@mui/material/Card';
-import CardActionArea from '@mui/material/CardActionArea';
-import CardContent from '@mui/material/CardContent';
-import Typography from '@mui/material/Typography';
-import TextField from '@mui/material/TextField';
+import React, { useState, useEffect } from 'react';
+import {
+  Box,
+  Grid,
+  Card,
+  CardActionArea,
+  CardContent,
+  Typography,
+  TextField,
+  Divider,
+  Chip,
+  Stack,
+} from '@mui/material';
+import {
+  DirectionsBike,
+  Restaurant,
+  EuroSymbol,
+} from '@mui/icons-material';
 import { useFormContext } from 'react-hook-form';
 
-const RACE_PRICE = 50;
-const PASTA_PRICE = 20;
+const RACE_PRICE = 25; // Aggiornato ai prezzi reali
+const PASTA_PRICE = 15;
 
-/**
- * Componente per il recap delle opzioni di pagamento,
- * integrato nello stesso form di React Hook Form usato negli step precedenti.
- */
 export default function FinalRegistrationStep() {
   const { watch, setValue } = useFormContext();
-
-  // Stato locale per l'opzione di pagamento (non registrata nel form)
   const [option, setOption] = useState<'race-only' | 'race-pasta'>('race-only');
-
-  // Conteggio persone per il Pasta Party dal form
   const pastaCount = watch('conteggio_pastaparty', 1);
 
-  // Calcolo prezzo totale
-  const totalPrice =
-    option === 'race-only'
-      ? RACE_PRICE
-      : RACE_PRICE + pastaCount * PASTA_PRICE;
+  // Sincronizza il form con l'opzione selezionata
+  useEffect(() => {
+    if (option === 'race-only') {
+      setValue('conteggio_pastaparty', 0);
+    } else if (pastaCount === 0) {
+      setValue('conteggio_pastaparty', 1);
+    }
+  }, [option, setValue, pastaCount]);
+
+  const handleOptionChange = (newOption: 'race-only' | 'race-pasta') => {
+    setOption(newOption);
+  };
+
+  const handlePastaCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = Math.max(1, parseInt(e.target.value, 10) || 1);
+    setValue('conteggio_pastaparty', value);
+  };
+
+  const racePrice = RACE_PRICE;
+  const pastaPrice = option === 'race-pasta' ? pastaCount * PASTA_PRICE : 0;
+  const totalPrice = racePrice + pastaPrice;
 
   return (
-    <Box sx={{ p: 2, maxWidth: 600, mx: 'auto' }}>
-      <Typography variant="h5" align="center" gutterBottom>
-        Scegli il tipo di iscrizione
-      </Typography>
-      <Grid container spacing={2}>
-        {/** Opzione Solo Gara */}
-        <Grid size={{ xs: 12, md: 6 }}>
+    <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 700, mx: 'auto' }}>
+      <Box textAlign="center" sx={{ mb: 4 }}>
+        <Typography variant="h4" gutterBottom fontWeight={600}>
+          Scegli il tuo pacchetto
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Seleziona l'opzione che preferisci per completare l'iscrizione
+        </Typography>
+      </Box>
+
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        {/* Opzione Solo Gara */}
+        <Grid size={{xs: 12, sm: 6}}>
           <Card
-            sx={theme => ({
-              border:
-                option === 'race-only'
-                  ? `2px solid ${theme.palette.warning.main}`
-                  : '1px solid rgba(0,0,0,0.12)',
-            })}
+            elevation={option === 'race-only' ? 8 : 2}
+            sx={{
+              height: "100%",
+              position: 'relative',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              border: option === 'race-only' 
+                ? '3px solid' 
+                : '2px solid transparent',
+              borderColor: option === 'race-only' 
+                ? 'primary.dark' 
+                : 'transparent',
+              transform: option === 'race-only' ? 'scale(1.02)' : 'scale(1)',
+              '&:hover': {
+                transform: 'scale(1.02)',
+                elevation: 6,
+              }
+            }}
           >
-            <CardActionArea onClick={() => setOption('race-only')}>
-              <CardContent>
-                <Typography variant="h6">Solo Gara</Typography>
-                <Typography>€{RACE_PRICE}</Typography>
+            <CardActionArea onClick={() => handleOptionChange('race-only')}>
+              <CardContent sx={{ p: 3, textAlign: 'center' }}>
+                <DirectionsBike 
+                  sx={{ 
+                    fontSize: 48, 
+                    color: 'primary.dark', 
+                    mb: 2 
+                  }} 
+                />
+                <Typography variant="h6" gutterBottom fontWeight={600}>
+                  Solo Gara
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  Partecipazione alla gara ciclistica
+                </Typography>
+                <Typography variant="h4" color="primary.dark" fontWeight={700}>
+                  €{RACE_PRICE}
+                </Typography>
               </CardContent>
             </CardActionArea>
           </Card>
         </Grid>
 
-        {/** Opzione Gara + Pasta Party */}
-        <Grid size={{ xs: 12, md: 6 }}>
+        {/* Opzione Gara + Pasta Party */}
+        <Grid size={{xs: 12, sm: 6}}>
           <Card
-            sx={theme => ({
-              border:
-                option === 'race-pasta'
-                  ? `2px solid ${theme.palette.warning.main}`
-                  : '1px solid rgba(0,0,0,0.12)',
-            })}
+            elevation={option === 'race-pasta' ? 8 : 2}
+            sx={{
+              position: 'relative',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              border: option === 'race-pasta' 
+                ? '3px solid' 
+                : '2px solid transparent',
+              borderColor: option === 'race-pasta' 
+                ? 'primary.dark' 
+                : 'transparent',
+              transform: option === 'race-pasta' ? 'scale(1.02)' : 'scale(1)',
+              '&:hover': {
+                transform: 'scale(1.02)',
+                elevation: 6,
+              }
+            }}
           >
-            <CardActionArea onClick={() => setOption('race-pasta')}>
-              <CardContent>
-                <Typography variant="h6">Gara + Pasta Party</Typography>
-                <Typography>
-                  €{RACE_PRICE} + €{PASTA_PRICE}/pax
+            <CardActionArea onClick={() => handleOptionChange('race-pasta')}>
+              <CardContent sx={{ p: 3, textAlign: 'center' }}>
+                <Stack direction="row" justifyContent="center" spacing={1} sx={{ mb: 2 }}>
+                  <DirectionsBike sx={{ fontSize: 40, color: 'primary.dark' }} />
+                  <Typography variant="h5" sx={{ mx: 1 }}>+</Typography>
+                  <Restaurant sx={{ fontSize: 40, color: 'primary.dark' }} />
+                </Stack>
+                <Typography variant="h6" gutterBottom fontWeight={600}>
+                  Gara + Pasta Party
                 </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  Gara + festa post-gara con pasta party
+                </Typography>
+                <Typography variant="h6" color="primary.dark" fontWeight={700}>
+                  €{RACE_PRICE} + €{PASTA_PRICE}/persona
+                </Typography>
+                <Chip 
+                  label="Più popolare" 
+                  color="secondary" 
+                  variant="outlined" 
+                  size="small"
+                  sx={{ mt: 1 }}
+                />
               </CardContent>
             </CardActionArea>
           </Card>
         </Grid>
       </Grid>
 
+      {/* Input numero persone - Stile coerente */}
       {option === 'race-pasta' && (
-        <Box sx={{ mt: 2 }}>
-          <TextField
-            label="Numero persone Pasta Party"
-            type="number"
-            value={pastaCount}
-            onChange={e => setValue('conteggio_pastaparty', Math.max(1, parseInt(e.target.value, 10) || 1))}
-            inputProps={{ min: 1 }}
-            fullWidth
-          />
+        <Box sx={{ mb: 4 }}>
+          <Card
+            elevation={4}
+            sx={{
+              border: '2px solid',
+              borderColor: 'secondary.main',
+              bgcolor: 'secondary.50',
+            }}
+          >
+            <CardContent sx={{ p: 3 }}>
+              <Typography variant="h6" gutterBottom color="secondary.main" fontWeight={600}>
+                Dettagli Pasta Party
+              </Typography>
+              
+              <TextField
+                label="Numero persone"
+                type="number"
+                value={pastaCount}
+                onChange={handlePastaCountChange}
+                inputProps={{ min: 1, max: 10 }}
+                fullWidth
+                helperText="Indica quante persone parteciperanno al pasta party"
+                sx={{ 
+                  mb: 2,
+                  '& .MuiOutlinedInput-root': {
+                    '&.Mui-focused fieldset': {
+                      borderColor: 'secondary.main',
+                    },
+                  },
+                  '& .MuiInputLabel-root.Mui-focused': {
+                    color: 'secondary.main',
+                  },
+                }}
+              />
+              
+              <Box 
+                sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center',
+                  bgcolor: 'background.paper',
+                  p: 2,
+                  borderRadius: 1,
+                  border: '1px solid',
+                  borderColor: 'secondary.light',
+                }}
+              >
+                <Typography variant="body1" fontWeight={500}>
+                  Costo pasta party: {pastaCount} × €{PASTA_PRICE}
+                </Typography>
+                <Typography variant="h6" color="secondary.main" fontWeight={700}>
+                  €{pastaPrice}
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
         </Box>
       )}
 
-      <Typography variant="h6" align="right" sx={{ mt: 2 }}>
-        Totale: €{totalPrice}
-      </Typography>
+      {/* Riepilogo totale */}
+      <Card 
+        variant="outlined" 
+        sx={{ 
+          p: 3, 
+          bgcolor: 'grey.50',
+          border: '2px solid',
+          borderColor: 'primary.dark'
+        }}
+      >
+        <Typography variant="h6" gutterBottom>
+          Riepilogo ordine
+        </Typography>
+        
+        <Stack spacing={2}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Typography>Gara ciclistica</Typography>
+            <Typography>€{racePrice}</Typography>
+          </Box>
+          
+          {option === 'race-pasta' && (
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography>Pasta Party ({pastaCount} {pastaCount === 1 ? 'persona' : 'persone'})</Typography>
+              <Typography>€{pastaPrice}</Typography>
+            </Box>
+          )}
+          
+          <Divider />
+          
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h5" fontWeight={700}>
+              Totale
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <EuroSymbol sx={{ mr: 0.5, color: 'primary.dark' }} />
+              <Typography variant="h4" color="primary.dark" fontWeight={700}>
+                {totalPrice}
+              </Typography>
+            </Box>
+          </Box>
+        </Stack>
+      </Card>
     </Box>
   );
 }

@@ -1,45 +1,68 @@
 "use client"
-import * as React from 'react';
-import { alpha, styled } from '@mui/material/styles';
-import Box from '@mui/material/Box';
-import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import Container from '@mui/material/Container';
-import Divider from '@mui/material/Divider';
-import MenuItem from '@mui/material/MenuItem';
-import Drawer from '@mui/material/Drawer';
-import MenuIcon from '@mui/icons-material/Menu';
-import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
-import { CalendarMonth, Collections, Handshake, Timeline } from '@mui/icons-material';
+import React, { useState, useEffect } from 'react';
+import {
+  AppBar,
+  Toolbar,
+  Container,
+  Box,
+  Button,
+  IconButton,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Fade,
+  Slide,
+  useScrollTrigger,
+  Typography,
+} from '@mui/material';
+import {
+  Menu as MenuIcon,
+  Close as CloseIcon,
+  Timeline,
+  CalendarMonth,
+  Collections,
+  Handshake,
+  DirectionsBike,
+} from '@mui/icons-material';
 import Link from 'next/link';
-import theme from '../../theme';
-import { useState } from 'react';
-import Image from "next/image";
+import Image from 'next/image';
 
-const StyledToolbar = styled(Toolbar)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  flexShrink: 0,
-  borderRadius: `calc(${theme.shape.borderRadius}px + 8px)`,
-  backdropFilter: 'blur(24px)',
-  border: '1px solid',
-  borderColor: (theme.vars || theme).palette.divider,
-  backgroundColor: theme.vars
-    ? `rgba(${theme.vars.palette.background.defaultChannel} / 0.4)`
-    : alpha(theme.palette.background.default, 0.4),
-  boxShadow: (theme.vars || theme).shadows[1],
-  padding: '8px 12px',
-}));
+// Hook per rilevare lo scroll
+function useScrollPosition() {
+  const [scrolled, setScrolled] = useState(false);
+  
+  useEffect(() => {
+    const handleScroll = () => {
+      const isScrolled = window.scrollY > 50;
+      setScrolled(isScrolled);
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+  
+  return scrolled;
+}
 
-export default function Header() {
-  const [open, setOpen] = useState(false);
+// Componente per nascondere header on scroll down
+function HideOnScroll({ children }: { children: React.ReactElement }) {
+  const trigger = useScrollTrigger({
+    threshold: 100,
+  });
 
-  const toggleDrawer = (newOpen: boolean) => () => {
-    setOpen(newOpen);
-  };
+  return (
+    <Slide appear={false} direction="down" in={!trigger}>
+      {children}
+    </Slide>
+  );
+}
+
+export default function ModernHeader() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const scrolled = useScrollPosition();
 
   const navItems = [
     { href: "/percorsi", label: "Percorsi", icon: <Timeline /> },
@@ -48,169 +71,273 @@ export default function Header() {
     { href: "/sponsor", label: "Sponsor", icon: <Handshake /> },
   ];
 
-  return (
-    <AppBar
-      position="fixed"
-      enableColorOnDark
-      sx={{
-        boxShadow: 0,
-        bgcolor: 'transparent',
-        backgroundImage: 'none',
-        mt: 'calc(var(--template-frame-height, 0px) + 28px)',
-        zIndex: "1000"
-      }}
-    >
-      <Container maxWidth="lg">
-        <StyledToolbar variant="dense" disableGutters sx={{
-          background: theme.palette.background.paper
-        }}>
-          <Box sx={{
-            flexGrow: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: "space-between",
-            px: 0,
-            "& > a": {
-              display: "flex",
-              alignItems: "center",
-              gap: 2,
-              color: theme.palette.text.primary,
-              "& > svg": {
-                width: "20px",
-                height: "20px",
-                color: theme.palette.text.primary
-              }
-            }
-          }}>
-            <Link href="/">
-              <Image
-                src={"/logo.png"}
-                alt="Banner Background"
-                width={40}
-                height={40}
-              />
-              <span>Beverino Bike Festival</span>
-            </Link>
-            <Box sx={{
-              display: { xs: 'none', md: 'flex' },
-              alignItems: "center",
-              gap: 4,
-              "& > .nav-link": {
-                color: theme.palette.text.primary,
-              }
-            }}>
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="nav-link"
-                >
-                  {item.label}
-                </Link>
-              ))}
-              <Button LinkComponent={Link} href='/iscriviti' color="primary" variant="contained" size="medium" sx={{
-                display: { xs: 'none', md: 'flex' },
-              }}>
-                Iscriviti ora
-              </Button>
-            </Box>
-          </Box>
-          <Box sx={{ display: { xs: 'flex', md: 'none' }, gap: 1 }}>
-            <IconButton aria-label="Menu button" onClick={toggleDrawer(true)}>
-              <MenuIcon />
-            </IconButton>
-            <Drawer
-              anchor="top"
-              open={open}
-              onClose={toggleDrawer(false)}
-              PaperProps={{
-                sx: {
-                  top: 'var(--template-frame-height, 0px)',
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
+  const drawer = (
+    <Box sx={{ width: 280 }}>
+      {/* Header del drawer */}
+      <Box
+        sx={{
+          p: 3,
+          background: 'linear-gradient(135deg, #BF360C 0%, #D32F2F 100%)',
+          color: 'white',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 2,
+        }}
+      >
+        <DirectionsBike sx={{ fontSize: 32 }} />
+        <Box>
+          <Typography variant="h6" fontWeight={700}>
+            Beverino Bike
+          </Typography>
+          <Typography variant="body2" sx={{ opacity: 0.9 }}>
+            Festival 2025
+          </Typography>
+        </Box>
+      </Box>
+
+      {/* Menu items */}
+      <List sx={{ px: 2, py: 3 }}>
+        {navItems.map((item) => (
+          <ListItem key={item.href} disablePadding sx={{ mb: 1 }}>
+            <ListItemButton
+              component={Link}
+              href={item.href}
+              onClick={handleDrawerToggle}
+              sx={{
+                borderRadius: 2,
+                '&:hover': {
+                  bgcolor: '#BF360C',
+                  color: 'white',
+                  '& .MuiListItemIcon-root': {
+                    color: 'white',
+                  },
                 },
+                transition: 'all 0.3s ease',
               }}
             >
-              <Box sx={{ p: 2, backgroundColor: 'background.default' }}>
+              <ListItemIcon sx={{ minWidth: 40 }}>
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText primary={item.label} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+
+      {/* CTA Button nel drawer */}
+      <Box sx={{ p: 3 }}>
+        <Button
+          component={Link}
+          href="/iscriviti"
+          variant="contained"
+          fullWidth
+          size="large"
+          onClick={handleDrawerToggle}
+          sx={{
+            background: 'linear-gradient(135deg, #BF360C 0%, #D32F2F 100%)',
+            borderRadius: 3,
+            py: 1.5,
+            boxShadow: '0 4px 15px rgba(191, 54, 12, 0.3)',
+            '&:hover': {
+              transform: 'translateY(-1px)',
+              boxShadow: '0 6px 20px rgba(191, 54, 12, 0.4)',
+            },
+            transition: 'all 0.3s ease',
+          }}
+        >
+          Iscriviti ora
+        </Button>
+      </Box>
+    </Box>
+  );
+
+  return (
+    <>
+      <HideOnScroll>
+        <AppBar
+          position="fixed"
+          elevation={0}
+          sx={{
+            backgroundColor: scrolled ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.9)',
+            backdropFilter: 'blur(20px)',
+            borderBottom: scrolled ? '1px solid rgba(0, 0, 0, 0.1)' : 'none',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            transform: scrolled ? 'scale(0.98)' : 'scale(1)',
+            borderRadius: '0',
+            margin: '0',
+            width: '100%',
+            boxShadow: scrolled 
+              ? '0 8px 32px rgba(0, 0, 0, 0.12)' 
+              : '0 2px 8px rgba(0, 0, 0, 0.05)',
+          }}
+        >
+          <Container maxWidth="lg">
+            <Toolbar
+              sx={{
+                height: { xs: 64, md: 72 },
+                px: { xs: 2, md: 3 },
+              }}
+            >
+              {/* Logo */}
+              <Box
+                component={Link}
+                href="/"
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  textDecoration: 'none',
+                  color: 'inherit',
+                  '&:hover': {
+                    transform: 'scale(1.02)',
+                  },
+                  transition: 'transform 0.2s ease',
+                }}
+              >
                 <Box
                   sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
+                    position: 'relative',
+                    width: 48,
+                    height: 48,
+                    borderRadius: '50%',
+                    overflow: 'hidden',
                   }}
                 >
-                  <Box sx={{
-                    flexGrow: 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: "space-between",
-                    px: 2,
-                    "& > a": {
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 2,
-                      color: theme.palette.text.primary,
-                      "& > svg": {
-                        width: "20px",
-                        height: "20px",
-                        color: theme.palette.text.primary
-                      }
-                    }
-                  }}>
-                    <Link href="/" onClick={toggleDrawer(false)}>
-                      <Image
-                        src={"/logo.png"}
-                        alt="Banner Background"
-                        width={40}
-                        height={40}
-                      />
-                      <span>Beverino Bike Festival</span>
-                    </Link>
-                    <Box sx={{
-                      display: { xs: 'none', md: 'flex' },
-                      alignItems: "center",
-                      gap: 4,
-                      "& > .nav-link": {
-                        color: theme.palette.text.primary,
-                      }
-                    }}>
-                      {navItems.map((item) => (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          className="nav-link"
-                        >
-                          {item.label}
-                        </Link>
-                      ))}
-                      <Button LinkComponent={Link} href='/iscriviti' color="primary" variant="contained" size="medium" sx={{
-                        display: { xs: 'none', md: 'flex' },
-                      }}>
-                        Iscriviti ora
-                      </Button>
-                    </Box>
-                  </Box>
-                  <IconButton onClick={toggleDrawer(false)}>
-                    <CloseRoundedIcon />
-                  </IconButton>
+                  <Image
+                    src="/logo.png"
+                    alt="Beverino Bike Festival"
+                    fill
+                    style={{ objectFit: 'cover' }}
+                  />
                 </Box>
-                {navItems.map((item) => (
-                  <MenuItem key={item.href} onClick={toggleDrawer(false)}>
-                    <Link href={item.href}>
-                      {item.label}
-                    </Link>
-                  </MenuItem>
-                ))}
-                <Divider sx={{ my: 3 }} />
-                <MenuItem onClick={toggleDrawer(false)}>
-                  <Button LinkComponent={Link} href='/iscriviti' color="primary" variant="contained" size="small" sx={{
-                    width: { xs: "100%" }
-                  }}>
-                    Iscriviti ora
-                  </Button>
-                </MenuItem>
+                <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 700,
+                      color: '#333',
+                      fontSize: scrolled ? '1.1rem' : '1.25rem',
+                      transition: 'font-size 0.3s ease',
+                    }}
+                  >
+                    Beverino Bike Festival
+                  </Typography>
+                </Box>
               </Box>
-            </Drawer>
-          </Box>
-        </StyledToolbar>
-      </Container>
-    </AppBar>
+
+              {/* Spacer */}
+              <Box sx={{ flexGrow: 1 }} />
+
+              {/* Desktop Navigation */}
+              <Box
+                sx={{
+                  display: { xs: 'none', md: 'flex' },
+                  alignItems: 'center',
+                  gap: 4,
+                }}
+              >
+                {navItems.map((item) => (
+                  <Box
+                    key={item.href}
+                    component={Link}
+                    href={item.href}
+                    sx={{
+                      color: '#333',
+                      textDecoration: 'none',
+                      fontSize: '1rem',
+                      fontWeight: 500,
+                      '&:hover': {
+                        color: '#BF360C',
+                      },
+                      transition: 'color 0.2s ease',
+                    }}
+                  >
+                    {item.label}
+                  </Box>
+                ))}
+
+                {/* CTA Button */}
+                <Button
+                  component={Link}
+                  href="/iscriviti"
+                  variant="contained"
+                  sx={{
+                    ml: 2,
+                    backgroundColor: '#BF360C',
+                    borderRadius: 2,
+                    px: 3,
+                    py: 1,
+                    fontWeight: 600,
+                    textTransform: 'none',
+                    '&:hover': {
+                      backgroundColor: '#D32F2F',
+                    },
+                    transition: 'background-color 0.2s ease',
+                  }}
+                >
+                  Iscriviti ora
+                </Button>
+              </Box>
+
+              {/* Mobile menu button */}
+              <IconButton
+                edge="start"
+                onClick={handleDrawerToggle}
+                sx={{
+                  display: { md: 'none' },
+                  color: '#FF5722',
+                  bgcolor: 'rgba(255, 87, 34, 0.1)',
+                  '&:hover': {
+                    bgcolor: 'rgba(191, 54, 12, 0.2)',
+                    transform: 'scale(1.1)',
+                  },
+                  transition: 'all 0.3s ease',
+                }}
+              >
+                <MenuIcon />
+              </IconButton>
+            </Toolbar>
+          </Container>
+        </AppBar>
+      </HideOnScroll>
+
+      {/* Mobile Drawer */}
+      <Drawer
+        variant="temporary"
+        anchor="right"
+        open={mobileOpen}
+        onClose={handleDrawerToggle}
+        ModalProps={{
+          keepMounted: true,
+        }}
+        PaperProps={{
+          sx: {
+            background: 'linear-gradient(180deg, #FFFFFF 0%, #F5F5F5 100%)',
+          },
+        }}
+        sx={{
+          display: { xs: 'block', md: 'none' },
+          '& .MuiDrawer-paper': {
+            boxSizing: 'border-box',
+            width: 280,
+          },
+        }}
+      >
+        {/* Close button */}
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
+          <IconButton onClick={handleDrawerToggle}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        {drawer}
+      </Drawer>
+
+      {/* Spacer per il contenuto */}
+      <Toolbar sx={{ height: { xs: 64, md: 72 } }} />
+    </>
   );
 }

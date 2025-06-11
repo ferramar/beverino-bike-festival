@@ -1,25 +1,21 @@
 "use client"
-// src/components/IscrizioneWizard.tsx
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { useForm, FormProvider } from 'react-hook-form';
 import { useTheme } from '@mui/material/styles';
 import {
   Box,
-  Stepper,
-  Step,
-  StepLabel,
-  StepConnector,
   Button,
   Container,
   Typography,
   useMediaQuery,
+  CircularProgress,
 } from '@mui/material';
 import DataForm from '../dataForm';
 import Liberatoria from '../Liberatoria';
 import FinalRegistrationStep from '../FinalRegistrationStep';
 import { customAlphabet } from 'nanoid';
-import strapi from '../../utils/strapi';
+import { useStripeCheckout } from '../../hooks/useStripeCheckout';
+import { OrangeStepper } from '../CustomStepper';
 
 interface WizardData {
   nome: string;
@@ -52,14 +48,11 @@ export default function IscrizioneWizard() {
   });
   const { watch, trigger, handleSubmit, reset } = methods;
   const [activeStep, setActiveStep] = useState(0);
-  const router = useRouter();
   const [userAgent, setUserAgent] = useState('');
-
-  // Persistenza su localStorage
-  // useEffect(() => {
-  //   const sub = watch((v) => localStorage.setItem('iscrizione', JSON.stringify(v)));
-  //   return () => sub.unsubscribe();
-  // }, [watch]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [registrationId, setRegistrationId] = useState<number | null>(null);
+  
+  const { createCheckoutSession, loading: stripeLoading } = useStripeCheckout();
 
   useEffect(() => {
     if (typeof navigator !== 'undefined') {
@@ -69,7 +62,8 @@ export default function IscrizioneWizard() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    // Carica valori salvati
+    
+    // Carica dati salvati dal localStorage
     const stored = localStorage.getItem('iscrizione');
     if (stored) {
       try {
@@ -78,14 +72,16 @@ export default function IscrizioneWizard() {
         console.warn('Dati in localStorage non validi');
       }
     }
-    // Salva ogni cambiamento
+    
+    // Salva automaticamente i cambiamenti
     const subscription = watch((value) => {
       localStorage.setItem('iscrizione', JSON.stringify(value));
     });
+    
     return () => subscription.unsubscribe();
-  }, [watch]);
+  }, [watch, reset]);
 
-  // Campi per la validazione step-by-step
+  // Validazione per step
   const fieldsPerStep: Record<number, (keyof WizardData)[]> = {
     0: [
       'nome', 'cognome', 'luogoNascita', 'dataNascita',
@@ -98,53 +94,118 @@ export default function IscrizioneWizard() {
 
   const onNext = async () => {
     const toValidate = fieldsPerStep[activeStep];
-    if (await trigger(toValidate)) setActiveStep(s => s + 1);
+    if (await trigger(toValidate)) {
+      setActiveStep(s => s + 1);
+    }
   };
 
-  const onBack = () => setActiveStep(s => s - 1);
+  const onBack = () => {
+    setActiveStep(s => s - 1);
+  };
 
-  const onSubmit = async (data: WizardData) => {
+  const saveRegistrationToStrapi = async (data: WizardData) => {
+    const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
     const codice_registrazione = nanoid();
-    if (!data.liberatoriaPdfBlob) {
-      alert('Errore: PDF non generato');
-      return;
-    }
-    const ipRes = await fetch('https://api.ipify.org?format=json');
-    const { ip: userIp } = await ipRes.json();
 
-    const formData = new FormData();
-    const fileName = "liberatoria_" + data.nome + "_" + data.cognome + ".pdf"
-    formData.append('files', data.liberatoriaPdfBlob, fileName);
-    const uploadRes = await strapi.post('/api/upload', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
-    const pdfId = uploadRes.data[0].id;
+    // Ottieni IP utente
+    let userIp = 'unknown';
+    try {
+      const ipRes = await fetch('https://api.ipify.org?format=json');
+      if (ipRes.ok) {
+        const ipData = await ipRes.json();
+        userIp = ipData.ip;
+      }
+    } catch {
+      // IP non critico, continua senza
+    }
+
+    // Upload PDF liberatoria
+    let pdfId = null;
+    if (data.liberatoriaPdfBlob) {
+      const formData = new FormData();
+      const fileName = `liberatoria_${data.nome}_${data.cognome}.pdf`;
+      formData.append('files', data.liberatoriaPdfBlob, fileName);
+
+      try {
+        const uploadResponse = await fetch(`${strapiUrl}/api/upload`, {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (uploadResponse.ok) {
+          const uploadResult = await uploadResponse.json();
+          pdfId = uploadResult[0]?.id;
+        }
+      } catch {
+        // Upload PDF non critico, continua senza
+      }
+    }
 
     const log_firma_liberatoria = {
       orario_firmatario: new Date().toISOString(),
       ip_firmatario: userIp,
       user_agent_firmatario: userAgent
-    }
+    };
 
     const payload = {
-      ...data,
+      nome: data.nome,
+      cognome: data.cognome,
+      luogoNascita: data.luogoNascita,
+      dataNascita: data.dataNascita,
+      residenza: data.residenza,
+      numeroCivico: data.numeroCivico,
+      cap: data.cap,
+      email: data.email,
+      tipoDocumento: data.tipoDocumento,
+      numeroDocumento: data.numeroDocumento,
+      cittaRilascio: data.cittaRilascio,
+      dataRilascioDocumento: data.dataRilascioDocumento,
+      liberatoriaAccettata: data.liberatoriaAccettata,
+      conteggio_pastaparty: data.conteggio_pastaparty,
       codice_registrazione,
       log_firma_liberatoria,
-      pasta_party: data.conteggio_pastaparty > 0 ? true : false,
-      liberatoriaPdf: pdfId
+      pasta_party: data.conteggio_pastaparty > 0,
+      stato_pagamento: 'in_attesa',
+      ...(pdfId && { liberatoriaPdf: pdfId }),
+    };
+
+    const response = await fetch(`${strapiUrl}/api/iscrizionis`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ data: payload }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Errore salvataggio: ${response.status} - ${errorText}`);
     }
 
-    delete payload.liberatoriaPdfBlob
+    const result = await response.json();
+    return result.data.id;
+  };
+
+  const onSubmit = async (data: WizardData) => {
+    setIsSubmitting(true);
 
     try {
-      await strapi.post('/api/iscrizionis', {
-        data: payload
-      });
-      router.push('/iscrizione-successo')
-    } catch (error) {
-      console.log(error);
+      // Salva iscrizione in Strapi
+      const newRegistrationId = await saveRegistrationToStrapi(data);
+      setRegistrationId(newRegistrationId);
+
+      // Procedi con pagamento Stripe
+      const includeCena = data.conteggio_pastaparty > 0;
+      await createCheckoutSession(newRegistrationId, includeCena, data.conteggio_pastaparty);
+
+    } catch (error: any) {
+      console.error('Errore durante l\'iscrizione:', error);
+      alert(`Si è verificato un errore: ${error.message}`);
+      setIsSubmitting(false);
     }
   };
+
+  const isLoading = isSubmitting || stripeLoading;
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -155,11 +216,9 @@ export default function IscrizioneWizard() {
         Compila il form e procedi con le istruzioni per confermare la tua partecipazione.
       </Typography>
 
-      {!isMobile &&
-        <Stepper sx={{ mt: 6 }} activeStep={activeStep} connector={<StepConnector />}>
-          {steps.map((label) => <Step key={label}><StepLabel>{label}</StepLabel></Step>)}
-        </Stepper>
-      }
+      {!isMobile && (
+        <OrangeStepper activeStep={activeStep} steps={steps}></OrangeStepper>
+      )}
 
       <FormProvider {...methods}>
         <Box sx={{ mb: 4 }}>
@@ -168,18 +227,34 @@ export default function IscrizioneWizard() {
           {activeStep === 2 && <FinalRegistrationStep />}
         </Box>
 
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: "center" }}>
-          <Button disabled={activeStep === 0} onClick={onBack} variant="outlined">
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Button
+            disabled={activeStep === 0 || isLoading}
+            onClick={onBack}
+            variant="outlined"
+          >
             Indietro
           </Button>
+
           {isMobile && <Typography>{activeStep + 1}/{steps.length}</Typography>}
+
           {activeStep < steps.length - 1 ? (
-            <Button variant="contained" onClick={onNext}>
+            <Button
+              variant="contained"
+              onClick={onNext}
+              disabled={isLoading}
+            >
               Avanti
             </Button>
           ) : (
-            <Button variant="contained" color="primary" onClick={handleSubmit(onSubmit)}>
-              Conferma e Paga
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleSubmit(onSubmit)}
+              disabled={isLoading}
+              startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : null}
+            >
+              {isLoading ? 'Elaborazione...' : 'Conferma e Paga'}
             </Button>
           )}
         </Box>

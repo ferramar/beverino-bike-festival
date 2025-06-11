@@ -6,7 +6,7 @@ export default function HomeBanner() {
   return (
     <Box sx={{
       minHeight: "500px",
-      height: { xs: "80svh", lg: "80svh" },
+      height: { xs: "70svh", lg: "80svh" },
       maxHeight: "700px",
       position: "relative",
     }}>
@@ -46,7 +46,6 @@ export default function HomeBanner() {
         width: "100%",
         height: "100%",
         zIndex: 2,
-        pt: "8rem",
         display: "flex",
         alignItems: "center",
       }}>

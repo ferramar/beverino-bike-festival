@@ -42,7 +42,7 @@ export default function GalleryPage() {
   if (!data) return <Box p={2}>Loading...</Box>;
 
   return (
-    <Box component="main" sx={{ pt: '8rem', pb: 4 }}>
+    <Box component="main" sx={{ py: 4 }}>
       <Head>
         <title>Galleria | Beverin Bike Festival</title>
         <meta name="description" content="Galleria fotografica Beverino Bike Festival" />

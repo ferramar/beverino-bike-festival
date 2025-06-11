@@ -12,10 +12,7 @@ export default function Sponsor() {
   if (!data) return <Box p={2}>Loading...</Box>;
 
   return (
-    <Box component="main" sx={{
-      pt: "8rem",
-      pb: 4
-    }}>
+    <Box component="main" sx={{ py: 4 }}>
       {data?.length && <SponsorList sponsors={data} />}
     </Box>
   );
