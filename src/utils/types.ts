@@ -22,4 +22,5 @@ export interface SponsorItem extends StrapiResponseGeneric {
   descrizione?: string | null;
   sito?: string | null;
   logo?: string;
+  categoria?: 'gold' | 'silver' | 'bronze' | 'partner';
 }
