@@ -1,0 +1,9 @@
+{
+  "name": "Beverino Bike Festival",
+  "short_name": "BBF 2025",
+  "theme_color": "#BF360C",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/"
+}

@@ -1,6 +1,4 @@
 /* eslint-disable */
-
-import { StrapiMediaAttributes } from "./strapiTypes";
 import { SponsorItem, SponsorItemComplete } from "./types";
 
 export interface MediaFile {
@@ -32,6 +30,7 @@ export interface SponsorAttributes {
 }
 
 type MediaItem = {
+  title: string;
   id: number;
   url: string;
   type: 'image' | 'video';
