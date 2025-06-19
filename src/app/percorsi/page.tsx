@@ -75,7 +75,7 @@ function GPXMap({ gpxFile, height = 400 }: { gpxFile: string; height?: number })
           p: 3,
         }}
       >
-        <DirectionsBike sx={{ fontSize: 48, mb: 2, opacity: 0.5, color: '#BF360C' }} />
+        <DirectionsBike sx={{ fontSize: 48, mb: 2, opacity: 0.5, color: '#A52D0C' }} />
         <Typography variant="body1" color="error" textAlign="center" sx={{ mb: 2 }}>
           {error}
         </Typography>
@@ -91,7 +91,7 @@ function GPXMap({ gpxFile, height = 400 }: { gpxFile: string; height?: number })
               link.click();
             }}
             sx={{
-              backgroundColor: '#BF360C',
+              backgroundColor: '#A52D0C',
               '&:hover': {
                 backgroundColor: '#D32F2F',
               },
@@ -106,8 +106,8 @@ function GPXMap({ gpxFile, height = 400 }: { gpxFile: string; height?: number })
               window.open(`https://gpx.studio/?state=${encodeURIComponent(JSON.stringify({ urls: [gpxFileUrl] }))}`, '_blank');
             }}
             sx={{
-              borderColor: '#BF360C',
-              color: '#BF360C',
+              borderColor: '#A52D0C',
+              color: '#A52D0C',
               '&:hover': {
                 borderColor: '#D32F2F',
                 color: '#D32F2F',
@@ -144,7 +144,7 @@ function GPXMap({ gpxFile, height = 400 }: { gpxFile: string; height?: number })
             width: 40,
             height: 40,
             border: '4px solid #f3f3f3',
-            borderTop: '4px solid #BF360C',
+            borderTop: '4px solid #A52D0C',
             borderRadius: '50%',
             animation: 'spin 1s linear infinite',
             mb: 2,
@@ -262,8 +262,8 @@ export default function PercorsiPage() {
         <Grid container spacing={3} sx={{ mb: 6 }}>
           <Grid size={{ xs: 12, md: 4 }}>
             <Card elevation={2} sx={{ p: 2, textAlign: 'center' }}>
-              <Straighten sx={{ fontSize: 40, color: '#BF360C', mb: 1 }} />
-              <Typography variant="h4" fontWeight={700} color="#BF360C">
+              <Straighten sx={{ fontSize: 40, color: '#A52D0C', mb: 1 }} />
+              <Typography variant="h4" fontWeight={700} color="#A52D0C">
                 85 km
               </Typography>
               <Typography variant="body2" color="text.secondary">
@@ -273,8 +273,8 @@ export default function PercorsiPage() {
           </Grid>
           <Grid size={{ xs: 12, md: 4 }}>
             <Card elevation={2} sx={{ p: 2, textAlign: 'center' }}>
-              <TrendingUp sx={{ fontSize: 40, color: '#BF360C', mb: 1 }} />
-              <Typography variant="h4" fontWeight={700} color="#BF360C">
+              <TrendingUp sx={{ fontSize: 40, color: '#A52D0C', mb: 1 }} />
+              <Typography variant="h4" fontWeight={700} color="#A52D0C">
                 1500m
               </Typography>
               <Typography variant="body2" color="text.secondary">
@@ -284,8 +284,8 @@ export default function PercorsiPage() {
           </Grid>
           <Grid size={{ xs: 12, md: 4 }}>
             <Card elevation={2} sx={{ p: 2, textAlign: 'center' }}>
-              <Timeline sx={{ fontSize: 40, color: '#BF360C', mb: 1 }} />
-              <Typography variant="h4" fontWeight={700} color="#BF360C">
+              <Timeline sx={{ fontSize: 40, color: '#A52D0C', mb: 1 }} />
+              <Typography variant="h4" fontWeight={700} color="#A52D0C">
                 3
               </Typography>
               <Typography variant="body2" color="text.secondary">
@@ -310,10 +310,10 @@ export default function PercorsiPage() {
               minWidth: 200,
             },
             '& .Mui-selected': {
-              color: '#BF360C',
+              color: '#A52D0C',
             },
             '& .MuiTabs-indicator': {
-              backgroundColor: '#BF360C',
+              backgroundColor: '#A52D0C',
               height: 3,
             },
           }}
@@ -426,7 +426,7 @@ export default function PercorsiPage() {
                 }}
                 sx={{
                   mt: 3,
-                  backgroundColor: '#BF360C',
+                  backgroundColor: '#A52D0C',
                   '&:hover': {
                     backgroundColor: '#D32F2F',
                   },
@@ -459,7 +459,7 @@ export default function PercorsiPage() {
         <Grid container spacing={3} sx={{ mt: 2 }}>
           <Grid size={{ xs: 12, md: 4 }}>
             <Box textAlign="center">
-              <Speed sx={{ fontSize: 40, color: '#BF360C', mb: 2 }} />
+              <Speed sx={{ fontSize: 40, color: '#A52D0C', mb: 2 }} />
               <Typography variant="h6" gutterBottom fontWeight={600}>
                 Attrezzatura
               </Typography>
@@ -470,7 +470,7 @@ export default function PercorsiPage() {
           </Grid>
           <Grid size={{ xs: 12, md: 4 }}>
             <Box textAlign="center">
-              <Schedule sx={{ fontSize: 40, color: '#BF360C', mb: 2 }} />
+              <Schedule sx={{ fontSize: 40, color: '#A52D0C', mb: 2 }} />
               <Typography variant="h6" gutterBottom fontWeight={600}>
                 Orari
               </Typography>
@@ -481,7 +481,7 @@ export default function PercorsiPage() {
           </Grid>
           <Grid size={{ xs: 12, md: 4 }}>
             <Box textAlign="center">
-              <Timeline sx={{ fontSize: 40, color: '#BF360C', mb: 2 }} />
+              <Timeline sx={{ fontSize: 40, color: '#A52D0C', mb: 2 }} />
               <Typography variant="h6" gutterBottom fontWeight={600}>
                 Assistenza
               </Typography>

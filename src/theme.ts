@@ -5,7 +5,7 @@ const theme = createTheme({
   palette: {
     primary: {
       light: '#FF8A65',    // 300
-      main: '#BF360C',     // 700 - Il tuo colore principale
+      main: '#A52D0C',     // 700 - Il tuo colore principale old: #A52D0C
       dark: '#8A2C12',     // 800 più scuro
       contrastText: '#fff',
     },
@@ -28,8 +28,8 @@ const theme = createTheme({
       main: '#4caf50',
     },
     text: {
-      primary: 'rgba(0, 0, 0, 0.87)',
-      secondary: 'rgba(0, 0, 0, 0.6)',
+      primary: '#141414',
+      secondary: '#555',
     },
     background: {
       default: '#FAFAFA',
@@ -45,7 +45,7 @@ const theme = createTheme({
       400: '#FF8A3C',      // FB8C3C
       500: '#FB6616',      // FB6616
       600: '#EA4B0C',      // EA4B0C
-      700: '#BF360C',      // BF360C - MAIN
+      700: '#A52D0C',      // BF360C - MAIN
       800: '#8A2C12',      // 8A2C12
       900: '#7C2712',      // 7C2712
       950: '#431107',      // 431107
@@ -151,7 +151,7 @@ const theme = createTheme({
           left: '-9999px',
           zIndex: 999,
           padding: '1em',
-          backgroundColor: '#BF360C',
+          backgroundColor: '#A52D0C',
           color: 'white',
           textDecoration: 'none',
           borderRadius: '4px',
@@ -176,7 +176,7 @@ const theme = createTheme({
           transition: 'all 0.2s ease-in-out',
         },
         contained: {
-          backgroundColor: '#BF360C',
+          backgroundColor: '#A52D0C',
           color: '#FFFFFF',
           '&:hover': {
             backgroundColor: '#8A2C12',
@@ -185,17 +185,17 @@ const theme = createTheme({
           },
         },
         outlined: {
-          borderColor: '#BF360C',
-          color: '#BF360C',
+          borderColor: '#A52D0C',
+          color: '#A52D0C',
           borderWidth: 2,
           '&:hover': {
             borderWidth: 2,
-            borderColor: '#BF360C',
+            borderColor: '#A52D0C',
             backgroundColor: 'rgba(191, 54, 12, 0.08)',
           },
         },
         text: {
-          color: '#BF360C',
+          color: '#A52D0C',
           '&:hover': {
             backgroundColor: 'rgba(191, 54, 12, 0.08)',
           },
@@ -209,14 +209,14 @@ const theme = createTheme({
         },
         filled: {
           '&.MuiChip-colorPrimary': {
-            backgroundColor: '#BF360C',
+            backgroundColor: '#A52D0C',
             color: '#FFFFFF',
           },
         },
         outlined: {
           '&.MuiChip-colorPrimary': {
-            borderColor: '#BF360C',
-            color: '#BF360C',
+            borderColor: '#A52D0C',
+            color: '#A52D0C',
           },
         },
       },
@@ -226,14 +226,14 @@ const theme = createTheme({
         root: {
           '& .MuiOutlinedInput-root': {
             '&:hover fieldset': {
-              borderColor: '#BF360C',
+              borderColor: '#A52D0C',
             },
             '&.Mui-focused fieldset': {
-              borderColor: '#BF360C',
+              borderColor: '#A52D0C',
             },
           },
           '& .MuiInputLabel-root.Mui-focused': {
-            color: '#BF360C',
+            color: '#A52D0C',
           },
         },
       },
@@ -242,7 +242,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           '&.Mui-selected': {
-            backgroundColor: '#BF360C',
+            backgroundColor: '#A52D0C',
             color: '#FFFFFF',
             '&:hover': {
               backgroundColor: '#8A2C12',
@@ -254,7 +254,7 @@ const theme = createTheme({
     MuiLink: {
       styleOverrides: {
         root: {
-          color: '#BF360C',
+          color: '#A52D0C',
           textDecoration: 'none',
           '&:hover': {
             textDecoration: 'underline',

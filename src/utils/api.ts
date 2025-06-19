@@ -1,33 +1,5 @@
 /* eslint-disable */
-import { SponsorItem, SponsorItemComplete } from "./types";
-
-export interface MediaFile {
-  id: number;
-  name: string;
-  mime: string;
-  url: string;
-  formats?: {
-    thumbnail?: { url: string };
-  };
-}
-
-export interface EditionRecord {
-  id: number;
-  edizione: number;
-  media: MediaFile[];
-}
-
-export interface StrapiResponse {
-  data: EditionRecord[];
-  meta: any;
-}
-
-export interface SponsorAttributes {
-  nome: string;
-  descrizione?: string;
-  logo?: string;
-  sito?: string;
-}
+import { SponsorItem, SponsorStrapi, CategoriaS, CategoriaStrapi } from "../types/sponsor";
 
 type MediaItem = {
   title: string;
@@ -44,7 +16,6 @@ const BASE = process.env.NEXT_PUBLIC_STRAPI_URL;
 export const fetcher = (url: string) =>
   fetch(`${BASE}${url}`).then(res => res.json());
 
-// “appiattisci” i dati in un array di MediaItem per il front-end
 export async function getAllMedia(): Promise<MediaItem[]> {
   const { data } = await fetcher('/api/media-edizionis?populate=media');
   return data.flatMap((record: any) =>
@@ -65,17 +36,48 @@ export async function getAllMedia(): Promise<MediaItem[]> {
 }
 
 export async function getAllSponsors(): Promise<SponsorItem[]> {
-  const { data } = await fetcher('/api/sponsors?populate=logo');
+  const { data } = await fetcher('/api/sponsors?populate=*');
   if (!data || !Array.isArray(data)) return []
 
-  return data.map((item: SponsorItemComplete) => {
+  return data.map((item: SponsorStrapi): SponsorItem => {
     return {
-      ...item,
-      logo: item && item.logo && item.logo.formats?.thumbnail?.url
-        ? (item.logo.formats.thumbnail.url.startsWith('http')
-            ? item.logo.formats.thumbnail.url
-            : `${BASE}${item.logo.formats.thumbnail.url}`)
-            : undefined,
+      id: item.id,
+      nome: item.nome,
+      descrizione: item.descrizione,
+      sito: item.sito,
+      principale: item.principale || false,
+      logo: item.logo?.formats?.thumbnail?.url || item.logo?.url,
+      categorie_sponsors: item.categorie_sponsors || []
     }
   })
+}
+
+export async function getAllSponsorsWithCategories(): Promise<SponsorItem[]> {
+  const { data } = await fetcher('/api/sponsors?populate=*&sort=principale:desc,nome:asc');
+  if (!data || !Array.isArray(data)) return []
+
+  return data.map((item: SponsorStrapi): SponsorItem => {
+    return {
+      id: item.id,
+      nome: item.nome,
+      descrizione: item.descrizione,
+      sito: item.sito,
+      principale: item.principale || false,
+      logo: item.logo?.formats?.thumbnail?.url || item.logo?.url,
+      categorie_sponsors: item.categorie_sponsors?.map((cat: CategoriaS) => ({
+        id: cat.id,
+        nome: cat.nome
+      })) || []
+    }
+  })
+}
+
+export async function getAllSponsorCategories(): Promise<CategoriaS[]> {
+  const { data } = await fetcher('/api/categorie-sponsors?sort=nome:asc');
+  if (!data || !Array.isArray(data)) return []
+
+  return data.map((item: CategoriaStrapi): CategoriaS => ({
+    id: item.id,
+    nome: item.nome
+  }))
 }

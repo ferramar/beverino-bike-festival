@@ -16,7 +16,7 @@ const Footer: React.FC = () => {
       <Container maxWidth="lg">
         <Grid container spacing={4}>
           <Grid size={{xs: 12, sm: 4}}>
-            <Typography variant="h6" gutterBottom>
+            <Typography variant="h6" component={"h3"} gutterBottom>
               Chi Siamo
             </Typography>
             <Typography variant="body2">
@@ -30,24 +30,24 @@ const Footer: React.FC = () => {
               }
             }
           }}>
-            <Typography variant="h6" gutterBottom>
+            <Typography variant="h6" component={"h3"} gutterBottom>
               Link 
             </Typography>
-            <Link href="/" color="inherit" display="block">
+            <Link href="/" color="inherit" display="block" lineHeight={"3"}>
               Home
             </Link>
-            <Link href="/programma" color="inherit" display="block">
+            <Link href="/programma" color="inherit" display="block" lineHeight={"3"}>
               Programma
             </Link>
-            <Link href="/galleria" color="inherit" display="block">
+            <Link href="/galleria" color="inherit" display="block" lineHeight={"3"}>
               Galleria
             </Link>
-            <Link href="/sponsor" color="inherit" display="block">
+            <Link href="/sponsor" color="inherit" display="block" lineHeight={"3"}>
               Sponsor
             </Link>
           </Grid>
           <Grid size={{xs: 12, sm: 4}}>
-            <Typography variant="h6" gutterBottom>
+            <Typography variant="h6" component={"h3"} gutterBottom>
               Seguici
             </Typography>
             <Box>
@@ -55,6 +55,7 @@ const Footer: React.FC = () => {
                 aria-label="Facebook"
                 href="https://facebook.com"
                 color="inherit"
+                sx={{width: "45px", height: "45px"}}
               >
                 <Facebook />
               </IconButton>
@@ -62,6 +63,7 @@ const Footer: React.FC = () => {
                 aria-label="Instagram"
                 href="https://instagram.com"
                 color="inherit"
+                sx={{width: "45px", height: "45px"}}
               >
                 <Instagram />
               </IconButton>

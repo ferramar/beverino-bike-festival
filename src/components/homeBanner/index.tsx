@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { Box, Button, Container, Typography, Chip } from "@mui/material";
 import Image from "next/image";
 import Link from "next/link";
@@ -31,13 +31,17 @@ const slideInLeft = keyframes`
 
 export default function HomeBanner() {
   return (
-    <Box sx={{
-      minHeight: "600px",
-      height: { xs: "80svh", lg: "90svh" },
-      maxHeight: "900px",
-      position: "relative",
-      overflow: "hidden",
-    }}>
+    <Box 
+      component="section"
+      aria-label="Banner principale - Beverino Bike Festival 2025"
+      sx={{
+        minHeight: "600px",
+        height: { xs: "80svh", lg: "90svh" },
+        maxHeight: "900px",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
       {/* Background Image con effetto parallax */}
       <Box sx={{
         position: "absolute",
@@ -47,6 +51,7 @@ export default function HomeBanner() {
         height: "120%",
         transform: "translate(-10%, -10%)",
         zIndex: 1,
+        background: "#000",
         "& > img": {
           objectFit: "cover",
           filter: "brightness(0.85)",
@@ -77,7 +82,7 @@ export default function HomeBanner() {
       }}>
         <Image
           src="/banner.jpg"
-          alt="Beverino Bike Festival"
+          alt=""
           fill
           priority
           quality={90}
@@ -100,135 +105,177 @@ export default function HomeBanner() {
           <Box sx={{ maxWidth: "700px" }}>
             {/* Badge */}
             <Chip 
-              label="ISCRIZIONI APERTE" 
-              color="success" 
-              size="small"
-              sx={{
-                mb: 3,
-                animation: `${fadeInUp} 0.8s ease-out forwards`,
-                fontWeight: 600,
-                letterSpacing: 1,
-              }}
-            />
-
-            {/* Data e Luogo */}
-            <Box sx={{ 
-              display: "flex", 
-              gap: 3, 
-              mb: 3,
-              flexWrap: "wrap",
-              animation: `${fadeInUp} 0.8s ease-out 0.2s forwards`,
-              opacity: 0,
-            }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <CalendarMonthIcon sx={{ color: 'secondary.light' }} />
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 500,
-                    color: 'secondary.light',
-                  }}
-                >
-                  21 Settembre 2025
-                </Typography>
-              </Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <LocationOnIcon sx={{ color: 'secondary.light' }} />
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 500,
-                    color: 'secondary.light',
-                  }}
-                >
-                  Beverino, La Spezia
-                </Typography>
-              </Box>
-            </Box>
-
-            {/* Titolo */}
-            <Typography 
-              variant="h1" 
-              color="secondary.main" 
-              sx={{
-                fontSize: { xs: "3rem", md: "4rem", lg: "5rem" },
-                mb: 3,
-                fontWeight: 800,
-                lineHeight: 1.1,
-                animation: `${slideInLeft} 0.8s ease-out 0.4s forwards`,
-                opacity: 0,
-                textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
-              }}
-            >
-              Beverino Bike Festival
-            </Typography>
-
-            {/* Sottotitolo */}
-            <Typography 
-              variant="body1" 
-              color="secondary.main" 
-              sx={{
-                fontSize: { xs: "1.125rem", md: "1.25rem", lg: "1.5rem" },
-                mb: 4,
-                lineHeight: 1.6,
-                animation: `${fadeInUp} 0.8s ease-out 0.6s forwards`,
-                opacity: 0,
-                textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
-              }}
-            >
-              Partecipa alla nostra epica gara ciclistica attraverso paesaggi 
-              mozzafiato e sfida te stesso sui percorsi che abbiamo creato 
-              per tutti i livelli di esperienza.
-            </Typography>
-
-            {/* CTA Buttons */}
-            <Box sx={{ 
-              display: "flex", 
-              gap: 2, 
-              flexWrap: "wrap",
-              animation: `${fadeInUp} 0.8s ease-out 0.8s forwards`,
-              opacity: 0,
-            }}>
-              <Button 
-                component={Link} 
-                href='/iscriviti' 
-                variant="contained" 
-                size="large" 
+                label="ISCRIZIONI APERTE" 
+                color="success" 
+                size="small"
                 sx={{
-                  px: 4,
-                  py: 1.5,
-                  fontSize: "1.125rem",
+                  mb: 3,
+                  animation: `${fadeInUp} 0.8s ease-out forwards`,
                   fontWeight: 600,
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
-                  transition: "all 0.3s ease",
-                  "&:hover": {
-                    transform: "translateY(-2px)",
-                    boxShadow: "0 6px 25px rgba(0,0,0,0.3)",
-                  }
+                  letterSpacing: 1,
+                }}
+              />
+
+              {/* Data e Luogo */}
+              <Box sx={{ 
+                display: "flex", 
+                gap: 3, 
+                mb: 3,
+                flexWrap: "wrap",
+                animation: `${fadeInUp} 0.8s ease-out 0.2s forwards`,
+                opacity: 0,
+              }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <CalendarMonthIcon sx={{ color: 'white' }} aria-hidden="true" />
+                  <Typography
+                    component="time"
+                    dateTime="2025-09-21"
+                    variant="h6"
+                    sx={{
+                      fontWeight: 500,
+                      color: 'white',
+                    }}
+                  >
+                    21 Settembre 2025
+                  </Typography>
+                </Box>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <LocationOnIcon sx={{ color: 'white' }} aria-hidden="true" />
+                  <Typography
+                    component="address"
+                    variant="h6"
+                    sx={{
+                      fontWeight: 500,
+                      color: 'white',
+                      fontStyle: 'normal',
+                    }}
+                  >
+                    Beverino, La Spezia
+                  </Typography>
+                </Box>
+              </Box>
+
+              {/* Titolo */}
+              <Typography 
+                variant="h1" 
+                sx={{
+                  fontSize: { xs: "3rem", md: "4rem", lg: "5rem" },
+                  mb: 3,
+                  fontWeight: 800,
+                  lineHeight: 1.1,
+                  animation: `${slideInLeft} 0.8s ease-out 0.4s forwards`,
+                  opacity: 0,
+                  textShadow: "2px 2px 4px rgba(0,0,0,0.3)",
+                  color: 'white',
                 }}
               >
-                Iscriviti Ora
-              </Button>
+                Beverino Bike Festival
+              </Typography>
+
+              {/* Sottotitolo */}
+              <Typography 
+                variant="body1" 
+                sx={{
+                  fontSize: { xs: "1.125rem", md: "1.25rem", lg: "1.5rem" },
+                  mb: 4,
+                  lineHeight: 1.6,
+                  animation: `${fadeInUp} 0.8s ease-out 0.6s forwards`,
+                  opacity: 0,
+                  textShadow: "1px 1px 2px rgba(0,0,0,0.3)",
+                  color: 'white',
+                }}
+              >
+                Partecipa alla nostra epica gara ciclistica attraverso paesaggi 
+                mozzafiato e sfida te stesso sui percorsi che abbiamo creato 
+                per tutti i livelli di esperienza.
+              </Typography>
+
+              {/* CTA Buttons */}
+              <Box sx={{ 
+                display: "flex", 
+                gap: 2, 
+                flexWrap: "wrap",
+                animation: `${fadeInUp} 0.8s ease-out 0.8s forwards`,
+                opacity: 0,
+              }}>
+                <Button 
+                  component={Link} 
+                  href='/iscriviti' 
+                  variant="contained" 
+                  size="large"
+                  aria-label="Iscriviti ora al Beverino Bike Festival 2025"
+                  sx={{
+                    px: 4,
+                    py: 1.5,
+                    fontSize: "1.125rem",
+                    fontWeight: 600,
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+                    transition: "all 0.3s ease",
+                    "&:hover": {
+                      transform: "translateY(-2px)",
+                      boxShadow: "0 6px 25px rgba(0,0,0,0.3)",
+                    },
+                    "&:focus-visible": {
+                      outline: "3px solid #FB6616",
+                      outlineOffset: "2px",
+                    }
+                  }}
+                >
+                  Iscriviti Ora
+                </Button>
+                <Button 
+                  component={Link} 
+                  href='/programma' 
+                  variant="outlined" 
+                  size="large"
+                  aria-label="Scopri il programma del Beverino Bike Festival 2025"
+                  sx={{
+                    px: 4,
+                    py: 1.5,
+                    fontSize: "1.125rem",
+                    fontWeight: 600,
+                    borderWidth: 2,
+                    borderColor: 'white',
+                    color: 'white',
+                    transition: "all 0.3s ease",
+                    "&:hover": {
+                      borderWidth: 2,
+                      borderColor: 'white',
+                      transform: "translateY(-2px)",
+                      backgroundColor: "rgba(255,255,255,0.1)",
+                    },
+                    "&:focus-visible": {
+                      outline: "3px solid #FB6616",
+                      outlineOffset: "2px",
+                    }
+                  }}
+                >
+                  Scopri il Programma
+                </Button>
+              </Box>
             </Box>
-          </Box>
         </Container>
       </Box>
 
-      {/* Scroll indicator */}
-      <Box sx={{
-        position: "absolute",
-        bottom: 30,
-        left: "50%",
-        transform: "translateX(-50%)",
-        zIndex: 3,
-        animation: `${fadeInUp} 1s ease-out 1s forwards`,
-        opacity: 0,
-      }}>
+      {/* Scroll indicator - solo desktop */}
+      <Box 
+        aria-hidden="true"
+        sx={{
+          position: "absolute",
+          bottom: 30,
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 3,
+          animation: `${fadeInUp} 1s ease-out 1s forwards`,
+          opacity: 0,
+          display: { xs: 'none', md: 'block' } // Nascosto su mobile
+        }}
+      >
         <Box sx={{
           width: 30,
           height: 50,
           border: "2px solid",
-          borderColor: "secondary.main",
+          borderColor: "white",
           borderRadius: 15,
           position: "relative",
           "&:before": {
@@ -238,7 +285,7 @@ export default function HomeBanner() {
             left: "50%",
             width: 4,
             height: 10,
-            backgroundColor: "secondary.main",
+            backgroundColor: "white",
             borderRadius: 2,
             transform: "translateX(-50%)",
             animation: "scrollDown 1.5s ease-in-out infinite",

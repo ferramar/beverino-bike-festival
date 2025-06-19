@@ -58,7 +58,7 @@ export const metadata: Metadata = {
     initialScale: 1,
     maximumScale: 5,
   },
-  themeColor: "#BF360C",
+  themeColor: "#A52D0C",
   manifest: "/site.webmanifest",
   alternates: {
     canonical: "https://beverinobikefestival.it",

@@ -37,17 +37,17 @@ export function OrangeStepper({ activeStep, steps }: CustomStepperProps) {
                     bgcolor: isCompleted
                       ? '#4CAF50' // Verde per completati
                       : isActive
-                        ? '#BF360C' // Arancione del tuo sito
+                        ? '#A52D0C' // Arancione del tuo sito
                         : '#E0E0E0', // Grigio per non raggiunti
                     color: isCompleted || isActive ? 'white' : '#9E9E9E',
                     transition: 'all 0.3s ease',
                     transform: isActive ? 'scale(1.1)' : 'scale(1)',
                     boxShadow: isActive
-                      ? '0 6px 20px #BF360C' // Ombra arancione
+                      ? '0 6px 20px #A52D0C' // Ombra arancione
                       : isCompleted
                         ? '0 4px 12px rgba(76, 175, 80, 0.2)' // Ombra verde
                         : 'none',
-                    border: isActive ? '3px solid #BF360C' : 'none', // Bordo arancione chiaro
+                    border: isActive ? '3px solid #A52D0C' : 'none', // Bordo arancione chiaro
                   }}
                 >
                   {isCompleted ? (
@@ -66,7 +66,7 @@ export function OrangeStepper({ activeStep, steps }: CustomStepperProps) {
                     mt: 2, // Più spazio dal cerchio
                     fontWeight: isActive ? 700 : isCompleted ? 600 : 400,
                     color: isActive
-                      ? '#BF360C'
+                      ? '#A52D0C'
                       : isCompleted
                         ? '#4CAF50'
                         : '#666',

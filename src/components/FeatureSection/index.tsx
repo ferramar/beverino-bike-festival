@@ -36,7 +36,11 @@ export default function FeaturesSection() {
           component="h2"
           textAlign="center"
           gutterBottom
-          sx={{ mb: 6, fontWeight: 700 }}
+          sx={{ 
+            mb: 6, 
+            fontWeight: 700,
+            fontSize: { xs: '2rem', md: '3rem', lg: '3.5rem' }
+          }}
         >
           Perché Partecipare
         </Typography>

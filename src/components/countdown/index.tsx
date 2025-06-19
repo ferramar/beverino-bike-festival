@@ -24,7 +24,7 @@ const fadeIn = keyframes`
 
 export function Countdown() {
   const targetDate = "2025-09-21T00:00:00";
-  
+
   const calculateTimeLeft = (): TimeLeft => {
     const now = new Date().getTime();
     const eventTime = new Date(targetDate).getTime();
@@ -42,11 +42,11 @@ export function Countdown() {
   useEffect(() => {
     setMounted(true);
     setTimeLeft(calculateTimeLeft());
-    
+
     const timer = setInterval(() => {
       setTimeLeft(calculateTimeLeft());
     }, 1000);
-    
+
     return () => clearInterval(timer);
   }, []);
 
@@ -72,6 +72,7 @@ export function Countdown() {
   return (
     <Box sx={{
       py: 10,
+      backgroundColor: "#fff",
       background: 'linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%)',
       position: 'relative',
       overflow: 'hidden',
@@ -87,11 +88,11 @@ export function Countdown() {
       }
     }}>
       <Container maxWidth="lg" sx={{ textAlign: "center", position: 'relative', zIndex: 1 }}>
-        <Typography 
-          variant='h2' 
-          component="h2" 
-          fontWeight={700} 
-          color='text.primary' 
+        <Typography
+          variant='h2'
+          component="h2"
+          fontWeight={700}
+          color='text.primary'
           sx={{
             mb: 2,
             animation: `${fadeIn} 0.8s ease-out`,
@@ -100,11 +101,12 @@ export function Countdown() {
         >
           Non vediamo l&apos;ora di partire
         </Typography>
-        
-        <Typography 
-          variant="h6" 
-          color="text.secondary" 
-          sx={{ 
+
+        <Typography
+          variant="h6"
+          component={"p"}
+          color="text.secondary"
+          sx={{
             mb: 6,
             animation: `${fadeIn} 0.8s ease-out 0.2s both`,
             maxWidth: 600,
@@ -114,20 +116,24 @@ export function Countdown() {
           Il countdown è iniziato! Preparati per l&apos;evento ciclistico più emozionante dell&apos;anno.
         </Typography>
 
-        <Box sx={{
-          display: "grid",
-          gridTemplateColumns: { xs: "repeat(2, 1fr)", md: "repeat(4, 1fr)" },
-          gap: { xs: 2, md: 3 },
-          maxWidth: 800,
-          mx: 'auto',
-        }}>
+        <Box
+          component={"dl"}
+          aria-label="Tempo rimanente all'evento"
+          aria-live="polite"
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "repeat(2, 1fr)", md: "repeat(4, 1fr)" },
+            gap: { xs: 2, md: 3 },
+            maxWidth: 800,
+            mx: 'auto',
+          }}>
           {timeUnits.map((unit, index) => (
             <Paper
               key={unit.label}
               elevation={0}
               sx={{
                 p: { xs: 2, md: 3 },
-                background: 'white',
+                backgroundColor: 'white',
                 borderRadius: 3,
                 position: 'relative',
                 overflow: 'hidden',
@@ -151,9 +157,9 @@ export function Countdown() {
                 }
               }}
             >
-              <Typography 
-                variant='h2' 
-                component="p" 
+              <Typography
+                variant='h2'
+                component="dt"
                 sx={{
                   fontSize: { xs: '2.5rem', md: '3.5rem' },
                   fontWeight: 800,
@@ -165,7 +171,8 @@ export function Countdown() {
               >
                 {formatNumber(unit.value)}
               </Typography>
-              <Typography 
+              <Typography
+                component={"dd"}
                 sx={{
                   textTransform: "uppercase",
                   fontSize: { xs: '0.75rem', md: '0.875rem' },
@@ -178,25 +185,6 @@ export function Countdown() {
               </Typography>
             </Paper>
           ))}
-        </Box>
-
-        {/* Messaggio motivazionale */}
-        <Box sx={{ 
-          mt: 6, 
-          animation: `${fadeIn} 0.8s ease-out 0.8s both`,
-        }}>
-          <Typography 
-            variant="body1" 
-            color="text.secondary"
-            sx={{ 
-              fontSize: '1.125rem',
-              fontStyle: 'italic',
-            }}
-          >
-            {timeLeft.days < 30 && timeLeft.days > 0 && "🔥 Ultimi posti disponibili!"}
-            {timeLeft.days === 0 && timeLeft.hours < 24 && "⏰ È il grande giorno!"}
-            {timeLeft.days > 30 && "🚴‍♂️ Assicurati il tuo posto in anticipo"}
-          </Typography>
         </Box>
       </Container>
     </Box>

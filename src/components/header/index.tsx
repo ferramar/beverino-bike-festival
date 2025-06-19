@@ -81,7 +81,7 @@ export default function ModernHeader() {
       <Box
         sx={{
           p: 3,
-          background: 'linear-gradient(135deg, #BF360C 0%, #D32F2F 100%)',
+          background: 'linear-gradient(135deg, #A52D0C 0%, #D32F2F 100%)',
           color: 'white',
           display: 'flex',
           alignItems: 'center',
@@ -110,7 +110,7 @@ export default function ModernHeader() {
               sx={{
                 borderRadius: 2,
                 '&:hover': {
-                  bgcolor: '#BF360C',
+                  bgcolor: '#A52D0C',
                   color: 'white',
                   '& .MuiListItemIcon-root': {
                     color: 'white',
@@ -138,7 +138,7 @@ export default function ModernHeader() {
           size="large"
           onClick={handleDrawerToggle}
           sx={{
-            background: 'linear-gradient(135deg, #BF360C 0%, #D32F2F 100%)',
+            background: 'linear-gradient(135deg, #A52D0C 0%, #D32F2F 100%)',
             borderRadius: 3,
             py: 1.5,
             boxShadow: '0 4px 15px rgba(191, 54, 12, 0.3)',
@@ -209,7 +209,7 @@ export default function ModernHeader() {
                 >
                   <Image
                     src="/logo.png"
-                    alt="Beverino Bike Festival"
+                    alt="Logo Beverino Bike Festival"
                     fill
                     style={{ objectFit: 'cover' }}
                   />
@@ -217,6 +217,7 @@ export default function ModernHeader() {
                 <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
                   <Typography
                     variant="h6"
+                    component={"span"}
                     sx={{
                       fontWeight: 700,
                       color: '#333',
@@ -234,6 +235,7 @@ export default function ModernHeader() {
 
               {/* Desktop Navigation */}
               <Box
+                component={"nav"}
                 sx={{
                   display: { xs: 'none', md: 'flex' },
                   alignItems: 'center',
@@ -251,7 +253,7 @@ export default function ModernHeader() {
                       fontSize: '1rem',
                       fontWeight: 500,
                       '&:hover': {
-                        color: '#BF360C',
+                        color: '#A52D0C',
                       },
                       transition: 'color 0.2s ease',
                     }}
@@ -267,7 +269,7 @@ export default function ModernHeader() {
                   variant="contained"
                   sx={{
                     ml: 2,
-                    backgroundColor: '#BF360C',
+                    backgroundColor: '#A52D0C',
                     borderRadius: 2,
                     px: 3,
                     py: 1,
@@ -278,6 +280,7 @@ export default function ModernHeader() {
                     },
                     transition: 'background-color 0.2s ease',
                   }}
+                  aria-label="Iscriviti ora"
                 >
                   Iscriviti ora
                 </Button>

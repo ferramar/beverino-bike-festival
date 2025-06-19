@@ -1,282 +1,333 @@
 'use client';
-import React from 'react';
+
+import { useState, useEffect } from 'react';
 import {
+  Box,
   Container,
   Typography,
-  Box,
   Grid,
   Card,
   CardContent,
-  Button,
   Chip,
+  ToggleButton,
+  ToggleButtonGroup,
   Stack,
-  Fade,
-  useTheme,
-  useMediaQuery,
+  Skeleton,
   Link as MuiLink,
+  alpha
 } from '@mui/material';
-import {
-  Business,
-  Launch,
-} from '@mui/icons-material';
-import Link from 'next/link';
 import Image from 'next/image';
-import useSWR from 'swr';
-import { getAllSponsors } from '../../utils/api';
-import { SponsorItem } from '../../utils/types';
+import StarIcon from '@mui/icons-material/Star';
+import LanguageIcon from '@mui/icons-material/Language';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import { getAllSponsorsWithCategories, getAllSponsorCategories } from '../../utils/api';
+import { SponsorItem, CategoriaS } from '../../types/sponsor';
+import theme from '../../theme';
 
-// Usa il tipo SponsorItem dai tuoi utils/types
+export default function SponsorsPage() {
+  const [sponsors, setSponsors] = useState<SponsorItem[]>([]);
+  const [categories, setCategories] = useState<CategoriaS[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [loading, setLoading] = useState(true);
 
-const SponsorCard = ({ sponsor, delay = 0 }: { sponsor: SponsorItem; delay?: number }) => {
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        // Usa le funzioni API
+        const [sponsorsData, categoriesData] = await Promise.all([
+          getAllSponsorsWithCategories(),
+          getAllSponsorCategories()
+        ]);
+        
+        setSponsors(sponsorsData);
+        setCategories(categoriesData);
+      } catch (error) {
+        console.error('Error fetching sponsors:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    fetchData();
+  }, []);
+
+  // Filtra sponsor
+  const filteredSponsors = selectedCategory === 'all'
+    ? sponsors
+    : sponsors.filter(sponsor => 
+        sponsor.categorie_sponsors?.some((cat: CategoriaS) => cat.id.toString() === selectedCategory)
+      );
+
+  // Separa principali
+  const principalSponsors = filteredSponsors.filter(s => s.principale);
+  const normalSponsors = filteredSponsors.filter(s => !s.principale);
+
+  if (loading) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 8 }}>
+        <Skeleton variant="text" width={300} height={60} sx={{ mb: 4 }} />
+        <Grid container spacing={3}>
+          {[...Array(6)].map((_, i) => (
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={i}>
+              <Skeleton variant="rectangular" height={200} />
+            </Grid>
+          ))}
+        </Grid>
+      </Container>
+    );
+  }
+
   return (
-    <Fade in timeout={600 + delay}>
-      <Card
-        elevation={1}
-        sx={{
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          transition: 'all 0.3s ease',
-          '&:hover': {
-            transform: 'translateY(0)',
-            boxShadow: `0 12px 24px rgba(191, 54, 12, 0.15)`,
-            borderColor: '#BF360C',
-          },
-          border: `2px solid transparent`,
-        }}
-      >
-        {/* Logo sponsor */}
-        <Box
-          sx={{
-            position: 'relative',
-            height: 200,
-            bgcolor: '#f5f5f5',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'hidden',
-          }}
-        >
-          {sponsor.logo ? (
-            <Image
-              src={sponsor.logo}
-              alt={sponsor.nome || 'Logo sponsor'}
-              fill
-              style={{
-                objectFit: 'contain',
-                padding: '20px',
-              }}
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-              }}
-            />
-          ) : (
-            <Business sx={{ fontSize: 80, color: '#ddd' }} />
-          )}
+    <Box sx={{ py: { xs: 6, md: 8 }, minHeight: '100vh', backgroundColor: '#fafafa' }}>
+      <Container maxWidth="lg">
+        {/* Header */}
+        <Box sx={{ mb: 6, textAlign: 'center' }}>
+          <Typography 
+            variant="h2" 
+            component="h1" 
+            gutterBottom
+            sx={{ 
+              fontWeight: 800,
+              fontSize: { xs: '2.5rem', md: '3.5rem' },
+              mb: 2
+            }}
+          >
+            I Nostri Sponsor
+          </Typography>
+          <Typography 
+            variant="h5" 
+            color="text.secondary"
+            sx={{ maxWidth: 700, mx: 'auto' }}
+          >
+            Un ringraziamento speciale a tutti i partner che rendono possibile il Beverino Bike Festival
+          </Typography>
         </Box>
 
-        <CardContent sx={{ flexGrow: 1, p: 3 }}>
-          <Typography variant="h6" gutterBottom fontWeight={600}>
-            {sponsor.nome || 'Nome non disponibile'}
+        {/* Filtri */}
+        {categories.length > 0 && (
+          <Box sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <FilterListIcon color="action" />
+              <ToggleButtonGroup
+                value={selectedCategory}
+                exclusive
+                onChange={(_, newCategory) => {
+                  if (newCategory !== null) {
+                    setSelectedCategory(newCategory);
+                  }
+                }}
+                size="small"
+              >
+                <ToggleButton value="all">
+                  Tutte le categorie
+                </ToggleButton>
+                {categories.map(category => (
+                  <ToggleButton key={category.id} value={category.id.toString()} sx={{
+                    color: theme.palette.text.secondary,
+                    lineHeight: "2.2"
+                  }}>
+                    {category.nome}
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
+            </Stack>
+          </Box>
+        )}
+
+        {/* Sponsor Principali */}
+        {principalSponsors.length > 0 && (
+          <Box sx={{ mb: 8 }}>
+            <Typography 
+              variant="h4" 
+              component="h2" 
+              sx={{ 
+                mb: 4,
+                textAlign: 'center',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 1
+              }}
+            >
+              <StarIcon sx={{ color: 'warning.main' }} />
+              Sponsor Principali
+              <StarIcon sx={{ color: 'warning.main' }} />
+            </Typography>
+
+            <Grid container spacing={4} justifyContent="center">
+              {principalSponsors.map((sponsor) => (
+                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={sponsor.id}>
+                  <SponsorCard sponsor={sponsor} isPrincipal />
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+        )}
+
+        {/* Altri Sponsor */}
+        {normalSponsors.length > 0 && (
+          <Box>
+            {principalSponsors.length > 0 && (
+              <Typography 
+                variant="h4" 
+                component="h2" 
+                sx={{ mb: 4, textAlign: 'center' }}
+              >
+                Altri Partner
+              </Typography>
+            )}
+
+            <Grid container spacing={3}>
+              {normalSponsors.map((sponsor) => (
+                <Grid size={{ xs: 12, sm: 6, md: 3 }} key={sponsor.id}>
+                  <SponsorCard sponsor={sponsor} />
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+        )}
+
+        {/* Nessuno sponsor */}
+        {filteredSponsors.length === 0 && (
+          <Box sx={{ textAlign: 'center', py: 8 }}>
+            <Typography variant="h5" color="text.secondary">
+              Nessuno sponsor trovato per questa categoria
+            </Typography>
+          </Box>
+        )}
+      </Container>
+    </Box>
+  );
+}
+
+// Card Component
+function SponsorCard({ sponsor, isPrincipal = false }: { sponsor: SponsorItem; isPrincipal?: boolean }) {
+  const [imageError, setImageError] = useState(false);
+
+  return (
+    <Card
+      elevation={0}
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'all 0.3s ease',
+        border: isPrincipal ? '3px solid' : '1px solid',
+        borderColor: isPrincipal ? 'warning.main' : 'divider',
+        backgroundColor: 'background.paper',
+        '&:hover': {
+          transform: 'translateY(-8px)',
+          boxShadow: isPrincipal ? '0 12px 40px rgba(255, 152, 0, 0.3)' : '0 8px 30px rgba(0,0,0,0.12)',
+        }
+      }}
+    >
+      {/* Logo */}
+      <Box
+        sx={{
+          height: isPrincipal ? 200 : 150,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          p: 3,
+          backgroundColor: 'grey.50',
+          position: 'relative'
+        }}
+      >
+        {isPrincipal && (
+          <Chip
+            icon={<StarIcon />}
+            label="Main Sponsor"
+            size="small"
+            color="warning"
+            sx={{
+              position: 'absolute',
+              top: 10,
+              right: 10,
+              fontWeight: 600
+            }}
+          />
+        )}
+        
+        {sponsor.logo && !imageError ? (
+          <Image
+            src={sponsor.logo}
+            alt={sponsor.nome}
+            width={isPrincipal ? 250 : 180}
+            height={isPrincipal ? 150 : 100}
+            style={{
+              objectFit: 'contain',
+              width: 'auto',
+              height: 'auto',
+              maxWidth: '100%',
+              maxHeight: '100%'
+            }}
+            onError={() => setImageError(true)}
+          />
+        ) : (
+          <Typography variant={isPrincipal ? "h4" : "h5"} color="text.disabled">
+            {sponsor.nome}
           </Typography>
-          
+        )}
+      </Box>
+
+      <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+        <Typography 
+          variant={isPrincipal ? "h5" : "h6"} 
+          component="h3" 
+          gutterBottom
+          fontWeight={600}
+        >
+          {sponsor.nome}
+        </Typography>
+
+        {sponsor.descrizione && (
           <Typography 
             variant="body2" 
             color="text.secondary" 
-            sx={{ 
-              mb: 3,
-              lineHeight: 1.6,
-              display: '-webkit-box',
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
+            sx={{ mb: 2, flexGrow: 1 }}
+          >
+            {sponsor.descrizione}
+          </Typography>
+        )}
+
+        {sponsor.sito && (
+          <MuiLink
+            href={sponsor.sito}
+            target="_blank"
+            rel="noopener noreferrer"
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 0.5,
+              textDecoration: 'none',
+              color: 'primary.main',
+              fontWeight: 500,
+              mb: 1,
+              '&:hover': {
+                textDecoration: 'underline'
+              }
             }}
           >
-            {sponsor.descrizione || 'Descrizione non disponibile'}
-          </Typography>
+            <LanguageIcon fontSize="small" />
+            Visita il sito
+          </MuiLink>
+        )}
 
-          {sponsor.sito && (
-            <Button
-              component={MuiLink}
-              href={sponsor.sito}
-              target="_blank"
-              rel="noopener noreferrer"
-              variant="contained"
-              startIcon={<Launch />}
-              fullWidth
-              sx={{
-                backgroundColor: '#BF360C',
-                '&:hover': {
-                  backgroundColor: '#D32F2F',
-                },
-                mt: 'auto',
-              }}
-            >
-              Visita il sito
-            </Button>
-          )}
-        </CardContent>
-      </Card>
-    </Fade>
-  );
-};
-
-const SponsorList = ({ sponsors }: { sponsors: SponsorItem[] }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-
-  return (
-    <Container maxWidth="lg">
-      {/* Hero Section */}
-      <Box textAlign="center" sx={{ mb: 8 }}>
-        <Typography variant="h2" component="h1" gutterBottom fontWeight={700}>
-          I Nostri Sponsor
-        </Typography>
-        <Typography variant="h6" color="text.secondary" sx={{ mb: 4, maxWidth: 600, mx: 'auto' }}>
-          Grazie a tutti i partner che rendono possibile il Beverino Bike Festival. 
-          Il loro supporto è fondamentale per creare un evento indimenticabile.
-        </Typography>
-
-        {/* Statistiche */}
-        <Grid container spacing={3} sx={{ maxWidth: 400, mx: 'auto' }}>
-          <Grid size={{ xs: 6 }}>
-            <Box textAlign="center">
-              <Typography variant="h3" fontWeight={700} color="#BF360C">
-                {sponsors.length}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Partner
-              </Typography>
-            </Box>
-          </Grid>
-          <Grid size={{ xs: 6 }}>
-            <Box textAlign="center">
-              <Typography variant="h3" fontWeight={700} color="#BF360C">
-                100%
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Locali
-              </Typography>
-            </Box>
-          </Grid>
-        </Grid>
-      </Box>
-
-      {/* Grid sponsor - tutti uguali */}
-      <Grid container spacing={3} sx={{ mb: 8 }}>
-        {sponsors.map((sponsor, index) => (
-          <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={sponsor.id}>
-            <SponsorCard sponsor={sponsor} delay={index * 100} />
-          </Grid>
-        ))}
-      </Grid>
-
-      {/* Call to Action */}
-      <Box
-        sx={{
-          p: 6,
-          textAlign: 'center',
-          bgcolor: '#f8f9fa',
-          borderRadius: 3,
-          border: '2px solid #BF360C',
-        }}
-      >
-        <Typography variant="h5" gutterBottom fontWeight={600}>
-          Vuoi diventare sponsor?
-        </Typography>
-        <Typography variant="body1" sx={{ mb: 3, maxWidth: 600, mx: 'auto' }}>
-          Unisciti a noi e supporta il Beverino Bike Festival! Contattaci per scoprire 
-          le opportunità di partnership e i pacchetti sponsorship disponibili.
-        </Typography>
-        <Button
-          component={Link}
-          href="/contatti"
-          variant="contained"
-          size="large"
-          sx={{
-            backgroundColor: '#BF360C',
-            px: 4,
-            py: 1.5,
-            '&:hover': {
-              backgroundColor: '#D32F2F',
-            },
-          }}
-        >
-          Contattaci
-        </Button>
-      </Box>
-    </Container>
-  );
-};
-
-const LoadingSkeleton = () => (
-  <Container maxWidth="lg">
-    <Box textAlign="center" sx={{ mb: 8 }}>
-      <Box sx={{ height: 60, bgcolor: '#f0f0f0', mb: 2, borderRadius: 1, mx: 'auto', maxWidth: 400 }} />
-      <Box sx={{ height: 40, bgcolor: '#f0f0f0', mb: 4, borderRadius: 1, mx: 'auto', maxWidth: 600 }} />
-    </Box>
-    
-    <Grid container spacing={3}>
-      {[1, 2, 3, 4].map((i) => (
-        <Grid size={{ xs: 12, sm: 6, md: 3 }} key={i}>
-          <Card sx={{ height: 400 }}>
-            <Box sx={{ height: 200, bgcolor: '#f0f0f0' }} />
-            <CardContent>
-              <Box sx={{ height: 20, bgcolor: '#f0f0f0', mb: 2, borderRadius: 1 }} />
-              <Box sx={{ height: 60, bgcolor: '#f0f0f0', mb: 2, borderRadius: 1 }} />
-              <Box sx={{ height: 36, bgcolor: '#f0f0f0', borderRadius: 1 }} />
-            </CardContent>
-          </Card>
-        </Grid>
-      ))}
-    </Grid>
-  </Container>
-);
-
-export default function Sponsor() {
-  const { data, error } = useSWR('/api/sponsors', getAllSponsors);
-
-  if (error) {
-    return (
-      <Box component="main" sx={{ py: 8 }}>
-        <Container maxWidth="lg">
-          <Box textAlign="center" sx={{ py: 8 }}>
-            <Typography variant="h5" color="error" gutterBottom>
-              Errore nel caricamento degli sponsor
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Si è verificato un problema. Riprova più tardi.
-            </Typography>
-          </Box>
-        </Container>
-      </Box>
-    );
-  }
-
-  if (!data) {
-    return (
-      <Box component="main" sx={{ py: 8 }}>
-        <LoadingSkeleton />
-      </Box>
-    );
-  }
-
-  return (
-    <Box component="main" sx={{ py: 8 }}>
-      {data?.length ? (
-        <SponsorList sponsors={data} />
-      ) : (
-        <Container maxWidth="lg">
-          <Box textAlign="center" sx={{ py: 8 }}>
-            <Typography variant="h5" gutterBottom>
-              Nessuno sponsor trovato
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Al momento non ci sono sponsor da visualizzare.
-            </Typography>
-          </Box>
-        </Container>
-      )}
-    </Box>
+        {/* Categorie */}
+        {sponsor.categorie_sponsors && sponsor.categorie_sponsors.length > 0 && (
+          <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', gap: 1 }}>
+            {sponsor.categorie_sponsors.map((cat: CategoriaS) => (
+              <Chip
+                key={cat.id}
+                label={cat.nome}
+                size="small"
+                variant="outlined"
+                color="primary"
+              />
+            ))}
+          </Stack>
+        )}
+      </CardContent>
+    </Card>
   );
 }

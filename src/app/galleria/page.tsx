@@ -99,7 +99,7 @@ export default function GalleryPage() {
             sx={{
               fontWeight: 800,
               fontSize: { xs: '2.5rem', md: '3.5rem' },
-              background: 'linear-gradient(135deg, #BF360C 0%, #FB6616 100%)',
+              background: 'linear-gradient(135deg, #A52D0C 0%, #FB6616 100%)',
               backgroundClip: 'text',
               WebkitBackgroundClip: 'text',
               color: 'transparent',
