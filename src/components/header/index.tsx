@@ -29,6 +29,7 @@ import {
 } from '@mui/icons-material';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 
 // Hook per rilevare lo scroll
 function useScrollPosition() {
@@ -63,6 +64,7 @@ function HideOnScroll({ children }: { children: React.ReactElement }) {
 export default function ModernHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const scrolled = useScrollPosition();
+  const pathname = usePathname();
 
   const navItems = [
     { href: "/percorsi", label: "Percorsi", icon: <Timeline /> },
@@ -73,6 +75,11 @@ export default function ModernHeader() {
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
+  };
+
+  // Funzione per verificare se il link è attivo
+  const isActive = (href: string) => {
+    return pathname === href;
   };
 
   const drawer = (
@@ -109,11 +116,16 @@ export default function ModernHeader() {
               onClick={handleDrawerToggle}
               sx={{
                 borderRadius: 2,
+                bgcolor: isActive(item.href) ? '#A52D0C' : 'transparent',
+                color: isActive(item.href) ? 'white' : 'inherit',
+                '& .MuiListItemIcon-root': {
+                  color: isActive(item.href) ? 'white' : 'inherit',
+                },
                 '&:hover': {
-                  bgcolor: '#A52D0C',
-                  color: 'white',
+                  bgcolor: isActive(item.href) ? '#D32F2F' : 'rgba(165, 45, 12, 0.1)',
+                  color: isActive(item.href) ? 'white' : '#A52D0C',
                   '& .MuiListItemIcon-root': {
-                    color: 'white',
+                    color: isActive(item.href) ? 'white' : '#A52D0C',
                   },
                 },
                 transition: 'all 0.3s ease',
@@ -122,7 +134,12 @@ export default function ModernHeader() {
               <ListItemIcon sx={{ minWidth: 40 }}>
                 {item.icon}
               </ListItemIcon>
-              <ListItemText primary={item.label} />
+              <ListItemText 
+                primary={item.label} 
+                primaryTypographyProps={{
+                  fontWeight: isActive(item.href) ? 600 : 400,
+                }}
+              />
             </ListItemButton>
           </ListItem>
         ))}
@@ -138,7 +155,9 @@ export default function ModernHeader() {
           size="large"
           onClick={handleDrawerToggle}
           sx={{
-            background: 'linear-gradient(135deg, #A52D0C 0%, #D32F2F 100%)',
+            background: isActive('/iscriviti') 
+              ? 'linear-gradient(135deg, #D32F2F 0%, #E53935 100%)'
+              : 'linear-gradient(135deg, #A52D0C 0%, #D32F2F 100%)',
             borderRadius: 3,
             py: 1.5,
             boxShadow: '0 4px 15px rgba(191, 54, 12, 0.3)',
@@ -248,14 +267,30 @@ export default function ModernHeader() {
                     component={Link}
                     href={item.href}
                     sx={{
-                      color: '#333',
+                      color: isActive(item.href) ? '#A52D0C' : '#333',
                       textDecoration: 'none',
                       fontSize: '1rem',
-                      fontWeight: 500,
+                      fontWeight: isActive(item.href) ? 700 : 500,
+                      position: 'relative',
+                      '&::after': {
+                        content: '""',
+                        position: 'absolute',
+                        bottom: -8,
+                        left: 0,
+                        right: 0,
+                        height: 3,
+                        backgroundColor: '#A52D0C',
+                        borderRadius: 2,
+                        transform: isActive(item.href) ? 'scaleX(1)' : 'scaleX(0)',
+                        transition: 'transform 0.3s ease',
+                      },
                       '&:hover': {
                         color: '#A52D0C',
+                        '&::after': {
+                          transform: 'scaleX(1)',
+                        },
                       },
-                      transition: 'color 0.2s ease',
+                      transition: 'all 0.2s ease',
                     }}
                   >
                     {item.label}
@@ -269,16 +304,19 @@ export default function ModernHeader() {
                   variant="contained"
                   sx={{
                     ml: 2,
-                    backgroundColor: '#A52D0C',
+                    backgroundColor: isActive('/iscriviti') ? '#D32F2F' : '#A52D0C',
                     borderRadius: 2,
                     px: 3,
                     py: 1,
                     fontWeight: 600,
                     textTransform: 'none',
+                    boxShadow: isActive('/iscriviti') ? '0 0 0 2px rgba(211, 47, 47, 0.3)' : 'none',
                     '&:hover': {
                       backgroundColor: '#D32F2F',
+                      transform: 'translateY(-1px)',
+                      boxShadow: '0 4px 12px rgba(165, 45, 12, 0.25)',
                     },
-                    transition: 'background-color 0.2s ease',
+                    transition: 'all 0.2s ease',
                   }}
                   aria-label="Iscriviti ora"
                 >
