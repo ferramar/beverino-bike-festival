@@ -1,4 +1,5 @@
 /* eslint-disable */
+import { FAQItem, FAQStrapi } from "../types/faq";
 import { SponsorItem, SponsorStrapi, CategoriaS, CategoriaStrapi } from "../types/sponsor";
 
 type MediaItem = {
@@ -80,4 +81,17 @@ export async function getAllSponsorCategories(): Promise<CategoriaS[]> {
     id: item.id,
     nome: item.nome
   }))
+}
+
+export async function getAllFAQs(): Promise<FAQItem[]> {
+  const { data } = await fetcher('/api/faqs?filters[attivo][$eq]=true&sort=ordine:asc');
+  if (!data || !Array.isArray(data)) return [];
+
+  return data.map((item: FAQStrapi): FAQItem => ({
+    id: item.id,
+    domanda: item.domanda,
+    risposta: item.risposta,
+    ordine: item.ordine,
+    attivo: item.attivo,
+  }));
 }

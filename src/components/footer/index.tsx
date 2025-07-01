@@ -45,6 +45,9 @@ const Footer: React.FC = () => {
             <Link href="/sponsor" color="inherit" display="block" lineHeight={"3"}>
               Sponsor
             </Link>
+            <Link href="/faq" color="inherit" display="block" lineHeight={"3"}>
+              FAQ
+            </Link>
           </Grid>
           <Grid size={{xs: 12, sm: 4}}>
             <Typography variant="h6" component={"h3"} gutterBottom>
@@ -72,7 +75,7 @@ const Footer: React.FC = () => {
         </Grid>
         <Box mt={4} textAlign="center">
           <Typography variant="body2">
-            © {new Date().getFullYear()} Beverin Bike Festival. All rights
+            © {new Date().getFullYear()} Beverino Bike Festival. All rights
             reserved.
           </Typography>
         </Box>

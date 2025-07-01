@@ -26,6 +26,7 @@ import {
   Collections,
   Handshake,
   DirectionsBike,
+  HelpOutline,
 } from '@mui/icons-material';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -71,6 +72,7 @@ export default function ModernHeader() {
     { href: "/programma", label: "Programma", icon: <CalendarMonth /> },
     { href: "/galleria", label: "Galleria", icon: <Collections /> },
     { href: "/sponsor", label: "Sponsor", icon: <Handshake /> },
+    { href: "/faq", label: "FAQ", icon: <HelpOutline /> },
   ];
 
   const handleDrawerToggle = () => {
@@ -189,7 +191,6 @@ export default function ModernHeader() {
             borderRadius: '0',
             margin: '0',
             width: '100%',
-            zIndex: 1000,
             boxShadow: scrolled 
               ? '0 8px 32px rgba(0, 0, 0, 0.12)' 
               : '0 2px 8px rgba(0, 0, 0, 0.05)',
