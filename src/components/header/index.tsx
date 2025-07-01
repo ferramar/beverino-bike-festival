@@ -189,6 +189,7 @@ export default function ModernHeader() {
             borderRadius: '0',
             margin: '0',
             width: '100%',
+            zIndex: 1000,
             boxShadow: scrolled 
               ? '0 8px 32px rgba(0, 0, 0, 0.12)' 
               : '0 2px 8px rgba(0, 0, 0, 0.05)',

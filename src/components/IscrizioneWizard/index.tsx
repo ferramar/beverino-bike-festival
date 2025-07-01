@@ -103,6 +103,8 @@ export default function IscrizioneWizard() {
     setActiveStep(s => s - 1);
   };
 
+
+
   const saveRegistrationToStrapi = async (data: WizardData) => {
     const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
     const codice_registrazione = nanoid();
@@ -119,25 +121,41 @@ export default function IscrizioneWizard() {
       // IP non critico, continua senza
     }
 
-    // Upload PDF liberatoria
-    let pdfId = null;
+    // Salva PDF sul server Next.js
+    let pdfUrl = null;
     if (data.liberatoriaPdfBlob) {
-      const formData = new FormData();
-      const fileName = `liberatoria_${data.nome}_${data.cognome}.pdf`;
-      formData.append('files', data.liberatoriaPdfBlob, fileName);
-
       try {
-        const uploadResponse = await fetch(`${strapiUrl}/api/upload`, {
-          method: 'POST',
-          body: formData,
+        console.log('Salvataggio PDF su server Next.js...');
+        
+        // Converti Blob in base64
+        const reader = new FileReader();
+        const base64 = await new Promise<string>((resolve) => {
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(data.liberatoriaPdfBlob!);
         });
-
-        if (uploadResponse.ok) {
-          const uploadResult = await uploadResponse.json();
-          pdfId = uploadResult[0]?.id;
+        
+        // Salva il PDF sul server Next.js
+        const saveResponse = await fetch('/api/save-pdf', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            pdfBase64: base64,
+            fileName: `liberatoria_${data.nome}_${data.cognome}_${Date.now()}.pdf`,
+          }),
+        });
+        
+        if (saveResponse.ok) {
+          const result = await saveResponse.json();
+          pdfUrl = result.url;
+          console.log('PDF salvato con successo:', pdfUrl);
+        } else {
+          console.error('Errore salvataggio PDF:', await saveResponse.text());
         }
-      } catch {
-        // Upload PDF non critico, continua senza
+      } catch (error) {
+        console.error('Errore durante salvataggio PDF:', error);
+        // Salvataggio PDF non critico, continua senza
       }
     }
 
@@ -166,8 +184,11 @@ export default function IscrizioneWizard() {
       log_firma_liberatoria,
       pasta_party: data.conteggio_pastaparty > 0,
       stato_pagamento: 'in_attesa',
-      ...(pdfId && { liberatoriaPdf: pdfId }),
+      // Salva l'URL del PDF salvato localmente
+      liberatoriaPdfUrl: pdfUrl,
     };
+
+    console.log('Payload completo da inviare a Strapi:', JSON.stringify(payload, null, 2));
 
     const response = await fetch(`${strapiUrl}/api/iscrizionis`, {
       method: 'POST',
@@ -197,6 +218,9 @@ export default function IscrizioneWizard() {
       // Procedi con pagamento Stripe
       const includeCena = data.conteggio_pastaparty > 0;
       await createCheckoutSession(newRegistrationId, includeCena, data.conteggio_pastaparty);
+
+      // Pulisci localStorage dopo successo
+      localStorage.removeItem('iscrizione');
 
     } catch (error: any) {
       console.error('Errore durante l\'iscrizione:', error);
