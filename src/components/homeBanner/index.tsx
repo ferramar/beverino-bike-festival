@@ -35,9 +35,9 @@ export default function HomeBanner() {
       component="section"
       aria-label="Banner principale - Beverino Bike Festival 2025"
       sx={{
-        minHeight: "600px",
-        height: { xs: "80svh", lg: "90svh" },
-        maxHeight: "900px",
+        minHeight: "700px",
+        height: { xs: "100svh", lg: "90svh" },
+        maxHeight: { xs: "700px", lg: "900px" },
         position: "relative",
         overflow: "hidden",
       }}
@@ -102,31 +102,32 @@ export default function HomeBanner() {
         alignItems: "center",
       }}>
         <Container maxWidth="lg">
-          <Box sx={{ maxWidth: "700px" }}>
+          <Box sx={{ maxWidth: { xs: "100%", md: "700px" } }}>
             {/* Badge */}
             <Chip 
                 label="ISCRIZIONI APERTE" 
                 color="success" 
                 size="small"
                 sx={{
-                  mb: 3,
+                  mb: { xs: 2, md: 3 },
                   animation: `${fadeInUp} 0.8s ease-out forwards`,
                   fontWeight: 600,
                   letterSpacing: 1,
+                  fontSize: { xs: '0.75rem', md: '0.875rem' },
                 }}
               />
 
               {/* Data e Luogo */}
               <Box sx={{ 
                 display: "flex", 
-                gap: 3, 
-                mb: 3,
+                gap: { xs: 2, md: 3 }, 
+                mb: { xs: 2, md: 3 },
                 flexWrap: "wrap",
                 animation: `${fadeInUp} 0.8s ease-out 0.2s forwards`,
                 opacity: 0,
               }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <CalendarMonthIcon sx={{ color: 'white' }} aria-hidden="true" />
+                  <CalendarMonthIcon sx={{ color: 'white', fontSize: { xs: 20, md: 24 } }} aria-hidden="true" />
                   <Typography
                     component="time"
                     dateTime="2025-09-21"
@@ -134,13 +135,14 @@ export default function HomeBanner() {
                     sx={{
                       fontWeight: 500,
                       color: 'white',
+                      fontSize: { xs: '0.875rem', md: '1.25rem' },
                     }}
                   >
                     21 Settembre 2025
                   </Typography>
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <LocationOnIcon sx={{ color: 'white' }} aria-hidden="true" />
+                  <LocationOnIcon sx={{ color: 'white', fontSize: { xs: 20, md: 24 } }} aria-hidden="true" />
                   <Typography
                     component="address"
                     variant="h6"
@@ -148,6 +150,7 @@ export default function HomeBanner() {
                       fontWeight: 500,
                       color: 'white',
                       fontStyle: 'normal',
+                      fontSize: { xs: '0.875rem', md: '1.25rem' },
                     }}
                   >
                     Beverino, La Spezia
@@ -159,8 +162,8 @@ export default function HomeBanner() {
               <Typography 
                 variant="h1" 
                 sx={{
-                  fontSize: { xs: "3rem", md: "4rem", lg: "5rem" },
-                  mb: 3,
+                  fontSize: { xs: "2.5rem", sm: "3rem", md: "4rem", lg: "5rem" },
+                  mb: { xs: 2, md: 3 },
                   fontWeight: 800,
                   lineHeight: 1.1,
                   animation: `${slideInLeft} 0.8s ease-out 0.4s forwards`,
@@ -176,8 +179,8 @@ export default function HomeBanner() {
               <Typography 
                 variant="body1" 
                 sx={{
-                  fontSize: { xs: "1.125rem", md: "1.25rem", lg: "1.5rem" },
-                  mb: 4,
+                  fontSize: { xs: "1rem", sm: "1.125rem", md: "1.25rem", lg: "1.5rem" },
+                  mb: { xs: 3, md: 4 },
                   lineHeight: 1.6,
                   animation: `${fadeInUp} 0.8s ease-out 0.6s forwards`,
                   opacity: 0,
@@ -197,6 +200,7 @@ export default function HomeBanner() {
                 flexWrap: "wrap",
                 animation: `${fadeInUp} 0.8s ease-out 0.8s forwards`,
                 opacity: 0,
+                mb: { xs: 3, md: 0 },
               }}>
                 <Button 
                   component={Link} 
@@ -205,9 +209,9 @@ export default function HomeBanner() {
                   size="large"
                   aria-label="Iscriviti ora al Beverino Bike Festival 2025"
                   sx={{
-                    px: 4,
-                    py: 1.5,
-                    fontSize: "1.125rem",
+                    px: { xs: 3, md: 4 },
+                    py: { xs: 1, md: 1.5 },
+                    fontSize: { xs: "1rem", md: "1.125rem" },
                     fontWeight: 600,
                     boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
                     transition: "all 0.3s ease",
@@ -230,9 +234,9 @@ export default function HomeBanner() {
                   size="large"
                   aria-label="Scopri il programma del Beverino Bike Festival 2025"
                   sx={{
-                    px: 4,
-                    py: 1.5,
-                    fontSize: "1.125rem",
+                    px: { xs: 3, md: 4 },
+                    py: { xs: 1, md: 1.5 },
+                    fontSize: { xs: "1rem", md: "1.125rem" },
                     fontWeight: 600,
                     borderWidth: 2,
                     borderColor: 'white',
@@ -252,6 +256,62 @@ export default function HomeBanner() {
                 >
                   Scopri il Programma
                 </Button>
+              </Box>
+
+              {/* Main Sponsor */}
+              <Box sx={{
+                mt: { xs: 4, md: 6 },
+                animation: `${fadeInUp} 0.8s ease-out 1s forwards`,
+                opacity: 0,
+              }}>
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    color: 'white', 
+                    mb: 1.5,
+                    textTransform: 'uppercase',
+                    letterSpacing: { xs: 1.5, md: 2 },
+                    fontSize: { xs: '0.75rem', md: '0.875rem' },
+                    fontWeight: 500,
+                    opacity: 0.9,
+                  }}
+                >
+                  Main Sponsor
+                </Typography>
+                <Box
+                  component={Link}
+                  href='/sponsor'
+                  sx={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    borderRadius: 2,
+                    px: { xs: 2, md: 3 },
+                    py: { xs: 1.5, md: 2 },
+                    transition: 'all 0.3s ease',
+                    textDecoration: 'none',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 255, 255, 1)',
+                      transform: 'scale(1.05)',
+                      boxShadow: '0 6px 25px rgba(0,0,0,0.3)',
+                    },
+                  }}
+                >
+                  <Image
+                    src="/damiani-ottica-logo.webp"
+                    alt="Damiani Ottica - Main Sponsor"
+                    width={150}
+                    height={50}
+                    style={{ 
+                      objectFit: 'contain',
+                      width: 'auto',
+                      height: 'auto',
+                      maxWidth: '150px',
+                      maxHeight: '50px',
+                    }}
+                  />
+                </Box>
               </Box>
             </Box>
         </Container>
