@@ -1,7 +1,7 @@
 /* eslint-disable */
 import React, { useMemo, useState } from 'react';
 import { useWatch, useFormContext } from 'react-hook-form';
-import { Box, Grid, SelectChangeEvent, TextField, Typography } from '@mui/material';
+import { Box, FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, Typography } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
 
 interface FormData {
@@ -124,18 +124,24 @@ export default function DataForm() {
             error={!!errors.cap}
             helperText={errors.cap?.message}
           />
-        </Grid>
+        </Grid> */}
         <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
           <TextField
             label="Email*"
             type='email'
             fullWidth
-            {...register('email', { required: 'Inserisci la mail' })}
+            {...register('email', {
+              required: 'Inserisci la mail',
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: 'Inserisci un indirizzo email valido'
+              }
+            })}
             error={!!errors.email}
             helperText={errors.email?.message}
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
+        {/* <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
           <FormControl fullWidth>
             <InputLabel id="tipo-documento">Tipo documento*</InputLabel>
             <Select

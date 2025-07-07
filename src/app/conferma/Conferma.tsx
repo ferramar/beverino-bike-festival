@@ -17,6 +17,7 @@ export default function Conferma() {
   const sessionId = searchParams.get('session_id');
   const [paymentStatus, setPaymentStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [paymentDetails, setPaymentDetails] = useState<any>(null);
+  const [isVerifying, setIsVerifying] = useState(false);
 
   useEffect(() => {
     // Pulizia localStorage
@@ -27,7 +28,8 @@ export default function Conferma() {
     }
 
     // Verifica pagamento se presente session_id
-    if (sessionId) {
+    if (sessionId && !isVerifying) {
+      setIsVerifying(true); 
       fetch(`/api/verify-payment?session_id=${sessionId}`)
         .then(res => res.json())
         .then(data => {

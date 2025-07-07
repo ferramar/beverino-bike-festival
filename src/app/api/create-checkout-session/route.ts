@@ -7,17 +7,28 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(request: NextRequest) {
   try {
+    const body = await request.json();
+    
     const { 
       registrationId, 
       includeCena, 
-      numeroPerssoneCena = 1,
-      prezzoGara = 25, // Imposta i tuoi prezzi
-      prezzoCena = 15  // Imposta i tuoi prezzi
-    } = await request.json();
+      numeroPersoneCena = 1,
+      codiceRegistrazione,
+      prezzoGara = 25,
+      prezzoCena = 15
+    } = body;
+
+    // Validazione parametri
+    if (!registrationId) {
+      return NextResponse.json(
+        { error: 'registrationId mancante' },
+        { status: 400 }
+      );
+    }
 
     // Calcolo prezzo totale
     const prezzoTotale = includeCena 
-      ? prezzoGara + (prezzoCena * numeroPerssoneCena)
+      ? prezzoGara + (prezzoCena * numeroPersoneCena)
       : prezzoGara;
 
     // Creazione sessione Stripe Checkout
@@ -30,7 +41,7 @@ export async function POST(request: NextRequest) {
             currency: 'eur',
             product_data: {
               name: includeCena 
-                ? `Beverino Bike Festival - Gara + Cena (${numeroPerssoneCena} persone)`
+                ? `Beverino Bike Festival - Gara + Cena (${numeroPersoneCena} persone)`
                 : 'Beverino Bike Festival - Solo Gara',
               description: 'Iscrizione al Beverino Bike Festival 2025'
             },
@@ -40,9 +51,10 @@ export async function POST(request: NextRequest) {
         },
       ],
       metadata: {
-        registrationId: registrationId.toString(),
-        includeCena: includeCena.toString(),
-        numeroPerssoneCena: numeroPerssoneCena.toString(),
+        registrationId: String(registrationId), // Usa String() invece di toString()
+        ...(codiceRegistrazione && { codice_registrazione: codiceRegistrazione }), // Aggiungi solo se esiste
+        includeCena: String(includeCena),
+        numeroPersoneCena: String(numeroPersoneCena),
       },
       success_url: `${request.nextUrl.origin}/conferma?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${request.nextUrl.origin}/iscriviti?step=3`,

@@ -10,21 +10,31 @@ import {
   Divider,
   Chip,
   Stack,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
+  FormHelperText,
 } from '@mui/material';
 import {
   DirectionsBike,
   Restaurant,
   EuroSymbol,
+  CheckroomOutlined,
 } from '@mui/icons-material';
 import { useFormContext } from 'react-hook-form';
 
-const RACE_PRICE = 25; // Aggiornato ai prezzi reali
+const RACE_PRICE = 25;
 const PASTA_PRICE = 15;
 
+const TAGLIE = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'] as const;
+
 export default function FinalRegistrationStep() {
-  const { watch, setValue } = useFormContext();
+  const { watch, setValue, formState: { errors } } = useFormContext();
   const [option, setOption] = useState<'race-only' | 'race-pasta'>('race-only');
   const pastaCount = watch('conteggio_pastaparty', 1);
+  const selectedSize = watch('taglia_maglietta', '');
 
   // Sincronizza il form con l'opzione selezionata
   useEffect(() => {
@@ -42,6 +52,10 @@ export default function FinalRegistrationStep() {
   const handlePastaCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Math.max(1, parseInt(e.target.value, 10) || 1);
     setValue('conteggio_pastaparty', value);
+  };
+
+  const handleSizeChange = (event: SelectChangeEvent) => {
+    setValue('taglia_maglietta', event.target.value, { shouldValidate: true });
   };
 
   const racePrice = RACE_PRICE;
@@ -155,7 +169,60 @@ export default function FinalRegistrationStep() {
         </Grid>
       </Grid>
 
-      {/* Input numero persone - Stile coerente */}
+      {/* Selezione taglia maglietta */}
+      <Box sx={{ mb: 4 }}>
+        <Card
+          elevation={4}
+          sx={{
+            border: '2px solid',
+            borderColor: 'primary.main',
+            bgcolor: 'primary.50',
+          }}
+        >
+          <CardContent sx={{ p: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <CheckroomOutlined sx={{ mr: 1, color: 'primary.main' }} />
+              <Typography variant="h6" color="primary.main" fontWeight={600}>
+                Taglia Maglietta Gara
+              </Typography>
+            </Box>
+            
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              Ogni partecipante riceverà una maglietta tecnica del Beverino Bike Festival
+            </Typography>
+            
+            <FormControl 
+              fullWidth 
+              required
+              error={!!errors.taglia_maglietta}
+            >
+              <InputLabel id="taglia-maglietta-label">Seleziona la taglia</InputLabel>
+              <Select
+                labelId="taglia-maglietta-label"
+                id="taglia-maglietta"
+                value={selectedSize}
+                label="Seleziona la taglia *"
+                onChange={handleSizeChange}
+              >
+                {TAGLIE.map((taglia) => (
+                  <MenuItem key={taglia} value={taglia}>
+                    {taglia}
+                  </MenuItem>
+                ))}
+              </Select>
+              {errors.taglia_maglietta && (
+                <FormHelperText error>
+                  {typeof errors.taglia_maglietta.message === 'string'
+                    ? errors.taglia_maglietta.message
+                    : 'Seleziona una taglia'}
+                </FormHelperText>
+              )}
+            </FormControl>
+          </CardContent>
+        </Card>
+      </Box>
+
+      {/* Input numero persone pasta party */}
       {option === 'race-pasta' && (
         <Box sx={{ mb: 4 }}>
           <Card
@@ -235,6 +302,17 @@ export default function FinalRegistrationStep() {
             <Typography>Gara ciclistica</Typography>
             <Typography>€{racePrice}</Typography>
           </Box>
+          
+          {selectedSize && (
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography variant="body2" color="text.secondary">
+                Maglietta taglia {selectedSize}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                inclusa
+              </Typography>
+            </Box>
+          )}
           
           {option === 'race-pasta' && (
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>

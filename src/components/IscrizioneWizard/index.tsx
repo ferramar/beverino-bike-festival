@@ -33,6 +33,7 @@ interface WizardData {
   liberatoriaAccettata: boolean;
   liberatoriaPdfBlob?: Blob;
   conteggio_pastaparty: number;
+  taglia_maglietta: string;
 }
 
 const steps = ['Dati Personali', 'Liberatoria', 'Pagamento'];
@@ -89,7 +90,7 @@ export default function IscrizioneWizard() {
       'tipoDocumento', 'numeroDocumento', 'cittaRilascio', 'dataRilascioDocumento'
     ],
     1: ['liberatoriaAccettata'],
-    2: ['conteggio_pastaparty'],
+    2: ['conteggio_pastaparty', 'taglia_maglietta'],
   };
 
   const onNext = async () => {
@@ -102,8 +103,6 @@ export default function IscrizioneWizard() {
   const onBack = () => {
     setActiveStep(s => s - 1);
   };
-
-
 
   const saveRegistrationToStrapi = async (data: WizardData) => {
     const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
@@ -124,9 +123,7 @@ export default function IscrizioneWizard() {
     // Salva PDF sul server Next.js
     let pdfUrl = null;
     if (data.liberatoriaPdfBlob) {
-      try {
-        console.log('Salvataggio PDF su server Next.js...');
-        
+      try {        
         // Converti Blob in base64
         const reader = new FileReader();
         const base64 = await new Promise<string>((resolve) => {
@@ -149,7 +146,6 @@ export default function IscrizioneWizard() {
         if (saveResponse.ok) {
           const result = await saveResponse.json();
           pdfUrl = result.url;
-          console.log('PDF salvato con successo:', pdfUrl);
         } else {
           console.error('Errore salvataggio PDF:', await saveResponse.text());
         }
@@ -184,11 +180,10 @@ export default function IscrizioneWizard() {
       log_firma_liberatoria,
       pasta_party: data.conteggio_pastaparty > 0,
       stato_pagamento: 'in_attesa',
-      // Salva l'URL del PDF salvato localmente
       liberatoriaPdfUrl: pdfUrl,
+      taglia_maglietta: data.taglia_maglietta,
+      publishedAt: new Date().toISOString()
     };
-
-    console.log('Payload completo da inviare a Strapi:', JSON.stringify(payload, null, 2));
 
     const response = await fetch(`${strapiUrl}/api/iscrizionis`, {
       method: 'POST',
@@ -204,7 +199,12 @@ export default function IscrizioneWizard() {
     }
 
     const result = await response.json();
-    return result.data.id;
+    
+    // IMPORTANTE: Restituisci un oggetto con id e codice_registrazione
+    return {
+      id: result.data.id,
+      codice_registrazione: codice_registrazione
+    };
   };
 
   const onSubmit = async (data: WizardData) => {
@@ -212,12 +212,17 @@ export default function IscrizioneWizard() {
 
     try {
       // Salva iscrizione in Strapi
-      const newRegistrationId = await saveRegistrationToStrapi(data);
-      setRegistrationId(newRegistrationId);
+      const registrationData = await saveRegistrationToStrapi(data);      
+      setRegistrationId(registrationData.id);
 
-      // Procedi con pagamento Stripe
+      // Procedi con pagamento Stripe passando il codice_registrazione
       const includeCena = data.conteggio_pastaparty > 0;
-      await createCheckoutSession(newRegistrationId, includeCena, data.conteggio_pastaparty);
+      await createCheckoutSession(
+        registrationData.id, 
+        includeCena, 
+        data.conteggio_pastaparty,
+        registrationData.codice_registrazione
+      );
 
       // Pulisci localStorage dopo successo
       localStorage.removeItem('iscrizione');

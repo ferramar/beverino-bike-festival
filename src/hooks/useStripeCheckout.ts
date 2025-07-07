@@ -9,7 +9,8 @@ export const useStripeCheckout = () => {
   const createCheckoutSession = async (
     registrationId: number,
     includeCena: boolean,
-    numeroPerssoneCena?: number
+    numeroPersoneCena?: number,
+    codiceRegistrazione?: string
   ) => {
     setLoading(true);
     
@@ -23,7 +24,8 @@ export const useStripeCheckout = () => {
         body: JSON.stringify({
           registrationId,
           includeCena,
-          numeroPerssoneCena,
+          numeroPersoneCena,
+          codiceRegistrazione,
         }),
       });
 
