@@ -154,6 +154,11 @@ function SponsorLogo({ sponsor }: { sponsor: SponsorItem }) {
     }
   };
 
+  console.log("sponsor logo", sponsor.logo);
+
+  console.log("imageError", imageError);
+  
+
   if (!sponsor.logo || imageError) {
     // Fallback se non c'è logo o errore di caricamento
     return (
