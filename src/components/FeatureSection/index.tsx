@@ -7,8 +7,8 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 const features = [
   {
     icon: <DirectionsBikeIcon sx={{ fontSize: 48 }} />,
-    title: "3 Percorsi",
-    description: "Scegli tra percorsi da 40km, 70km e 100km adatti a ogni livello di preparazione"
+    title: "3 Percorsi MTB e 1 running",
+    description: "Scegli tra percorsi da 30km, 35km e 40km MTB adatti a ogni livello di preparazione ed uno running"
   },
   {
     icon: <TerrainIcon sx={{ fontSize: 48 }} />,
@@ -22,8 +22,8 @@ const features = [
   },
   {
     icon: <EmojiEventsIcon sx={{ fontSize: 48 }} />,
-    title: "Premi e Ristori",
-    description: "Ricchi premi per i vincitori e ristori con prodotti locali lungo il percorso"
+    title: "Ristori",
+    description: "Ristori con prodotti locali lungo il percorso"
   }
 ];
 

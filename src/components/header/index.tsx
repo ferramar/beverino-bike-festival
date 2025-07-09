@@ -67,12 +67,12 @@ export default function ModernHeader() {
   const scrolled = useScrollPosition();
   const pathname = usePathname();
 
-  const navItems = [
-    { href: "/percorsi", label: "Percorsi", icon: <Timeline /> },
-    { href: "/programma", label: "Programma", icon: <CalendarMonth /> },
-    { href: "/galleria", label: "Galleria", icon: <Collections /> },
-    { href: "/sponsor", label: "Sponsor", icon: <Handshake /> },
-    { href: "/faq", label: "FAQ", icon: <HelpOutline /> },
+  const navItems: any[] = [
+    // { href: "/percorsi", label: "Percorsi", icon: <Timeline /> },
+    // { href: "/programma", label: "Programma", icon: <CalendarMonth /> },
+    // { href: "/galleria", label: "Galleria", icon: <Collections /> },
+    // { href: "/sponsor", label: "Sponsor", icon: <Handshake /> },
+    // { href: "/faq", label: "FAQ", icon: <HelpOutline /> },
   ];
 
   const handleDrawerToggle = () => {
@@ -148,7 +148,7 @@ export default function ModernHeader() {
       </List>
 
       {/* CTA Button nel drawer */}
-      <Box sx={{ p: 3 }}>
+      {/* <Box sx={{ p: 3 }}>
         <Button
           component={Link}
           href="/iscriviti"
@@ -172,7 +172,7 @@ export default function ModernHeader() {
         >
           Iscriviti ora
         </Button>
-      </Box>
+      </Box> */}
     </Box>
   );
 
@@ -300,7 +300,7 @@ export default function ModernHeader() {
                 ))}
 
                 {/* CTA Button */}
-                <Button
+                {/* <Button
                   component={Link}
                   href="/iscriviti"
                   variant="contained"
@@ -323,7 +323,7 @@ export default function ModernHeader() {
                   aria-label="Iscriviti ora"
                 >
                   Iscriviti ora
-                </Button>
+                </Button> */}
               </Box>
 
               {/* Mobile menu button */}

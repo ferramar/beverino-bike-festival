@@ -105,8 +105,8 @@ export default function HomeBanner() {
           <Box sx={{ maxWidth: { xs: "100%", md: "700px" } }}>
             {/* Badge */}
             <Chip 
-                label="ISCRIZIONI APERTE" 
-                color="success" 
+                label="ISCRIZIONI APERTE DAL 14/07/2025" 
+                color="warning" 
                 size="small"
                 sx={{
                   mb: { xs: 2, md: 3 },
@@ -194,7 +194,7 @@ export default function HomeBanner() {
               </Typography>
 
               {/* CTA Buttons */}
-              <Box sx={{ 
+              {/* <Box sx={{ 
                 display: "flex", 
                 gap: 2, 
                 flexWrap: "wrap",
@@ -256,7 +256,7 @@ export default function HomeBanner() {
                 >
                   Scopri il Programma
                 </Button>
-              </Box>
+              </Box> */}
 
               {/* Main Sponsor */}
               <Box sx={{

@@ -36,7 +36,7 @@ const Footer: React.FC = () => {
             <Link href="/" color="inherit" display="block" lineHeight={"3"}>
               Home
             </Link>
-            <Link href="/programma" color="inherit" display="block" lineHeight={"3"}>
+            {/* <Link href="/programma" color="inherit" display="block" lineHeight={"3"}>
               Programma
             </Link>
             <Link href="/galleria" color="inherit" display="block" lineHeight={"3"}>
@@ -47,7 +47,7 @@ const Footer: React.FC = () => {
             </Link>
             <Link href="/faq" color="inherit" display="block" lineHeight={"3"}>
               FAQ
-            </Link>
+            </Link> */}
           </Grid>
           <Grid size={{xs: 12, sm: 4}}>
             <Typography variant="h6" component={"h3"} gutterBottom>
@@ -56,7 +56,8 @@ const Footer: React.FC = () => {
             <Box>
               <IconButton
                 aria-label="Facebook"
-                href="https://facebook.com"
+                href="https://www.facebook.com/beverinobikefestival/?locale=it_IT"
+                target='_blank'
                 color="inherit"
                 sx={{width: "45px", height: "45px"}}
               >
@@ -64,7 +65,8 @@ const Footer: React.FC = () => {
               </IconButton>
               <IconButton
                 aria-label="Instagram"
-                href="https://instagram.com"
+                href="https://www.instagram.com/beverino_bike_festival/"
+                target='_blank'
                 color="inherit"
                 sx={{width: "45px", height: "45px"}}
               >
