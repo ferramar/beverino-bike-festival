@@ -142,7 +142,17 @@ export interface LiberatoriaData {
   luogoNascitaGenitore?: string;
   dataNascitaGenitore?: string;
   comuneResidenzaGenitore?: string;
-  provinciaGenitore?: string;
+  viaResidenzaGenitore?: string;
+  numeroCivicoGenitore?: string;
+  capGenitore?: string;
+  emailGenitore?: string;
+  tipoDocumentoGenitore?: string;
+  numeroDocumentoGenitore?: string;
+  cittaRilascioGenitore?: string;
+  dataRilascioDocumentoGenitore?: string;
+  // Dati tutore
+  nomeTutore?: string;
+  cognomeTutore?: string;
 }
 
 // Funzione helper per creare il documento
@@ -159,7 +169,7 @@ export const createLiberatoriaPDF = (data: LiberatoriaData) => {
       <Page size="A4" style={styles.page}>
         {/* Header con logo */}
         <View style={styles.header}>
-          {/* Se hai un logo, decommentalo */}
+          {/* Logo - usa path assoluto o base64 */}
           <Image 
             style={styles.logo} 
             src={process.env.NODE_ENV === 'production' 
@@ -296,49 +306,49 @@ export const createLiberatoriaPDF = (data: LiberatoriaData) => {
           <View style={styles.row}>
             <View style={styles.halfRow}>
               <Text style={styles.label}>Via</Text>
-              <Text style={styles.value}>{'________________________'}</Text>
+              <Text style={styles.value}>{data.viaResidenzaGenitore || '________________________'}</Text>
             </View>
             <View style={{ width: '25%' }}>
               <Text style={styles.label}>n°</Text>
-              <Text style={styles.value}>{'____'}</Text>
+              <Text style={styles.value}>{data.numeroCivicoGenitore || '____'}</Text>
             </View>
             <View style={{ width: '25%' }}>
               <Text style={styles.label}>C.A.P.</Text>
-              <Text style={styles.value}>{'_________'}</Text>
+              <Text style={styles.value}>{data.capGenitore || '_________'}</Text>
             </View>
           </View>
 
           <View style={styles.row}>
             <Text style={styles.label}>E-mail</Text>
-            <Text style={styles.value}>{'________________________'}</Text>
+            <Text style={styles.value}>{data.emailGenitore || '________________________'}</Text>
           </View>
 
           <View style={styles.row}>
             <View style={styles.halfRow}>
               <Text style={styles.label}>Doc. D'Identità</Text>
-              <Text style={styles.value}>{'________________________'}</Text>
+              <Text style={styles.value}>{data.tipoDocumentoGenitore === 'cartaIdentita' ? "Carta d'identità" : data.tipoDocumentoGenitore === 'patente' ? 'Patente' : '________________________'}</Text>
             </View>
           </View>
 
           <View style={styles.row}>
             <View style={styles.halfRow}>
               <Text style={styles.label}>Tipo</Text>
-              <Text style={styles.value}>{'________________________'}</Text>
+              <Text style={styles.value}>{data.tipoDocumentoGenitore === 'cartaIdentita' ? "Carta d'identità" : data.tipoDocumentoGenitore === 'patente' ? 'Patente' : '________________________'}</Text>
             </View>
             <View style={styles.halfRow}>
               <Text style={styles.label}>N°</Text>
-              <Text style={styles.value}>{'________________________'}</Text>
+              <Text style={styles.value}>{data.numeroDocumentoGenitore || '________________________'}</Text>
             </View>
           </View>
 
           <View style={styles.row}>
             <View style={styles.halfRow}>
               <Text style={styles.label}>Luogo</Text>
-              <Text style={styles.value}>{'________________________'}</Text>
+              <Text style={styles.value}>{data.cittaRilascioGenitore || '________________________'}</Text>
             </View>
             <View style={styles.halfRow}>
               <Text style={styles.label}>Data di rilascio</Text>
-              <Text style={styles.value}>{'________________________'}</Text>
+              <Text style={styles.value}>{data.dataRilascioDocumentoGenitore ? formatDate(data.dataRilascioDocumentoGenitore) : '________________________'}</Text>
             </View>
           </View>
         </View>
@@ -371,11 +381,11 @@ export const createLiberatoriaPDF = (data: LiberatoriaData) => {
         <View style={[styles.row, { marginBottom: 30 }]}>
           <View style={styles.halfRow}>
             <Text style={styles.label}>Nome</Text>
-            <Text style={styles.value}>{'________________________'}</Text>
+            <Text style={styles.value}>{data.nomeTutore || '________________________'}</Text>
           </View>
           <View style={styles.halfRow}>
             <Text style={styles.label}>Cognome</Text>
-            <Text style={styles.value}>{'________________________'}</Text>
+            <Text style={styles.value}>{data.cognomeTutore || '________________________'}</Text>
           </View>
         </View>
 

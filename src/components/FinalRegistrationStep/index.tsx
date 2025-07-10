@@ -1,3 +1,4 @@
+"use client"
 import React, { useState, useEffect } from 'react';
 import {
   Box,
@@ -28,13 +29,20 @@ import { useFormContext } from 'react-hook-form';
 const RACE_PRICE = 25;
 const PASTA_PRICE = 15;
 
-const TAGLIE = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'] as const;
+const TAGLIE = ['XS', 'S', 'M', 'L', 'XL', 'XXL'] as const;
 
 export default function FinalRegistrationStep() {
-  const { watch, setValue, formState: { errors } } = useFormContext();
+  const { watch, setValue, formState: { errors }, register } = useFormContext();
   const [option, setOption] = useState<'race-only' | 'race-pasta'>('race-only');
   const pastaCount = watch('conteggio_pastaparty', 1);
   const selectedSize = watch('taglia_maglietta', '');
+
+  // Registra il campo taglia_maglietta con validazione
+  useEffect(() => {
+    register('taglia_maglietta', { 
+      required: 'Seleziona una taglia per la maglietta' 
+    });
+  }, [register]);
 
   // Sincronizza il form con l'opzione selezionata
   useEffect(() => {
@@ -196,7 +204,7 @@ export default function FinalRegistrationStep() {
               required
               error={!!errors.taglia_maglietta}
             >
-              <InputLabel id="taglia-maglietta-label">Seleziona la taglia</InputLabel>
+              <InputLabel id="taglia-maglietta-label">Seleziona la taglia *</InputLabel>
               <Select
                 labelId="taglia-maglietta-label"
                 id="taglia-maglietta"
@@ -212,7 +220,7 @@ export default function FinalRegistrationStep() {
               </Select>
               {errors.taglia_maglietta && (
                 <FormHelperText error>
-                  {typeof errors.taglia_maglietta.message === 'string'
+                  {typeof errors.taglia_maglietta?.message === 'string'
                     ? errors.taglia_maglietta.message
                     : 'Seleziona una taglia'}
                 </FormHelperText>

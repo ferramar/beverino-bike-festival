@@ -17,7 +17,24 @@ import { customAlphabet } from 'nanoid';
 import { useStripeCheckout } from '../../hooks/useStripeCheckout';
 import { OrangeStepper } from '../CustomStepper';
 
+interface DatiGenitore {
+  nome: string;
+  cognome: string;
+  luogoNascita: string;
+  dataNascita: string;
+  comuneResidenza: string;
+  viaResidenza: string;
+  numeroCivico: string;
+  cap: string;
+  email: string;
+  tipoDocumento: string;
+  numeroDocumento: string;
+  cittaRilascio: string;
+  dataRilascioDocumento: string;
+}
+
 interface WizardData {
+  // Dati personali
   nome: string;
   cognome: string;
   luogoNascita: string;
@@ -30,10 +47,29 @@ interface WizardData {
   numeroDocumento: string;
   cittaRilascio: string;
   dataRilascioDocumento: string;
+  // Dati genitore (se minore) - campi singoli per il form
+  nomeGenitore?: string;
+  cognomeGenitore?: string;
+  luogoNascitaGenitore?: string;
+  dataNascitaGenitore?: string;
+  comuneResidenzaGenitore?: string;
+  viaResidenzaGenitore?: string;
+  numeroCivicoGenitore?: string;
+  capGenitore?: string;
+  emailGenitore?: string;
+  tipoDocumentoGenitore?: string;
+  numeroDocumentoGenitore?: string;
+  cittaRilascioGenitore?: string;
+  dataRilascioDocumentoGenitore?: string;
+  // Dati tutore/accompagnatore
+  nomeTutore?: string;
+  cognomeTutore?: string;
+  // Liberatoria
   liberatoriaAccettata: boolean;
   liberatoriaPdfBlob?: Blob;
+  // Pagamento e opzioni
   conteggio_pastaparty: number;
-  taglia_maglietta: string;
+  taglia_maglietta?: string;
 }
 
 const steps = ['Dati Personali', 'Liberatoria', 'Pagamento'];
@@ -82,12 +118,17 @@ export default function IscrizioneWizard() {
     return () => subscription.unsubscribe();
   }, [watch, reset]);
 
-  // Validazione per step
+  // Validazione per step - includiamo tutti i possibili campi
   const fieldsPerStep: Record<number, (keyof WizardData)[]> = {
     0: [
       'nome', 'cognome', 'luogoNascita', 'dataNascita',
       'residenza', 'numeroCivico', 'cap', 'email',
-      'tipoDocumento', 'numeroDocumento', 'cittaRilascio', 'dataRilascioDocumento'
+      'tipoDocumento', 'numeroDocumento', 'cittaRilascio', 'dataRilascioDocumento',
+      // Campi genitore (validati solo se minore)
+      'nomeGenitore', 'cognomeGenitore', 'luogoNascitaGenitore', 'dataNascitaGenitore',
+      'comuneResidenzaGenitore', 'viaResidenzaGenitore', 'numeroCivicoGenitore', 'capGenitore',
+      'emailGenitore', 'tipoDocumentoGenitore', 'numeroDocumentoGenitore', 
+      'cittaRilascioGenitore', 'dataRilascioDocumentoGenitore'
     ],
     1: ['liberatoriaAccettata'],
     2: ['conteggio_pastaparty', 'taglia_maglietta'],
@@ -123,7 +164,9 @@ export default function IscrizioneWizard() {
     // Salva PDF sul server Next.js
     let pdfUrl = null;
     if (data.liberatoriaPdfBlob) {
-      try {        
+      try {
+        console.log('Salvataggio PDF su server Next.js...');
+        
         // Converti Blob in base64
         const reader = new FileReader();
         const base64 = await new Promise<string>((resolve) => {
@@ -146,6 +189,7 @@ export default function IscrizioneWizard() {
         if (saveResponse.ok) {
           const result = await saveResponse.json();
           pdfUrl = result.url;
+          console.log('PDF salvato con successo:', pdfUrl);
         } else {
           console.error('Errore salvataggio PDF:', await saveResponse.text());
         }
@@ -161,7 +205,28 @@ export default function IscrizioneWizard() {
       user_agent_firmatario: userAgent
     };
 
+    // Prepara i dati del genitore come componente se presenti
+    let dati_genitore = null;
+    if (data.nomeGenitore) {
+      dati_genitore = {
+        nome: data.nomeGenitore,
+        cognome: data.cognomeGenitore || '',
+        luogoNascita: data.luogoNascitaGenitore || '',
+        dataNascita: data.dataNascitaGenitore || '',
+        comuneResidenza: data.comuneResidenzaGenitore || '',
+        viaResidenza: data.viaResidenzaGenitore || '',
+        numeroCivico: data.numeroCivicoGenitore || '',
+        cap: data.capGenitore || '',
+        email: data.emailGenitore || '',
+        tipoDocumento: data.tipoDocumentoGenitore || '',
+        numeroDocumento: data.numeroDocumentoGenitore || '',
+        cittaRilascio: data.cittaRilascioGenitore || '',
+        dataRilascioDocumento: data.dataRilascioDocumentoGenitore || ''
+      };
+    }
+
     const payload = {
+      // Dati personali
       nome: data.nome,
       cognome: data.cognome,
       luogoNascita: data.luogoNascita,
@@ -174,16 +239,24 @@ export default function IscrizioneWizard() {
       numeroDocumento: data.numeroDocumento,
       cittaRilascio: data.cittaRilascio,
       dataRilascioDocumento: data.dataRilascioDocumento,
+      // Dati genitore come componente
+      dati_genitore,
+      // Dati tutore
+      nomeTutore: data.nomeTutore || null,
+      cognomeTutore: data.cognomeTutore || null,
+      // Altri dati
       liberatoriaAccettata: data.liberatoriaAccettata,
       conteggio_pastaparty: data.conteggio_pastaparty,
+      taglia_maglietta: data.taglia_maglietta || null,
       codice_registrazione,
       log_firma_liberatoria,
       pasta_party: data.conteggio_pastaparty > 0,
       stato_pagamento: 'in_attesa',
       liberatoriaPdfUrl: pdfUrl,
-      taglia_maglietta: data.taglia_maglietta,
       publishedAt: new Date().toISOString()
     };
+
+    console.log('Payload completo da inviare a Strapi:', JSON.stringify(payload, null, 2));
 
     const response = await fetch(`${strapiUrl}/api/iscrizionis`, {
       method: 'POST',
@@ -199,6 +272,7 @@ export default function IscrizioneWizard() {
     }
 
     const result = await response.json();
+    console.log('Risposta da Strapi:', result);
     
     // IMPORTANTE: Restituisci un oggetto con id e codice_registrazione
     return {
@@ -212,7 +286,9 @@ export default function IscrizioneWizard() {
 
     try {
       // Salva iscrizione in Strapi
-      const registrationData = await saveRegistrationToStrapi(data);      
+      const registrationData = await saveRegistrationToStrapi(data);
+      console.log('Registration data ricevuto:', registrationData);
+      
       setRegistrationId(registrationData.id);
 
       // Procedi con pagamento Stripe passando il codice_registrazione
