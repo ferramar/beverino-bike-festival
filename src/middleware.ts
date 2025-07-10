@@ -15,7 +15,7 @@ export function middleware(request: NextRequest) {
     '/sitemap.xml',        // Sitemap per SEO
     '/logo.png',           // Logo e immagini pubbliche
     '/banner.jpg',         // Banner immagine
-    '/damiani-ottica-logo.png', // Logo sponsor
+    '/damiani-ottica-logo.webp', // Logo sponsor
     '/liberatorie',        // Cartella liberatorie PDF
   ];
   
