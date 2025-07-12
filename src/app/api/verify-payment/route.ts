@@ -116,6 +116,7 @@ export async function GET(request: NextRequest) {
     const emailData = {
       nome: registration.nome,
       cognome: registration.cognome,
+      tipo_gara: registration.tipo_gara,
       includesPastaParty: registration.pasta_party || false,
       numeroPartecipantiPastaParty: registration.conteggio_pastaparty || 0,
       importoTotale: (session.amount_total || 0) / 100,

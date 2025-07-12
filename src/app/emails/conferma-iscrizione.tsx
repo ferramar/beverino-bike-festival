@@ -18,6 +18,7 @@ import * as React from 'react';
 interface ConfermaIscrizioneEmailProps {
   nome: string;
   cognome: string;
+  tipo_gara: 'ciclistica' | 'running';
   includesPastaParty: boolean;
   numeroPartecipantiPastaParty?: number;
   importoTotale: number;
@@ -27,12 +28,16 @@ interface ConfermaIscrizioneEmailProps {
 export const ConfermaIscrizioneEmail = ({
   nome,
   cognome,
+  tipo_gara,
   includesPastaParty,
-  numeroPartecipantiPastaParty,
+  numeroPartecipantiPastaParty = 0,
   importoTotale,
   codiceRegistrazione,
 }: ConfermaIscrizioneEmailProps) => {
   const previewText = `Conferma iscrizione Beverino Bike Festival - ${nome} ${cognome}`;
+  const tipoGaraText = tipo_gara === 'ciclistica' ? 'Gara Ciclistica' : 'Gara Running';
+  const prezzoGara = tipo_gara === 'ciclistica' ? 25 : 10;
+  const prezzoPastaParty = numeroPartecipantiPastaParty * 10;
 
   return (
     <Html>
@@ -59,8 +64,8 @@ export const ConfermaIscrizioneEmail = ({
           </Text>
           
           <Text style={paragraph}>
-            La tua iscrizione al <strong>Beverino Bike Festival</strong> è stata confermata con successo!
-            Siamo entusiasti di averti con noi per questa fantastica giornata all'insegna del ciclismo e del divertimento.
+            La tua iscrizione al <strong>Beverino Bike Festival 2025</strong> è stata confermata con successo!
+            Ti sei iscritto alla <strong>{tipoGaraText}</strong> del 21 Settembre 2025.
           </Text>
 
           {/* Box riepilogo */}
@@ -74,19 +79,39 @@ export const ConfermaIscrizioneEmail = ({
             </Text>
             
             <Text style={infoRow}>
+              <strong>Tipo di gara:</strong> {tipoGaraText}
+            </Text>
+            
+            <Text style={infoRow}>
               <strong>Codice registrazione:</strong> <span style={code}>{codiceRegistrazione}</span>
             </Text>
             
-            {includesPastaParty && (
-              <Text style={infoRow}>
-                <strong>Pasta Party:</strong> Sì ({numeroPartecipantiPastaParty} {numeroPartecipantiPastaParty === 1 ? 'partecipante' : 'partecipanti'})
-              </Text>
-            )}
+            <Hr style={hrLight} />
             
-            <Hr style={hr} />
-            
+            {/* Dettaglio prezzi */}
             <Text style={infoRow}>
-              <strong>Importo pagato:</strong> €{importoTotale.toFixed(2)}
+              <strong>Dettaglio pagamento:</strong>
+            </Text>
+            
+            <Section style={priceTable}>
+              <Text style={priceRow}>
+                <span>{tipoGaraText}:</span>
+                <span style={priceValue}>€{prezzoGara}</span>
+              </Text>
+              
+              {includesPastaParty && (
+                <Text style={priceRow}>
+                  <span>Pasta Party ({numeroPartecipantiPastaParty} {numeroPartecipantiPastaParty === 1 ? 'persona' : 'persone'}):</span>
+                  <span style={priceValue}>€{prezzoPastaParty}</span>
+                </Text>
+              )}
+            </Section>
+            
+            <Hr style={hrLight} />
+            
+            <Text style={totalRow}>
+              <strong>Totale pagato:</strong>
+              <span style={totalValue}>€{importoTotale.toFixed(2)}</span>
             </Text>
           </Section>
 
@@ -101,15 +126,16 @@ export const ConfermaIscrizioneEmail = ({
             </Text>
             
             <Text style={paragraph}>
-              <strong>📍 Ritrovo:</strong> Centro Sportivo di Beverino - Via dello Sport, 15
+              <strong>📍 Ritrovo:</strong> Centro Sportivo di Beverino, La Spezia
             </Text>
             
-            <Text style={paragraph}>
-              <strong>⏰ Orari partenza:</strong>
-              <br />• Percorso Lungo (80 km): ore 8:30
-              <br />• Percorso Medio (50 km): ore 9:00
-              <br />• Percorso Corto (30 km): ore 9:30
-            </Text>
+            {includesPastaParty && (
+              <Text style={paragraph}>
+                <strong>🍝 Pasta Party:</strong>
+                <br />• Ore 13:00 presso il Centro Sportivo
+                <br />• Hai prenotato per {numeroPartecipantiPastaParty} {numeroPartecipantiPastaParty === 1 ? 'persona' : 'persone'}
+              </Text>
+            )}
           </Section>
 
           {/* Cosa portare */}
@@ -120,8 +146,19 @@ export const ConfermaIscrizioneEmail = ({
             
             <Text style={paragraph}>
               • Documento d'identità valido<br />
-              • Bicicletta in buono stato<br />
-              • Casco (OBBLIGATORIO)<br />
+              • Questo codice di registrazione: <strong>{codiceRegistrazione}</strong><br />
+              {tipo_gara === 'ciclistica' ? (
+                <>
+                  • Bicicletta in buono stato<br />
+                  • Casco (OBBLIGATORIO)<br />
+                </>
+              ) : (
+                <>
+                  • Abbigliamento sportivo adeguato<br />
+                  • Scarpe da running<br />
+                </>
+              )}
+              • Borraccia per l'acqua<br />
             </Text>
           </Section>
 
@@ -227,12 +264,44 @@ const infoRow = {
 };
 
 const code = {
-  backgroundColor: '#333',
+  backgroundColor: '#FB6616',
   color: '#fff',
   padding: '4px 8px',
   borderRadius: '4px',
   fontFamily: 'monospace',
   fontSize: '14px',
+};
+
+const priceTable = {
+  margin: '10px 0',
+};
+
+const priceRow = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  color: '#666',
+  fontSize: '15px',
+  lineHeight: '22px',
+  marginBottom: '5px',
+};
+
+const priceValue = {
+  fontWeight: 'normal' as const,
+};
+
+const totalRow = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  color: '#333',
+  fontSize: '17px',
+  fontWeight: 'bold' as const,
+  marginTop: '10px',
+};
+
+const totalValue = {
+  color: '#FB6616',
+  fontSize: '20px',
+  fontWeight: 'bold' as const,
 };
 
 const section = {
@@ -241,7 +310,7 @@ const section = {
 };
 
 const button = {
-  backgroundColor: '#A52D0C',
+  backgroundColor: '#FB6616',
   borderRadius: '5px',
   color: '#fff',
   fontSize: '16px',
@@ -255,9 +324,9 @@ const button = {
 
 const buttonSecondary = {
   backgroundColor: '#fff',
-  border: '1px solid #A52D0C',
+  border: '1px solid #FB6616',
   borderRadius: '5px',
-  color: '#A52D0C',
+  color: '#FB6616',
   fontSize: '16px',
   fontWeight: 'bold',
   textDecoration: 'none',
@@ -276,9 +345,20 @@ const hr = {
   margin: '20px 0',
 };
 
+const hrLight = {
+  borderColor: '#e6ebf1',
+  margin: '15px 0',
+};
+
 const link = {
-  color: '#A52D0C',
+  color: '#FB6616',
   textDecoration: 'underline',
+};
+
+const italic = {
+  fontStyle: 'italic' as const,
+  color: '#666',
+  fontSize: '14px',
 };
 
 const footer = {
