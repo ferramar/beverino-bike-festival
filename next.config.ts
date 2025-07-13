@@ -33,7 +33,7 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'https://stylish-flowers-c12f2e4071.media.strapiapp.com',
-        pathname: '/**'
+        pathname: '/uploads/**'
       }
     ],
     // Ottimizzazioni per Cloudinary
