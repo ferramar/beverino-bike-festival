@@ -30,6 +30,11 @@ const nextConfig: NextConfig = {
         port: '1337',
         pathname: '/uploads/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'https://stylish-flowers-c12f2e4071.media.strapiapp.com',
+        pathname: '/**'
+      }
     ],
     // Ottimizzazioni per Cloudinary
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
