@@ -72,11 +72,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="it" className={inter.variable}>
-      <head>
-        {/* Preconnect per performance */}
-        <link rel="preconnect" href="https://res.cloudinary.com" />
-        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
-      </head>
       <body className={inter.className}>
         <Providers>
           {/* Skip Link - componente client separato */}

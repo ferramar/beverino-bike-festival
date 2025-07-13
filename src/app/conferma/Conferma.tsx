@@ -23,6 +23,7 @@ export default function Conferma() {
     // Pulizia localStorage
     try {
       localStorage.removeItem('iscrizione');
+      localStorage.removeItem('beverino_registration_session');
     } catch (error) {
       console.warn('Errore pulizia localStorage:', error);
     }

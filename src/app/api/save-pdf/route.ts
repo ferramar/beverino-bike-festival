@@ -1,6 +1,5 @@
+// src/app/api/save-pdf/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,26 +9,64 @@ export async function POST(request: NextRequest) {
     // Rimuovi il prefisso data:application/pdf;base64,
     const base64Data = pdfBase64.replace(/^data:application\/pdf;base64,/, '');
     
-    // Crea la directory se non esiste
-    const uploadsDir = path.join(process.cwd(), 'public', 'liberatorie');
-    await mkdir(uploadsDir, { recursive: true });
+    // Converti base64 in Buffer
+    const buffer = Buffer.from(base64Data, 'base64');
     
-    // Salva il file
-    const filePath = path.join(uploadsDir, fileName);
-    await writeFile(filePath, base64Data, 'base64');
+    // Crea FormData per upload su Strapi
+    const formData = new FormData();
+    const blob = new Blob([buffer], { type: 'application/pdf' });
+    formData.append('files', blob, fileName);
     
-    // Restituisci l'URL pubblico completo
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || `http://localhost:${process.env.PORT || 3000}`;
-    const publicUrl = `${baseUrl}/liberatorie/${fileName}`;
+    // Se Strapi supporta la specifica della cartella via FormData
+    formData.append('folder', 'liberatorie');
+    
+    // Upload su Strapi
+    const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
+    const uploadResponse = await fetch(`${strapiUrl}/api/upload`, {
+      method: 'POST',
+      body: formData,
+      // Se serve autenticazione per upload
+      // headers: {
+      //   'Authorization': `Bearer ${process.env.STRAPI_API_TOKEN}`
+      // }
+    });
+    
+    if (!uploadResponse.ok) {
+      const errorText = await uploadResponse.text();
+      console.error('Errore upload Strapi:', errorText);
+      throw new Error(`Upload fallito: ${uploadResponse.status}`);
+    }
+    
+    const uploadResult = await uploadResponse.json();
+    
+    if (!uploadResult || uploadResult.length === 0) {
+      throw new Error('Nessun file restituito da Strapi');
+    }
+    
+    // Prendi il primo file caricato
+    const uploadedFile = uploadResult[0];
+    
+    // Costruisci l'URL completo
+    const fileUrl = uploadedFile.url?.startsWith('http') 
+      ? uploadedFile.url 
+      : `${strapiUrl}${uploadedFile.url}`;
+    
+    console.log('PDF salvato su Strapi:', {
+      id: uploadedFile.id,
+      url: fileUrl,
+      name: uploadedFile.name
+    });
     
     return NextResponse.json({ 
       success: true,
-      url: publicUrl 
+      url: fileUrl,
+      fileId: uploadedFile.id,
+      fileName: uploadedFile.name
     });
   } catch (error) {
-    console.error('Errore salvataggio PDF:', error);
+    console.error('Errore salvataggio PDF su Strapi:', error);
     return NextResponse.json(
-      { error: 'Errore interno del server' },
+      { error: 'Errore durante il salvataggio del PDF' },
       { status: 500 }
     );
   }
