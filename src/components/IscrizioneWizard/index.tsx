@@ -34,7 +34,6 @@ interface DatiGenitore {
 }
 
 interface WizardData {
-  // Dati personali
   nome: string;
   cognome: string;
   luogoNascita: string;
@@ -47,7 +46,6 @@ interface WizardData {
   numeroDocumento: string;
   cittaRilascio: string;
   dataRilascioDocumento: string;
-  // Dati genitore (se minore) - campi singoli per il form
   nomeGenitore?: string;
   cognomeGenitore?: string;
   luogoNascitaGenitore?: string;
@@ -61,20 +59,26 @@ interface WizardData {
   numeroDocumentoGenitore?: string;
   cittaRilascioGenitore?: string;
   dataRilascioDocumentoGenitore?: string;
-  // Dati tutore/accompagnatore
   nomeTutore?: string;
   cognomeTutore?: string;
-  // Liberatoria
   liberatoriaAccettata: boolean;
   liberatoriaPdfBlob?: Blob;
-  // Pagamento e opzioni
   tipo_gara: 'ciclistica' | 'running' | '';
   conteggio_pastaparty: number;
   pasta_party_enabled: boolean;
   taglia_maglietta?: string;
 }
 
+interface SessionData {
+  token: string;
+  createdAt: number;
+  ttl: number;
+  registrationId?: number;
+}
+
 const steps = ['Dati Personali', 'Liberatoria', 'Pagamento'];
+const SESSION_KEY = 'beverino_registration_session';
+const SESSION_TTL = 24 * 60 * 60 * 1000; // 24 ore
 
 export default function IscrizioneWizard() {
   const alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -90,6 +94,7 @@ export default function IscrizioneWizard() {
   const [userAgent, setUserAgent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [registrationId, setRegistrationId] = useState<number | null>(null);
+  const [sessionToken, setSessionToken] = useState<string>('');
   
   const { createCheckoutSession, loading: stripeLoading } = useStripeCheckout();
 
@@ -98,6 +103,51 @@ export default function IscrizioneWizard() {
       setUserAgent(navigator.userAgent);
     }
   }, []);
+
+  // Gestione session token
+  useEffect(() => {
+    // Controlla se esiste una sessione valida
+    const storedSession = localStorage.getItem(SESSION_KEY);
+    
+    if (storedSession) {
+      try {
+        const session: SessionData = JSON.parse(storedSession);
+        const now = Date.now();
+        
+        // Verifica se la sessione è ancora valida
+        if (now - session.createdAt < session.ttl) {
+          setSessionToken(session.token);
+          setRegistrationId(session.registrationId || null);
+        } else {
+          // Sessione scaduta, rimuovi
+          localStorage.removeItem(SESSION_KEY);
+          const newToken = nanoid();
+          setSessionToken(newToken);
+        }
+      } catch {
+        // Token corrotto, genera nuovo
+        const newToken = nanoid();
+        setSessionToken(newToken);
+      }
+    } else {
+      // Nessuna sessione, genera nuovo token
+      const newToken = nanoid();
+      setSessionToken(newToken);
+    }
+  }, []);
+
+  // Salva sessione quando cambia
+  useEffect(() => {
+    if (sessionToken) {
+      const sessionData: SessionData = {
+        token: sessionToken,
+        createdAt: Date.now(),
+        ttl: SESSION_TTL,
+        registrationId: registrationId || undefined
+      };
+      localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
+    }
+  }, [sessionToken, registrationId]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -149,7 +199,9 @@ export default function IscrizioneWizard() {
 
   const saveRegistrationToStrapi = async (data: WizardData) => {
     const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
-    const codice_registrazione = nanoid();
+    
+    // Usa il codice esistente se c'è un registrationId, altrimenti genera nuovo
+    let codice_registrazione = nanoid();
 
     // Ottieni IP utente
     let userIp = 'unknown';
@@ -253,15 +305,75 @@ export default function IscrizioneWizard() {
       pasta_party: data.conteggio_pastaparty > 0,
       stato_pagamento: 'in_attesa',
       liberatoriaPdfUrl: pdfUrl,
+      session_token: sessionToken, // NUOVO CAMPO
       publishedAt: new Date().toISOString()
     };
 
+    // Prima controlla se esiste già un'iscrizione con questo token
+    try {
+      const checkResponse = await fetch(
+        `${strapiUrl}/api/iscrizionis?filters[session_token][$eq]=${sessionToken}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (checkResponse.ok) {
+        const checkData = await checkResponse.json();
+        
+        if (checkData.data && checkData.data.length > 0) {
+          // Esiste già, aggiorna invece di creare
+          const existingRegistration = checkData.data[0];
+          const updateId = existingRegistration.documentId || existingRegistration.id;
+          
+          // Mantieni il codice_registrazione esistente
+          codice_registrazione = existingRegistration.codice_registrazione;
+          
+          const updateResponse = await fetch(`${strapiUrl}/api/iscrizionis/${updateId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+              data: {
+                ...payload,
+                codice_registrazione // Usa quello esistente
+              } 
+            }),
+          });
+
+          if (!updateResponse.ok) {
+            const errorText = await updateResponse.text();
+            throw new Error(`Errore aggiornamento: ${updateResponse.status} - ${errorText}`);
+          }
+
+          const result = await updateResponse.json();
+          return {
+            id: result.data.id,
+            codice_registrazione: codice_registrazione
+          };
+        }
+      }
+    } catch (error) {
+      console.error('Errore durante il check duplicati:', error);
+      // Continua con la creazione normale se il check fallisce
+    }
+
+    // Se non esiste, crea nuova iscrizione
     const response = await fetch(`${strapiUrl}/api/iscrizionis`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ data: payload }),
+      body: JSON.stringify({ 
+        data: {
+          ...payload,
+          codice_registrazione
+        } 
+      }),
     });
 
     if (!response.ok) {
@@ -271,7 +383,6 @@ export default function IscrizioneWizard() {
 
     const result = await response.json();
     
-    // IMPORTANTE: Restituisci un oggetto con id e codice_registrazione
     return {
       id: result.data.id,
       codice_registrazione: codice_registrazione

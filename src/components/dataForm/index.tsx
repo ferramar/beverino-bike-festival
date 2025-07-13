@@ -17,7 +17,6 @@ interface FormData {
   numeroDocumento: string;
   cittaRilascio: string;
   dataRilascioDocumento: string;
-  // Dati genitore
   nomeGenitore?: string;
   cognomeGenitore?: string;
   luogoNascitaGenitore?: string;
@@ -31,7 +30,6 @@ interface FormData {
   numeroDocumentoGenitore?: string;
   cittaRilascioGenitore?: string;
   dataRilascioDocumentoGenitore?: string;
-  // Dati tutore/accompagnatore
   nomeTutore?: string;
   cognomeTutore?: string;
 }
