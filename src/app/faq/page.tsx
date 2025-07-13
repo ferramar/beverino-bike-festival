@@ -192,7 +192,7 @@ export default function FAQPage() {
           
           <Typography
             variant="h3"
-            component="h1"
+            component="h2"
             fontWeight={700}
             gutterBottom
             sx={{
@@ -205,7 +205,7 @@ export default function FAQPage() {
             Domande Frequenti
           </Typography>
           
-          <Typography variant="h6" color="text.secondary" sx={{ maxWidth: 600, mx: 'auto' }}>
+          <Typography variant="h6" component={'p'} color="text.secondary" sx={{ maxWidth: 600, mx: 'auto' }}>
             Trova le risposte alle domande più comuni sul Beverino Bike Festival
           </Typography>
         </Box>
@@ -296,7 +296,8 @@ export default function FAQPage() {
                         }} 
                       />
                       <Typography 
-                        variant="h6" 
+                        variant="h6"
+                        component={'p'} 
                         fontWeight={600}
                         sx={{ flex: 1 }}
                       >
@@ -333,7 +334,7 @@ export default function FAQPage() {
       </AnimatePresence>
 
       {/* Footer CTA */}
-      <motion.div
+      {/* <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6 }}
@@ -367,7 +368,7 @@ export default function FAQPage() {
             Contattaci
           </Button>
         </Paper>
-      </motion.div>
+      </motion.div> */}
     </Container>
   );
 }

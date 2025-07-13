@@ -9,6 +9,7 @@ interface FormData {
   cognome: string;
   luogoNascita: string;
   dataNascita: string;
+  comuneResidenza: string;
   residenza: string;
   numeroCivico: string;
   cap: string;
@@ -62,12 +63,12 @@ export default function DataForm() {
   return (
     <Box component="form" noValidate sx={{ mt: 6, mb: 4 }}>
       <Typography sx={visuallyHidden}>Inserisci i dati personali</Typography>
-      
+
       {/* Sezione dati partecipante */}
       <Typography variant="h6" sx={{ mb: 2 }}>
         Dati del partecipante
       </Typography>
-      
+
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
           <TextField
@@ -109,6 +110,15 @@ export default function DataForm() {
             })}
             error={!!errors.dataNascita}
             helperText={errors.dataNascita?.message}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
+          <TextField
+            label="Comune di residenza*"
+            fullWidth
+            {...register('comuneResidenza', { required: 'Inserisci il comune di residenza' })}
+            error={!!errors.comuneResidenza}
+            helperText={errors.comuneResidenza?.message}
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
@@ -155,14 +165,14 @@ export default function DataForm() {
             helperText={errors.email?.message}
           />
         </Grid>
-        
+
         {/* Sezione documento */}
         <Grid size={12} sx={{ mt: 2 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
             Documento d'identità
           </Typography>
         </Grid>
-        
+
         <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
           <FormControl fullWidth error={!!errors.tipoDocumento}>
             <InputLabel id="tipo-documento">Tipo documento*</InputLabel>
@@ -214,7 +224,7 @@ export default function DataForm() {
             helperText={errors.dataRilascioDocumento?.message}
           />
         </Grid>
-        
+
         {/* Sezione genitore se minore */}
         {isMinor && (
           <>
@@ -226,7 +236,7 @@ export default function DataForm() {
                 Essendo il partecipante minorenne, è necessario inserire i dati di chi esercita la potestà genitoriale
               </Typography>
             </Grid>
-            
+
             <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
               <TextField
                 label="Nome genitore*"
@@ -335,14 +345,14 @@ export default function DataForm() {
                 helperText={errors.emailGenitore?.message}
               />
             </Grid>
-            
+
             {/* Documento genitore */}
             <Grid size={12} sx={{ mt: 2 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
                 Documento d'identità del genitore
               </Typography>
             </Grid>
-            
+
             <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
               <FormControl fullWidth error={!!errors.tipoDocumentoGenitore}>
                 <InputLabel id="tipo-documento-genitore">Tipo documento genitore*</InputLabel>
@@ -351,7 +361,7 @@ export default function DataForm() {
                   id="tipo-documento-genitore-select"
                   value={tipoDocumentoGenitoreValue || ''}
                   label="Tipo documento genitore*"
-                  {...register('tipoDocumentoGenitore', { 
+                  {...register('tipoDocumentoGenitore', {
                     required: isMinor ? 'Seleziona il tipo di documento del genitore' : false
                   })}
                 >
@@ -409,7 +419,7 @@ export default function DataForm() {
                 Nel caso in cui il genitore del minore non partecipasse al raduno, indicare le generalità di un tutore maggiorenne che ne partecipi
               </Typography>
             </Grid>
-            
+
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 label="Nome tutore"

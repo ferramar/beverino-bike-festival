@@ -73,7 +73,7 @@ export default function FinalRegistrationStep() {
   };
 
   // Calcolo prezzi
-  const prezzoGara = tipoGara === 'ciclistica' ? 25 : tipoGara === 'running' ? 10 : 0;
+  const prezzoGara = tipoGara === 'ciclistica' ? 20 : tipoGara === 'running' ? 10 : 0;
   const prezzoPastaParty = pastaPartyEnabled ? pastaCount * 10 : 0;
   const prezzoTotale = prezzoGara + prezzoPastaParty;
 
@@ -119,7 +119,7 @@ export default function FinalRegistrationStep() {
               Gara Ciclistica
             </Typography>
             <Typography variant="h4" color="primary" gutterBottom>
-              €25
+              €20
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Percorsi attraverso paesaggi mozzafiato

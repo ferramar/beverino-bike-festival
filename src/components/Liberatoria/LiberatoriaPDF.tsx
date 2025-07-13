@@ -128,6 +128,7 @@ export interface LiberatoriaData {
   cognome: string;
   luogoNascita: string;
   dataNascita: string;
+  comuneResidenza: string;
   residenza: string;
   numeroCivico: string;
   cap: string;
@@ -216,7 +217,7 @@ export const createLiberatoriaPDF = (data: LiberatoriaData) => {
 
           <View style={styles.row}>
             <Text style={styles.label}>Residente in</Text>
-            <Text style={styles.value}>{data.residenza || '________________________'}</Text>
+            <Text style={styles.value}>{data.comuneResidenza || '________________________'}</Text>
           </View>
 
           <View style={styles.row}>

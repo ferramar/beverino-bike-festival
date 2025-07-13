@@ -18,6 +18,7 @@ import {
   useScrollTrigger,
   Typography,
 } from '@mui/material';
+import { visuallyHidden } from '@mui/utils';
 import {
   Menu as MenuIcon,
   Close as CloseIcon,
@@ -35,17 +36,17 @@ import { usePathname } from 'next/navigation';
 // Hook per rilevare lo scroll
 function useScrollPosition() {
   const [scrolled, setScrolled] = useState(false);
-  
+
   useEffect(() => {
     const handleScroll = () => {
       const isScrolled = window.scrollY > 50;
       setScrolled(isScrolled);
     };
-    
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-  
+
   return scrolled;
 }
 
@@ -74,6 +75,14 @@ export default function ModernHeader() {
     { href: "/sponsor", label: "Sponsor", icon: <Handshake /> },
     { href: "/faq", label: "FAQ", icon: <HelpOutline /> },
   ];
+
+  // Funzione per ottenere il nome della pagina corrente
+  const getCurrentPageName = () => {
+    if (pathname === '/') return 'Home';
+    if (pathname === '/iscriviti') return 'Iscrizioni';
+    const currentItem = navItems.find(item => item.href === pathname);
+    return currentItem?.label || 'Pagina';
+  };
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -136,8 +145,8 @@ export default function ModernHeader() {
               <ListItemIcon sx={{ minWidth: 40 }}>
                 {item.icon}
               </ListItemIcon>
-              <ListItemText 
-                primary={item.label} 
+              <ListItemText
+                primary={item.label}
                 primaryTypographyProps={{
                   fontWeight: isActive(item.href) ? 600 : 400,
                 }}
@@ -157,7 +166,7 @@ export default function ModernHeader() {
           size="large"
           onClick={handleDrawerToggle}
           sx={{
-            background: isActive('/iscriviti') 
+            background: isActive('/iscriviti')
               ? 'linear-gradient(135deg, #D32F2F 0%, #E53935 100%)'
               : 'linear-gradient(135deg, #A52D0C 0%, #D32F2F 100%)',
             borderRadius: 3,
@@ -178,6 +187,14 @@ export default function ModernHeader() {
 
   return (
     <>
+      {/* H1 nascosto per accessibilità */}
+      <Typography
+        variant="h1"
+        component="h1"
+        sx={visuallyHidden}
+      >
+        Beverino Bike Festival - {getCurrentPageName()}
+      </Typography>
       <HideOnScroll>
         <AppBar
           position="fixed"
@@ -191,8 +208,8 @@ export default function ModernHeader() {
             borderRadius: '0',
             margin: '0',
             width: '100%',
-            boxShadow: scrolled 
-              ? '0 8px 32px rgba(0, 0, 0, 0.12)' 
+            boxShadow: scrolled
+              ? '0 8px 32px rgba(0, 0, 0, 0.12)'
               : '0 2px 8px rgba(0, 0, 0, 0.05)',
           }}
         >

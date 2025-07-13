@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     const { 
       registrationId, 
       includeCena, 
-      numeroPersoneCena = 1,
+      numeroPersoneCena = 0,
       codiceRegistrazione,
       prezzoCena = 15,
       tipo_gara,
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     
 
     // Calcola il prezzo in base al tipo di gara
-    const prezzoGara = tipo_gara === 'ciclistica' ? 2500 : 1000; // €25 o €10 in centesimi
+    const prezzoGara = tipo_gara === 'ciclistica' ? 2000 : 1000; // €20 o €10 in centesimi
 
     const prezzoTotale = numeroPersoneCena > 0 
       ? prezzoGara + (1000 * numeroPersoneCena)

@@ -38,6 +38,7 @@ interface WizardData {
   cognome: string;
   luogoNascita: string;
   dataNascita: string;
+  comuneResidenza: string;
   residenza: string;
   numeroCivico: string;
   cap: string;
@@ -174,7 +175,7 @@ export default function IscrizioneWizard() {
   const fieldsPerStep: Record<number, (keyof WizardData)[]> = {
     0: [
       'nome', 'cognome', 'luogoNascita', 'dataNascita',
-      'residenza', 'numeroCivico', 'cap', 'email',
+      'comuneResidenza', 'residenza', 'numeroCivico', 'cap', 'email',
       'tipoDocumento', 'numeroDocumento', 'cittaRilascio', 'dataRilascioDocumento',
       // Campi genitore (validati solo se minore)
       'nomeGenitore', 'cognomeGenitore', 'luogoNascitaGenitore', 'dataNascitaGenitore',
@@ -282,6 +283,7 @@ export default function IscrizioneWizard() {
       cognome: data.cognome,
       luogoNascita: data.luogoNascita,
       dataNascita: data.dataNascita,
+      comuneResidenza: data.comuneResidenza,
       residenza: data.residenza,
       numeroCivico: data.numeroCivico,
       cap: data.cap,

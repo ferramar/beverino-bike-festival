@@ -22,8 +22,8 @@ const features = [
   },
   {
     icon: <EmojiEventsIcon sx={{ fontSize: 48 }} />,
-    title: "Premi e Ristori",
-    description: "Ricchi premi per i vincitori e ristori con prodotti locali lungo il percorso"
+    title: "Ristori",
+    description: "Ristori con prodotti locali lungo il percorso"
   }
 ];
 
