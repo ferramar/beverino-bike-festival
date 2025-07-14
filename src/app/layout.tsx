@@ -5,6 +5,7 @@ import { Providers } from "./providers";
 import Header from "../components/header";
 import Footer from "../components/footer";
 import SkipLink from "../components/SkipLink";
+import Script from "next/script";
 
 // Inter è più moderno e leggibile di Roboto per UI
 const inter = Inter({
@@ -104,6 +105,50 @@ export default function RootLayout({
             <Footer />
           </div>
         </Providers>
+
+        <Script id="iubenda-cs-configuration" strategy="beforeInteractive">
+          {`
+            var _iub = _iub || [];
+            _iub.csConfiguration = {
+              "siteId": 4157081,
+              "cookiePolicyId": 20393244,
+              "lang": "it",
+              "storage": {
+                "useSiteId": true
+              },
+              "banner": {
+                "position": "bottom",
+                "acceptButtonDisplay": true,
+                "customizeButtonDisplay": true,
+                "closeButtonDisplay": false,
+                "fontSizeBody": "14px",
+                "backgroundColor": "#000000",
+                "textColor": "#FFFFFF",
+                "acceptButtonColor": "#A52D0C",
+                "acceptButtonCaptionColor": "#FFFFFF",
+                "customizeButtonColor": "#212121",
+                "customizeButtonCaptionColor": "#FFFFFF"
+              }
+            };
+          `}
+        </Script>
+        
+        <Script 
+          src="https://cs.iubenda.com/autoblocking/4157081.js"
+          strategy="beforeInteractive"
+        />
+        
+        <Script 
+          src="//cdn.iubenda.com/cs/gpp/stub.js"
+          strategy="beforeInteractive"
+        />
+        
+        <Script 
+          src="//cdn.iubenda.com/cs/iubenda_cs.js"
+          strategy="lazyOnload"
+          charSet="UTF-8"
+        />
+
 
         {/* Noscript fallback */}
         <noscript>

@@ -189,9 +189,64 @@ const Footer: React.FC = () => {
           </Grid>
         </Grid>
 
-        {/* Copyright */}
-        <Box mt={6} pt={4} textAlign="center" sx={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-          <Typography variant="body2" sx={{ opacity: 0.8 }}>
+        {/* Legal Links & Copyright */}
+        <Box mt={6} pt={4} sx={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+          {/* Legal Links */}
+          <Stack 
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={{ xs: 1, sm: 3 }}
+            justifyContent="center"
+            alignItems="center"
+            sx={{ mb: 3 }}
+          >
+            <Link 
+              href="https://www.iubenda.com/privacy-policy/20393244"
+              target="_blank"
+              rel="noopener noreferrer"
+              color="inherit"
+              sx={{ 
+                textDecoration: 'none',
+                opacity: 0.8,
+                fontSize: '0.875rem',
+                '&:hover': { 
+                  opacity: 1, 
+                  textDecoration: 'underline' 
+                }
+              }}
+            >
+              Privacy Policy
+            </Link>
+            
+            <Typography 
+              sx={{ 
+                display: { xs: 'none', sm: 'block' },
+                opacity: 0.5 
+              }}
+            >
+              •
+            </Typography>
+            
+            <Link 
+              href="https://www.iubenda.com/privacy-policy/20393244/cookie-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              color="inherit"
+              sx={{ 
+                textDecoration: 'none',
+                opacity: 0.8,
+                fontSize: '0.875rem',
+                '&:hover': { 
+                  opacity: 1, 
+                  textDecoration: 'underline' 
+                }
+              }}
+            >
+              Cookie Policy
+            </Link>
+          </Stack>
+          
+          {/* Copyright */}
+          <Typography variant="body2" sx={{ opacity: 0.8, textAlign: 'center' }}>
             © {new Date().getFullYear()} Beverino Bike Festival. Tutti i diritti riservati.
           </Typography>
         </Box>
