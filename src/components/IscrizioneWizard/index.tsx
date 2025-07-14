@@ -399,18 +399,18 @@ export default function IscrizioneWizard() {
   const onSubmit = async (data: WizardData) => {
     setIsSubmitting(true);
     setErrorMessage('');
+    setShowError(false);
 
     try {
       // Salva iscrizione in Strapi
       const registrationData = await saveRegistrationToStrapi(data);
-
       setRegistrationId(registrationData.id);
 
-      // Mostra messaggio di attesa
-      setErrorMessage('Reindirizzamento al pagamento in corso...');
+      // Mostra messaggio durante i tentativi
+      setErrorMessage('Connessione al sistema di pagamento in corso...');
       setShowError(true);
 
-      // Procedi con pagamento Stripe
+      // Procedi con pagamento Stripe (con retry automatici)
       const includeCena = data.conteggio_pastaparty > 0;
       await createCheckoutSession(
         registrationData.id,
@@ -420,35 +420,22 @@ export default function IscrizioneWizard() {
         data.tipo_gara
       );
 
-      // Se arriviamo qui senza errori, il redirect dovrebbe essere avvenuto
       // Pulisci localStorage dopo successo
       localStorage.removeItem('iscrizione');
 
     } catch (error: any) {
-      console.error('Errore durante l\'iscrizione:', error);
+      console.error('Errore finale:', error);
 
-      // Messaggio user-friendly basato sul tipo di errore
-      let userMessage = 'Si è verificato un errore durante l\'elaborazione.';
-
-      if (error.message.includes('pagamento')) {
-        userMessage = 'Impossibile procedere al pagamento. Verifica la tua connessione e riprova.';
-      } else if (error.message.includes('server')) {
-        userMessage = 'Il server non risponde. Riprova tra qualche minuto.';
-      } else if (error.message) {
-        userMessage = error.message;
-      }
-
-      // Aggiungi info di debug in development
-      if (process.env.NODE_ENV === 'development') {
-        userMessage += ` (Debug: ${error.message})`;
-      }
-
-      setErrorMessage(userMessage);
+      // Solo se TUTTI i tentativi falliscono mostriamo l'errore finale
+      setErrorMessage(
+        'Non è stato possibile collegarsi al sistema di pagamento. ' +
+        'La tua iscrizione è stata salvata. ' +
+        'Puoi riprovare il pagamento o contattare l\'assistenza.'
+      );
       setShowError(true);
       setIsSubmitting(false);
     }
   };
-
 
   const isLoading = isSubmitting || stripeLoading;
 
