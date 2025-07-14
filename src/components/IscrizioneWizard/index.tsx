@@ -9,6 +9,8 @@ import {
   Typography,
   useMediaQuery,
   CircularProgress,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import DataForm from '../dataForm';
 import Liberatoria from '../Liberatoria';
@@ -96,7 +98,10 @@ export default function IscrizioneWizard() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [registrationId, setRegistrationId] = useState<number | null>(null);
   const [sessionToken, setSessionToken] = useState<string>('');
-  
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [showError, setShowError] = useState(false);
+
+
   const { createCheckoutSession, loading: stripeLoading } = useStripeCheckout();
 
   useEffect(() => {
@@ -109,12 +114,12 @@ export default function IscrizioneWizard() {
   useEffect(() => {
     // Controlla se esiste una sessione valida
     const storedSession = localStorage.getItem(SESSION_KEY);
-    
+
     if (storedSession) {
       try {
         const session: SessionData = JSON.parse(storedSession);
         const now = Date.now();
-        
+
         // Verifica se la sessione è ancora valida
         if (now - session.createdAt < session.ttl) {
           setSessionToken(session.token);
@@ -152,7 +157,7 @@ export default function IscrizioneWizard() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    
+
     // Carica dati salvati dal localStorage
     const stored = localStorage.getItem('iscrizione');
     if (stored) {
@@ -162,12 +167,12 @@ export default function IscrizioneWizard() {
         console.warn('Dati in localStorage non validi');
       }
     }
-    
+
     // Salva automaticamente i cambiamenti
     const subscription = watch((value) => {
       localStorage.setItem('iscrizione', JSON.stringify(value));
     });
-    
+
     return () => subscription.unsubscribe();
   }, [watch, reset]);
 
@@ -180,7 +185,7 @@ export default function IscrizioneWizard() {
       // Campi genitore (validati solo se minore)
       'nomeGenitore', 'cognomeGenitore', 'luogoNascitaGenitore', 'dataNascitaGenitore',
       'comuneResidenzaGenitore', 'viaResidenzaGenitore', 'numeroCivicoGenitore', 'capGenitore',
-      'emailGenitore', 'tipoDocumentoGenitore', 'numeroDocumentoGenitore', 
+      'emailGenitore', 'tipoDocumentoGenitore', 'numeroDocumentoGenitore',
       'cittaRilascioGenitore', 'dataRilascioDocumentoGenitore'
     ],
     1: ['liberatoriaAccettata'],
@@ -200,7 +205,7 @@ export default function IscrizioneWizard() {
 
   const saveRegistrationToStrapi = async (data: WizardData) => {
     const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
-    
+
     // Usa il codice esistente se c'è un registrationId, altrimenti genera nuovo
     let codice_registrazione = nanoid();
 
@@ -219,14 +224,14 @@ export default function IscrizioneWizard() {
     // Salva PDF sul server Next.js
     let pdfUrl = null;
     if (data.liberatoriaPdfBlob) {
-      try {        
+      try {
         // Converti Blob in base64
         const reader = new FileReader();
         const base64 = await new Promise<string>((resolve) => {
           reader.onloadend = () => resolve(reader.result as string);
           reader.readAsDataURL(data.liberatoriaPdfBlob!);
         });
-        
+
         // Salva il PDF sul server Next.js
         const saveResponse = await fetch('/api/save-pdf', {
           method: 'POST',
@@ -238,7 +243,7 @@ export default function IscrizioneWizard() {
             fileName: `liberatoria_${data.nome}_${data.cognome}_${Date.now()}.pdf`,
           }),
         });
-        
+
         if (saveResponse.ok) {
           const result = await saveResponse.json();
           pdfUrl = result.url;
@@ -325,25 +330,25 @@ export default function IscrizioneWizard() {
 
       if (checkResponse.ok) {
         const checkData = await checkResponse.json();
-        
+
         if (checkData.data && checkData.data.length > 0) {
           // Esiste già, aggiorna invece di creare
           const existingRegistration = checkData.data[0];
           const updateId = existingRegistration.documentId || existingRegistration.id;
-          
+
           // Mantieni il codice_registrazione esistente
           codice_registrazione = existingRegistration.codice_registrazione;
-          
+
           const updateResponse = await fetch(`${strapiUrl}/api/iscrizionis/${updateId}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ 
+            body: JSON.stringify({
               data: {
                 ...payload,
                 codice_registrazione // Usa quello esistente
-              } 
+              }
             }),
           });
 
@@ -370,11 +375,11 @@ export default function IscrizioneWizard() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         data: {
           ...payload,
           codice_registrazione
-        } 
+        }
       }),
     });
 
@@ -384,7 +389,7 @@ export default function IscrizioneWizard() {
     }
 
     const result = await response.json();
-    
+
     return {
       id: result.data.id,
       codice_registrazione: codice_registrazione
@@ -393,32 +398,61 @@ export default function IscrizioneWizard() {
 
   const onSubmit = async (data: WizardData) => {
     setIsSubmitting(true);
+    setErrorMessage('');
 
     try {
       // Salva iscrizione in Strapi
       const registrationData = await saveRegistrationToStrapi(data);
-      
+
       setRegistrationId(registrationData.id);
 
-      // Procedi con pagamento Stripe passando il codice_registrazione
+      if (true) { // Cambia in false per disabilitare
+      throw new Error('Impossibile procedere al pagamento. Verifica la tua connessione e riprova.');
+    }
+
+      // Mostra messaggio di attesa
+      setErrorMessage('Reindirizzamento al pagamento in corso...');
+      setShowError(true);
+
+      // Procedi con pagamento Stripe
       const includeCena = data.conteggio_pastaparty > 0;
       await createCheckoutSession(
-        registrationData.id, 
-        includeCena, 
+        registrationData.id,
+        includeCena,
         data.conteggio_pastaparty,
         registrationData.codice_registrazione,
         data.tipo_gara
       );
 
+      // Se arriviamo qui senza errori, il redirect dovrebbe essere avvenuto
       // Pulisci localStorage dopo successo
       localStorage.removeItem('iscrizione');
 
     } catch (error: any) {
       console.error('Errore durante l\'iscrizione:', error);
-      alert(`Si è verificato un errore: ${error.message}`);
+
+      // Messaggio user-friendly basato sul tipo di errore
+      let userMessage = 'Si è verificato un errore durante l\'elaborazione.';
+
+      if (error.message.includes('pagamento')) {
+        userMessage = 'Impossibile procedere al pagamento. Verifica la tua connessione e riprova.';
+      } else if (error.message.includes('server')) {
+        userMessage = 'Il server non risponde. Riprova tra qualche minuto.';
+      } else if (error.message) {
+        userMessage = error.message;
+      }
+
+      // Aggiungi info di debug in development
+      if (process.env.NODE_ENV === 'development') {
+        userMessage += ` (Debug: ${error.message})`;
+      }
+
+      setErrorMessage(userMessage);
+      setShowError(true);
       setIsSubmitting(false);
     }
   };
+
 
   const isLoading = isSubmitting || stripeLoading;
 
@@ -462,18 +496,86 @@ export default function IscrizioneWizard() {
               Avanti
             </Button>
           ) : (
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleSubmit(onSubmit)}
-              disabled={isLoading}
-              startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : null}
-            >
-              {isLoading ? 'Elaborazione...' : 'Conferma e Paga'}
-            </Button>
+            <>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSubmit(onSubmit)}
+                disabled={isLoading}
+                startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : null}
+              >
+                {isLoading ? 'Elaborazione...' : 'Conferma e Paga'}
+              </Button>
+              {registrationId && showError && !errorMessage.includes('corso') && (
+                <Box sx={{ mt: 2, textAlign: 'center' }}>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    Problemi con il pagamento?
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    onClick={async () => {
+                      try {
+                        setShowError(false);
+                        await createCheckoutSession(
+                          registrationId,
+                          watch('conteggio_pastaparty') > 0,
+                          watch('conteggio_pastaparty'),
+                          // Trova il codice registrazione salvato
+                          'retry_' + registrationId,
+                          watch('tipo_gara')
+                        );
+                      } catch (error) {
+                        // Errore già gestito dal hook
+                      }
+                    }}
+                    disabled={stripeLoading}
+                  >
+                    Riprova Pagamento
+                  </Button>
+                </Box>
+              )}
+            </>
           )}
         </Box>
       </FormProvider>
+
+      <Snackbar
+        open={showError}
+        autoHideDuration={10000}
+        onClose={() => setShowError(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setShowError(false)}
+          severity={errorMessage.includes('corso') ? 'info' : 'error'}
+          sx={{ width: '100%', opacity: 1 }}
+        >
+          {errorMessage}
+          {!errorMessage.includes('corso') && registrationId && (
+            <Box sx={{ mt: 1 }}>
+              <Typography variant="caption" display="block">
+                La tua iscrizione è stata salvata (ID: {registrationId}).
+                Se il problema persiste, contatta uno dei numeri presenti in fondo alla pagina.
+              </Typography>
+            </Box>
+          )}
+        </Alert>
+      </Snackbar>
+
+      {/* Alert fisso per problemi comuni */}
+      {isSubmitting && (
+        <Alert severity="info" sx={{ mt: 2 }}>
+          <Typography variant="body2" gutterBottom>
+            <strong>Il pagamento non si apre?</strong>
+          </Typography>
+          <Typography variant="caption" component="div">
+            • Verifica che i popup non siano bloccati<br />
+            • Prova con un browser diverso<br />
+            • Disabilita temporaneamente AdBlock<br />
+            • Se usi Safari, verifica le impostazioni privacy
+          </Typography>
+        </Alert>
+      )}
     </Container>
   );
 }

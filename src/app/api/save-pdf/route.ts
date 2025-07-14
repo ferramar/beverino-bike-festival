@@ -51,12 +51,6 @@ export async function POST(request: NextRequest) {
       ? uploadedFile.url 
       : `${strapiUrl}${uploadedFile.url}`;
     
-    console.log('PDF salvato su Strapi:', {
-      id: uploadedFile.id,
-      url: fileUrl,
-      name: uploadedFile.name
-    });
-    
     return NextResponse.json({ 
       success: true,
       url: fileUrl,
