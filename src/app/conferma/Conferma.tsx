@@ -144,14 +144,15 @@ export default function Conferma() {
         >
           Torna alla Home
         </Button>
-        <Button 
+        {/* da decommentare */}
+        {/* <Button 
           component={Link} 
           href="/programma" 
           variant="outlined" 
           size="large"
         >
           Visualizza Programma
-        </Button>
+        </Button> */}
       </Box>
     </Container>
   );

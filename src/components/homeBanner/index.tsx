@@ -249,7 +249,8 @@ export default function HomeBanner() {
               >
                 Iscriviti Ora
               </Button>
-              <Button
+              {/* da decommentare */}
+              {/* <Button
                 component={Link}
                 href='/programma'
                 variant="outlined"
@@ -277,7 +278,7 @@ export default function HomeBanner() {
                 }}
               >
                 Scopri il Programma
-              </Button>
+              </Button> */}
             </Box>
 
             {/* Main Sponsor */}

@@ -49,13 +49,14 @@ const Footer: React.FC = () => {
                   }}>
                     Home
                   </Link>
-                  <Link href="/programma" color="inherit" sx={{
+                  {/* da decommentare */}
+                  {/* <Link href="/programma" color="inherit" sx={{
                     textDecoration: 'none',
                     opacity: 0.9,
                     '&:hover': { opacity: 1, textDecoration: 'underline' }
                   }}>
                     Programma
-                  </Link>
+                  </Link> */}
                   <Link href="/galleria" color="inherit" sx={{
                     textDecoration: 'none',
                     opacity: 0.9,
@@ -74,13 +75,14 @@ const Footer: React.FC = () => {
                   }}>
                     Sponsor
                   </Link>
-                  <Link href="/faq" color="inherit" sx={{
+                  {/* da decommentare */}
+                  {/* <Link href="/faq" color="inherit" sx={{
                     textDecoration: 'none',
                     opacity: 0.9,
                     '&:hover': { opacity: 1, textDecoration: 'underline' }
                   }}>
                     FAQ
-                  </Link>
+                  </Link> */}
                   <Link href="/iscriviti" color="inherit" sx={{
                     textDecoration: 'none',
                     opacity: 0.9,

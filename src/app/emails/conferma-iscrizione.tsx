@@ -163,23 +163,25 @@ export const ConfermaIscrizioneEmail = ({
           </Section>
 
           {/* CTA Buttons */}
-          <Section style={buttonContainer}>
+          {/* da decommentare */}
+          {/* <Section style={buttonContainer}>
             <Button
               style={button}
               href={`${process.env.NEXT_PUBLIC_SITE_URL}/programma`}
             >
               Visualizza Programma Completo
             </Button>
-          </Section>
+          </Section> */}
 
-          <Section style={buttonContainer}>
+          {/* da decommentare */}
+          {/* <Section style={buttonContainer}>
             <Button
               style={buttonSecondary}
               href={`${process.env.NEXT_PUBLIC_SITE_URL}/faq`}
             >
               Domande Frequenti
             </Button>
-          </Section>
+          </Section> */}
 
           {/* Footer */}
           <Hr style={hr} />
