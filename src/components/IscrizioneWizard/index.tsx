@@ -406,10 +406,6 @@ export default function IscrizioneWizard() {
 
       setRegistrationId(registrationData.id);
 
-      if (true) { // Cambia in false per disabilitare
-      throw new Error('Impossibile procedere al pagamento. Verifica la tua connessione e riprova.');
-    }
-
       // Mostra messaggio di attesa
       setErrorMessage('Reindirizzamento al pagamento in corso...');
       setShowError(true);
