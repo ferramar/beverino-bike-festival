@@ -183,10 +183,10 @@ function GPXMap({ gpxFile, height = 400 }: { gpxFile: string; height?: number })
 const percorsiData = [
   {
     id: 1,
-    nome: "Percorso Principianti",
+    nome: "Bici in Comune",
     difficolta: "Facile",
-    distanza: "15 km",
-    dislivello: "200 m",
+    distanza: "32 km",
+    dislivello: "800 m",
     durata: "1-2 ore",
     gpxFile: "https://gpx.studio/embed?options=%7B%22token%22%3A%22pk.eyJ1IjoibG9sbG9tYWciLCJhIjoiY21icjFzbzVzMDU0NjJsczdvcHA5bzh0ZSJ9.Kwsyv3hGs6qC8GP6099UkQ%22%2C%22files%22%3A%5B%22https%3A%2F%2Fstylish-flowers-c12f2e4071.media.strapiapp.com%2Fgiro_corto_17e634af01.gpx%22%5D%2C%22elevation%22%3A%7B%22height%22%3A%22200%22%2C%22fill%22%3A%22slope%22%7D%2C%22distanceMarkers%22%3Atrue%7D",
     descrizione: "Un percorso ideale per chi si avvicina al mondo del mountain bike. Tracciato prevalentemente su sterrato con pendenze dolci e panorami mozzafiato sulla valle. Adatto a famiglie e principianti che vogliono godersi la natura senza troppa fatica.",
@@ -200,10 +200,10 @@ const percorsiData = [
   },
   {
     id: 2,
-    nome: "Percorso Intermedio",
+    nome: "Percorso Medio",
     difficolta: "Medio",
-    distanza: "28 km",
-    dislivello: "450 m",
+    distanza: "35 km",
+    dislivello: "1150 m",
     durata: "2-3 ore",
     gpxFile: "giro_medio.gpx",
     descrizione: "Un tracciato che mette alla prova le vostre capacità tecniche con single track divertenti e alcuni passaggi più impegnativi. Attraversa boschi secolari e antichi sentieri dei carbonari, offrendo un perfetto equilibrio tra sfida e divertimento.",
@@ -218,10 +218,10 @@ const percorsiData = [
   },
   {
     id: 3,
-    nome: "Percorso Esperti",
+    nome: "Percorso Lungo",
     difficolta: "Difficile",
-    distanza: "42 km",
-    dislivello: "850 m",
+    distanza: "50 km",
+    dislivello: "1700 m",
     durata: "3-4 ore",
     gpxFile: "giro_lungo.gpx",
     descrizione: "La sfida definitiva per i biker più esperti. Tracciato tecnico con single track impegnativi, rocce, radici e discese mozzafiato. Solo per chi ha esperienza e allenamento adeguato. La fatica sarà ripagata da panorami unici e dall'adrenalina pura.",
@@ -264,7 +264,7 @@ export default function PercorsiPage() {
             <Card elevation={2} sx={{ p: 2, textAlign: 'center' }}>
               <Straighten sx={{ fontSize: 40, color: '#A52D0C', mb: 1 }} />
               <Typography variant="h4" fontWeight={700} color="#A52D0C">
-                85 km
+                117 km
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Distanza totale
@@ -275,7 +275,7 @@ export default function PercorsiPage() {
             <Card elevation={2} sx={{ p: 2, textAlign: 'center' }}>
               <TrendingUp sx={{ fontSize: 40, color: '#A52D0C', mb: 1 }} />
               <Typography variant="h4" fontWeight={700} color="#A52D0C">
-                1500m
+                1700m
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Dislivello massimo
@@ -333,9 +333,9 @@ export default function PercorsiPage() {
       </Box>
 
       {/* Dettaglio percorso selezionato */}
-      <Grid container spacing={4}>
+      <Grid container spacing={4} justifyContent={'center'}>
         {/* Colonna sinistra - Info percorso */}
-        <Grid size={{ xs: 12, lg: 5 }}>
+        <Grid size={{ xs: 12, lg: 8 }}>
           <Card elevation={3}>
             <CardContent sx={{ p: 4 }}>
               <Box sx={{ mb: 3 }}>
@@ -395,7 +395,7 @@ export default function PercorsiPage() {
               </Typography>
 
               {/* Punti di interesse */}
-              <Accordion>
+              {/* <Accordion>
                 <AccordionSummary expandIcon={<ExpandMore />}>
                   <Typography variant="h6" fontWeight={600}>
                     Punti di interesse
@@ -410,10 +410,10 @@ export default function PercorsiPage() {
                     ))}
                   </Stack>
                 </AccordionDetails>
-              </Accordion>
+              </Accordion> */}
 
               {/* Download GPX */}
-              <Button
+              {/* <Button
                 variant="contained"
                 fullWidth
                 size="large"
@@ -433,13 +433,13 @@ export default function PercorsiPage() {
                 }}
               >
                 Scarica tracciato GPX
-              </Button>
+              </Button> */}
             </CardContent>
           </Card>
         </Grid>
 
         {/* Colonna destra - Mappa */}
-        <Grid size={{ xs: 12, lg: 7 }}>
+        {/* <Grid size={{ xs: 12, lg: 7 }}>
           <Card elevation={3} sx={{ height: 'auto', minHeight: 300 }}>
             <CardContent sx={{ height: '100%', p: "0 !important" }}>
               <Typography variant="h6" sx={visuallyHidden} >
@@ -448,7 +448,7 @@ export default function PercorsiPage() {
               <GPXMap gpxFile={selectedPercorso.gpxFile} height={500} />
             </CardContent>
           </Card>
-        </Grid>
+        </Grid> */}
       </Grid>
 
       {/* Sezione info aggiuntive */}

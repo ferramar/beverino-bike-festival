@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
     const prezzoGara = tipo_gara === 'ciclistica' ? 2000 : 1000; // €20 o €10 in centesimi
 
     const prezzoTotale = numeroPersoneCena > 0 
-      ? prezzoGara + (1000 * numeroPersoneCena)
+      ? prezzoGara + (1200 * numeroPersoneCena)
       : prezzoGara;
 
 

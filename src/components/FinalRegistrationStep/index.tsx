@@ -74,7 +74,7 @@ export default function FinalRegistrationStep() {
 
   // Calcolo prezzi
   const prezzoGara = tipoGara === 'ciclistica' ? 20 : tipoGara === 'running' ? 10 : 0;
-  const prezzoPastaParty = pastaPartyEnabled ? pastaCount * 10 : 0;
+  const prezzoPastaParty = pastaPartyEnabled ? pastaCount * 12 : 0;
   const prezzoTotale = prezzoGara + prezzoPastaParty;
 
   return (
@@ -246,7 +246,7 @@ export default function FinalRegistrationStep() {
               }
               label={
                 <Typography>
-                  Voglio partecipare al Pasta Party (€10 a persona)
+                  Voglio partecipare al Pasta Party (€12 a persona)
                 </Typography>
               }
             />
