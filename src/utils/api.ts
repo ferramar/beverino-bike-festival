@@ -22,9 +22,7 @@ export async function getAllMedia(): Promise<MediaItem[]> {
   return data.flatMap((record: any) =>
     record.media.map((file: any) => ({
       id: file.id,
-      url: file.url.startsWith('http')
-        ? file.url
-        : `${BASE}${file.url}`,
+      url: getFullUrl(file.url) || '',
       type: file.mime.startsWith('image/') ? 'image' : 'video',
       editionYear: record.edizione,
       thumbnailUrl: file.formats?.thumbnail?.url
@@ -35,6 +33,12 @@ export async function getAllMedia(): Promise<MediaItem[]> {
     }))
   );
 }
+
+const getFullUrl = (url?: string): string | undefined => {
+  if (!url) return undefined;
+  if (url.startsWith('http')) return url;
+  return `${BASE}${url}`;
+};
 
 export async function getAllSponsors(): Promise<SponsorItem[]> {
   const { data } = await fetcher('/api/sponsors?populate=*');
@@ -47,7 +51,7 @@ export async function getAllSponsors(): Promise<SponsorItem[]> {
       descrizione: item.descrizione,
       sito: item.sito,
       principale: item.principale || false,
-      logo: item.logo?.formats?.thumbnail?.url || item.logo?.url,
+      logo: getFullUrl(item.logo?.formats?.thumbnail?.url || item.logo?.url),
       categorie_sponsors: item.categorie_sponsors || []
     }
   })

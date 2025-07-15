@@ -194,11 +194,7 @@ function SponsorLogo({ sponsor }: { sponsor: SponsorItem }) {
         position: 'relative',
         flexShrink: 0,
         transition: 'all 0.3s ease',
-        filter: 'grayscale(100%)',
-        opacity: 0.7,
         '&:hover': {
-          filter: 'grayscale(0%)',
-          opacity: 1,
           transform: 'scale(1.05)',
           cursor: sponsor.sito ? 'pointer' : 'default',
         },
