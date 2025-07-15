@@ -25,56 +25,6 @@ export const useStripeCheckout = () => {
     // Detecta se siamo su Windows
     const isWindows = typeof window !== 'undefined' && navigator.platform.toLowerCase().includes('win');
     
-    // Pre-apri una finestra su Windows per evitare blocco popup
-    let checkoutWindow: Window | null = null;
-    if (isWindows) {
-      checkoutWindow = window.open('', '_blank');
-      if (checkoutWindow) {
-        // Mostra un messaggio di caricamento nella finestra
-        checkoutWindow.document.write(`
-          <html>
-            <head>
-              <title>Reindirizzamento al pagamento...</title>
-              <style>
-                body { 
-                  font-family: Arial, sans-serif; 
-                  display: flex; 
-                  justify-content: center; 
-                  align-items: center; 
-                  height: 100vh; 
-                  margin: 0;
-                  background-color: #f5f5f5;
-                }
-                .loader { 
-                  text-align: center; 
-                }
-                .spinner {
-                  border: 4px solid #f3f3f3;
-                  border-top: 4px solid #A52D0C;
-                  border-radius: 50%;
-                  width: 40px;
-                  height: 40px;
-                  animation: spin 1s linear infinite;
-                  margin: 0 auto 20px;
-                }
-                @keyframes spin {
-                  0% { transform: rotate(0deg); }
-                  100% { transform: rotate(360deg); }
-                }
-              </style>
-            </head>
-            <body>
-              <div class="loader">
-                <div class="spinner"></div>
-                <h2>Reindirizzamento al pagamento sicuro...</h2>
-                <p>Attendi qualche secondo</p>
-              </div>
-            </body>
-          </html>
-        `);
-      }
-    }
-    
     // Tenta fino a maxRetries volte
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
@@ -107,7 +57,8 @@ export const useStripeCheckout = () => {
         });
 
         if (!response.ok) {
-          throw new Error(`Errore del server (${response.status})`);
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || `Errore del server (${response.status})`);
         }
 
         const { sessionId } = await response.json();
@@ -116,87 +67,60 @@ export const useStripeCheckout = () => {
           throw new Error('Sessione di pagamento non valida');
         }
 
-        // URL di checkout
-        const checkoutUrl = `https://checkout.stripe.com/c/pay/${sessionId}`;
-
-        // Se abbiamo pre-aperto una finestra su Windows, usala
-        if (checkoutWindow && !checkoutWindow.closed) {
-          checkoutWindow.location.href = checkoutUrl;
-          setLoading(false);
-          setError(null);
-          return;
-        }
-
-        // Altrimenti usa i metodi standard
-        try {
-          // Prova prima il redirect standard di Stripe
-          const redirectResult = await stripe.redirectToCheckout({ sessionId });
+        // USA SEMPRE il metodo ufficiale di Stripe
+        const { error: stripeError } = await stripe.redirectToCheckout({ sessionId });
+        
+        if (stripeError) {
+          console.error('Errore Stripe:', stripeError);
           
-          if (redirectResult?.error) {
-            throw new Error(redirectResult.error.message);
-          }
-        } catch (stripeError: any) {
-          console.log('Redirect Stripe fallito, provo metodi alternativi...');
-          
-          // Metodo 2: window.open
-          const newWindow = window.open(checkoutUrl, '_blank');
-          if (newWindow) {
-            setLoading(false);
-            setError(null);
-            return;
+          // Se siamo su Windows e non è l'ultimo tentativo, riprova
+          if (isWindows && attempt < maxRetries) {
+            throw new Error('Redirect bloccato, riprovo...');
           }
           
-          // Metodo 3: Form submit (funziona meglio su alcuni browser Windows)
+          // Altrimenti, genera un errore user-friendly
+          let errorMessage = stripeError.message;
+          
           if (isWindows) {
-            const form = document.createElement('form');
-            form.method = 'GET';
-            form.action = checkoutUrl;
-            form.target = '_blank';
-            
-            document.body.appendChild(form);
-            form.submit();
-            document.body.removeChild(form);
-            
-            setLoading(false);
-            setError(null);
-            return;
+            errorMessage += '\n\nSoluzioni per Windows:\n';
+            errorMessage += '• Disabilita temporaneamente il blocco popup\n';
+            errorMessage += '• Tieni premuto CTRL mentre clicchi "Conferma e Paga"\n';
+            errorMessage += '• Prova con Chrome o Firefox\n';
+            errorMessage += '• Disabilita temporaneamente antivirus/firewall';
           }
           
-          // Metodo 4: Redirect nella stessa finestra (ultimo tentativo)
-          if (attempt === maxRetries) {
-            window.location.href = checkoutUrl;
-            return;
-          }
-          
-          throw stripeError;
+          throw new Error(errorMessage);
         }
         
         // Se arriviamo qui, il redirect è riuscito
         setRetryCount(0);
         setError(null);
+        setLoading(false);
         return;
         
       } catch (err: any) {
         lastError = err;
         console.error(`Errore tentativo ${attempt + 1}:`, err.message);
         
-        // Se abbiamo una finestra pre-aperta e c'è stato un errore, chiudila
-        if (checkoutWindow && !checkoutWindow.closed && attempt === maxRetries) {
-          checkoutWindow.close();
-        }
-        
         // Se non è l'ultimo tentativo, continua il loop
         if (attempt < maxRetries) {
-          setError(`Errore: ${err.message}. Riprovo...`);
+          setError(`${err.message}`);
           continue;
         }
       }
     }
     
     // Se arriviamo qui, tutti i tentativi sono falliti
-    setError(lastError?.message || 'Impossibile procedere al pagamento dopo multipli tentativi');
+    const finalError = lastError?.message || 'Impossibile procedere al pagamento dopo multipli tentativi';
+    setError(finalError);
     setLoading(false);
     setRetryCount(retryCount + 1);
+    
+    // Aggiungi un messaggio di fallback per Windows
+    if (isWindows && retryCount === 0) {
+      setError(finalError + '\n\nProva a copiare questo link e incollarlo in una nuova scheda del browser.');
+    }
+    
     throw lastError;
   };
 
