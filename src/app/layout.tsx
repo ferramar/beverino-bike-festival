@@ -6,6 +6,7 @@ import Header from "../components/header";
 import Footer from "../components/footer";
 import SkipLink from "../components/SkipLink";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/next"
 
 // Inter è più moderno e leggibile di Roboto per UI
 const inter = Inter({
@@ -167,6 +168,7 @@ export default function RootLayout({
             Per favore, abilita JavaScript nel tuo browser.
           </div>
         </noscript>
+        <Analytics />
       </body>
     </html>
   );
