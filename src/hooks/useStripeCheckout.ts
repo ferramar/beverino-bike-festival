@@ -1,5 +1,9 @@
 // src/hooks/useStripeCheckout.ts
 import { useState } from 'react';
+import { loadStripe } from '@stripe/stripe-js';
+
+// Dobbiamo ancora usare Stripe.js!
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 export const useStripeCheckout = () => {
   const [loading, setLoading] = useState(false);
@@ -16,6 +20,7 @@ export const useStripeCheckout = () => {
     setError(null);
     
     try {
+      // 1. Crea la sessione
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: {
@@ -31,23 +36,44 @@ export const useStripeCheckout = () => {
       });
 
       const data = await response.json();
+      console.log('Risposta API:', data);
       
       if (!response.ok) {
-        throw new Error(data.error || 'Errore creazione sessione di pagamento');
+        throw new Error(data.error || 'Errore creazione sessione');
       }
 
-      if (!data.url) {
-        throw new Error('URL di checkout non disponibile');
+      // 2. Usa l'URL se disponibile
+      if (data.url) {
+        console.log('Redirect diretto a:', data.url);
+        window.location.href = data.url;
+        return;
       }
 
-      // Redirect diretto all'URL di Stripe
-      window.location.href = data.url;
-      
-      // Il loading rimane true perché stiamo per lasciare la pagina
+      // 3. Altrimenti usa Stripe.js con il nuovo metodo
+      if (data.sessionId) {
+        console.log('Uso Stripe.js con sessionId:', data.sessionId);
+        
+        const stripe = await stripePromise;
+        if (!stripe) {
+          throw new Error('Stripe non caricato');
+        }
+
+        // Secondo la documentazione, ora si usa questo approccio:
+        // https://docs.stripe.com/js/deprecated/redirect_to_checkout
+        const { error: stripeError } = await stripe.redirectToCheckout({
+          sessionId: data.sessionId
+        });
+        
+        if (stripeError) {
+          throw stripeError;
+        }
+      } else {
+        throw new Error('Né URL né sessionId disponibili');
+      }
       
     } catch (error: any) {
       console.error('Errore checkout:', error);
-      setError(error.message || 'Si è verificato un errore durante il checkout');
+      setError(error.message || 'Errore durante il checkout');
       setLoading(false);
       throw error;
     }
