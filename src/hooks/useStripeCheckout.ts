@@ -22,6 +22,59 @@ export const useStripeCheckout = () => {
     const maxRetries = 2;
     let lastError: any;
     
+    // Detecta se siamo su Windows
+    const isWindows = typeof window !== 'undefined' && navigator.platform.toLowerCase().includes('win');
+    
+    // Pre-apri una finestra su Windows per evitare blocco popup
+    let checkoutWindow: Window | null = null;
+    if (isWindows) {
+      checkoutWindow = window.open('', '_blank');
+      if (checkoutWindow) {
+        // Mostra un messaggio di caricamento nella finestra
+        checkoutWindow.document.write(`
+          <html>
+            <head>
+              <title>Reindirizzamento al pagamento...</title>
+              <style>
+                body { 
+                  font-family: Arial, sans-serif; 
+                  display: flex; 
+                  justify-content: center; 
+                  align-items: center; 
+                  height: 100vh; 
+                  margin: 0;
+                  background-color: #f5f5f5;
+                }
+                .loader { 
+                  text-align: center; 
+                }
+                .spinner {
+                  border: 4px solid #f3f3f3;
+                  border-top: 4px solid #A52D0C;
+                  border-radius: 50%;
+                  width: 40px;
+                  height: 40px;
+                  animation: spin 1s linear infinite;
+                  margin: 0 auto 20px;
+                }
+                @keyframes spin {
+                  0% { transform: rotate(0deg); }
+                  100% { transform: rotate(360deg); }
+                }
+              </style>
+            </head>
+            <body>
+              <div class="loader">
+                <div class="spinner"></div>
+                <h2>Reindirizzamento al pagamento sicuro...</h2>
+                <p>Attendi qualche secondo</p>
+              </div>
+            </body>
+          </html>
+        `);
+      }
+    }
+    
     // Tenta fino a maxRetries volte
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
@@ -63,35 +116,59 @@ export const useStripeCheckout = () => {
           throw new Error('Sessione di pagamento non valida');
         }
 
-        // Prova redirect con gestione speciale per popup bloccati
-        let redirectResult;
-        
-        // Metodo 1: Redirect standard
-        redirectResult = await stripe.redirectToCheckout({ sessionId });
-        
-        if (redirectResult?.error) {
-          // Se il popup è bloccato o c'è un errore, prova metodo alternativo
-          if (attempt < maxRetries) {
-            console.log('Redirect fallito, provo metodo alternativo...');
-            
-            // Metodo 2: Apri in nuova finestra
-            const checkoutUrl = `https://checkout.stripe.com/pay/${sessionId}`;
-            const newWindow = window.open(checkoutUrl, '_blank');
-            
-            if (newWindow) {
-              setLoading(false);
-              setError(null);
-              return; // Successo con metodo alternativo
-            } else {
-              // Metodo 3: Redirect nella stessa finestra (ultimo tentativo)
-              if (attempt === maxRetries - 1) {
-                window.location.href = checkoutUrl;
-                return;
-              }
-            }
+        // URL di checkout
+        const checkoutUrl = `https://checkout.stripe.com/c/pay/${sessionId}`;
+
+        // Se abbiamo pre-aperto una finestra su Windows, usala
+        if (checkoutWindow && !checkoutWindow.closed) {
+          checkoutWindow.location.href = checkoutUrl;
+          setLoading(false);
+          setError(null);
+          return;
+        }
+
+        // Altrimenti usa i metodi standard
+        try {
+          // Prova prima il redirect standard di Stripe
+          const redirectResult = await stripe.redirectToCheckout({ sessionId });
+          
+          if (redirectResult?.error) {
+            throw new Error(redirectResult.error.message);
+          }
+        } catch (stripeError: any) {
+          console.log('Redirect Stripe fallito, provo metodi alternativi...');
+          
+          // Metodo 2: window.open
+          const newWindow = window.open(checkoutUrl, '_blank');
+          if (newWindow) {
+            setLoading(false);
+            setError(null);
+            return;
           }
           
-          throw new Error(redirectResult.error.message);
+          // Metodo 3: Form submit (funziona meglio su alcuni browser Windows)
+          if (isWindows) {
+            const form = document.createElement('form');
+            form.method = 'GET';
+            form.action = checkoutUrl;
+            form.target = '_blank';
+            
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+            
+            setLoading(false);
+            setError(null);
+            return;
+          }
+          
+          // Metodo 4: Redirect nella stessa finestra (ultimo tentativo)
+          if (attempt === maxRetries) {
+            window.location.href = checkoutUrl;
+            return;
+          }
+          
+          throw stripeError;
         }
         
         // Se arriviamo qui, il redirect è riuscito
@@ -102,6 +179,11 @@ export const useStripeCheckout = () => {
       } catch (err: any) {
         lastError = err;
         console.error(`Errore tentativo ${attempt + 1}:`, err.message);
+        
+        // Se abbiamo una finestra pre-aperta e c'è stato un errore, chiudila
+        if (checkoutWindow && !checkoutWindow.closed && attempt === maxRetries) {
+          checkoutWindow.close();
+        }
         
         // Se non è l'ultimo tentativo, continua il loop
         if (attempt < maxRetries) {
