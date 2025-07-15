@@ -3,6 +3,7 @@ import React, { useMemo, useState } from 'react';
 import { useWatch, useFormContext } from 'react-hook-form';
 import { Box, FormControl, FormHelperText, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, Typography } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
+import LiberatoriaOfflineAlert from '../LiberatoriaOfflineAlert';
 
 interface FormData {
   nome: string;
@@ -60,9 +61,35 @@ export default function DataForm() {
     return age < 18;
   }, [birthDateValue]);
 
+  // Funzione per validare l'età minima di 14 anni
+  const validateMinimumAge = (value: string) => {
+    if (!value) return 'Seleziona la data di nascita';
+    
+    const today = new Date();
+    const birth = new Date(value);
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    
+    if (age < 14) {
+      return 'Devi avere almeno 14 anni per partecipare';
+    }
+    
+    if (birth > today) {
+      return 'La data non può essere futura';
+    }
+    
+    return true;
+  };
+
   return (
     <Box component="form" noValidate sx={{ mt: 6, mb: 4 }}>
       <Typography sx={visuallyHidden}>Inserisci i dati personali</Typography>
+      
+      {/* Alert per liberatoria offline */}
+      <LiberatoriaOfflineAlert />
 
       {/* Sezione dati partecipante */}
       <Typography variant="h6" sx={{ mb: 2 }}>
@@ -105,11 +132,10 @@ export default function DataForm() {
             InputLabelProps={{ shrink: true }}
             {...register('dataNascita', {
               required: 'Seleziona la data di nascita',
-              validate: value =>
-                new Date(value) <= new Date() || 'La data non può essere futura',
+              validate: validateMinimumAge
             })}
             error={!!errors.dataNascita}
-            helperText={errors.dataNascita?.message}
+            helperText={errors.dataNascita?.message || 'Età minima: 14 anni'}
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
