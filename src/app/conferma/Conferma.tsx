@@ -127,11 +127,11 @@ export default function Conferma() {
           • Riceverai una <strong>email di conferma</strong> con tutti i dettagli dell'evento
         </Typography>
         <Typography variant="body1" sx={{ mb: 2 }}>
-          • Le <strong>istruzioni per la giornata</strong> della gara ti verranno inviate nei prossimi giorni
+          • Le <strong>istruzioni per la giornata</strong> della gara ti verranno inviate nei qualche settimana prima dell'evento
         </Typography>
-        <Typography variant="body1" sx={{ mb: 2 }}>
+        {/* <Typography variant="body1" sx={{ mb: 2 }}>
           • Consulta il <strong>programma completo</strong> per conoscere tutti gli orari
-        </Typography>
+        </Typography> */}
       </Box>
 
       <Box>

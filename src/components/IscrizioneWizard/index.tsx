@@ -12,9 +12,11 @@ import {
   Snackbar,
   Alert,
 } from '@mui/material';
+import { useRouter } from 'next/navigation';
 import DataForm from '../dataForm';
 import Liberatoria from '../Liberatoria';
 import FinalRegistrationStep from '../FinalRegistrationStep';
+import PaymentStep from '../PaymentStep';
 import { customAlphabet } from 'nanoid';
 import { useStripeCheckout } from '../../hooks/useStripeCheckout';
 import { OrangeStepper } from '../CustomStepper';
@@ -77,9 +79,10 @@ interface SessionData {
   createdAt: number;
   ttl: number;
   registrationId?: number;
+  codiceRegistrazione?: string;
 }
 
-const steps = ['Dati Personali', 'Liberatoria', 'Pagamento'];
+const steps = ['Dati Personali', 'Liberatoria', 'Opzioni', 'Pagamento'];
 const SESSION_KEY = 'beverino_registration_session';
 const SESSION_TTL = 24 * 60 * 60 * 1000; // 24 ore
 
@@ -87,6 +90,7 @@ export default function IscrizioneWizard() {
   const alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const nanoid = customAlphabet(alphabet, 10);
   const theme = useTheme();
+  const router = useRouter();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const methods = useForm<WizardData>({
     mode: 'onTouched',
@@ -97,12 +101,28 @@ export default function IscrizioneWizard() {
   const [userAgent, setUserAgent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [registrationId, setRegistrationId] = useState<number | null>(null);
+  const [codiceRegistrazione, setCodiceRegistrazione] = useState<string>('');
   const [sessionToken, setSessionToken] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [showError, setShowError] = useState(false);
-
+  const [totalAmount, setTotalAmount] = useState(0);
 
   const { createCheckoutSession, loading: stripeLoading } = useStripeCheckout();
+
+  // Calcola il totale in base alla gara e pasta party
+  useEffect(() => {
+    const tipoGara = watch('tipo_gara');
+    const pastaPartyCount = watch('conteggio_pastaparty') || 0;
+    
+    let racePrice = 0;
+    if (tipoGara === 'ciclistica') racePrice = 20;
+    else if (tipoGara === 'running') racePrice = 10;
+    
+    const pastaPrice = pastaPartyCount * 12;
+    const total = racePrice + pastaPrice;
+    
+    setTotalAmount(total);
+  }, [watch('tipo_gara'), watch('conteggio_pastaparty')]);
 
   useEffect(() => {
     if (typeof navigator !== 'undefined') {
@@ -112,7 +132,6 @@ export default function IscrizioneWizard() {
 
   // Gestione session token
   useEffect(() => {
-    // Controlla se esiste una sessione valida
     const storedSession = localStorage.getItem(SESSION_KEY);
 
     if (storedSession) {
@@ -120,23 +139,20 @@ export default function IscrizioneWizard() {
         const session: SessionData = JSON.parse(storedSession);
         const now = Date.now();
 
-        // Verifica se la sessione è ancora valida
         if (now - session.createdAt < session.ttl) {
           setSessionToken(session.token);
           setRegistrationId(session.registrationId || null);
+          setCodiceRegistrazione(session.codiceRegistrazione || '');
         } else {
-          // Sessione scaduta, rimuovi
           localStorage.removeItem(SESSION_KEY);
           const newToken = nanoid();
           setSessionToken(newToken);
         }
       } catch {
-        // Token corrotto, genera nuovo
         const newToken = nanoid();
         setSessionToken(newToken);
       }
     } else {
-      // Nessuna sessione, genera nuovo token
       const newToken = nanoid();
       setSessionToken(newToken);
     }
@@ -149,16 +165,16 @@ export default function IscrizioneWizard() {
         token: sessionToken,
         createdAt: Date.now(),
         ttl: SESSION_TTL,
-        registrationId: registrationId || undefined
+        registrationId: registrationId || undefined,
+        codiceRegistrazione: codiceRegistrazione || undefined
       };
       localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
     }
-  }, [sessionToken, registrationId]);
+  }, [sessionToken, registrationId, codiceRegistrazione]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // Carica dati salvati dal localStorage
     const stored = localStorage.getItem('iscrizione');
     if (stored) {
       try {
@@ -168,7 +184,6 @@ export default function IscrizioneWizard() {
       }
     }
 
-    // Salva automaticamente i cambiamenti
     const subscription = watch((value) => {
       localStorage.setItem('iscrizione', JSON.stringify(value));
     });
@@ -176,7 +191,7 @@ export default function IscrizioneWizard() {
     return () => subscription.unsubscribe();
   }, [watch, reset]);
 
-  // Validazione per step - includiamo tutti i possibili campi
+  // Validazione per step
   const fieldsPerStep: Record<number, (keyof WizardData)[]> = {
     0: [
       'nome', 'cognome', 'luogoNascita', 'dataNascita',
@@ -190,11 +205,16 @@ export default function IscrizioneWizard() {
     ],
     1: ['liberatoriaAccettata'],
     2: ['tipo_gara', 'taglia_maglietta'],
+    3: [], // Step pagamento non ha campi da validare
   };
 
   const onNext = async () => {
     const toValidate = fieldsPerStep[activeStep];
     if (await trigger(toValidate)) {
+      // Se siamo allo step 2 (opzioni), salva i dati su Strapi prima del pagamento
+      if (activeStep === 2) {
+        await saveRegistrationToStrapi();
+      }
       setActiveStep(s => s + 1);
     }
   };
@@ -203,238 +223,180 @@ export default function IscrizioneWizard() {
     setActiveStep(s => s - 1);
   };
 
-  const saveRegistrationToStrapi = async (data: WizardData) => {
-    const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
-
-    // Usa il codice esistente se c'è un registrationId, altrimenti genera nuovo
-    let codice_registrazione = nanoid();
-
-    // Ottieni IP utente
-    let userIp = 'unknown';
-    try {
-      const ipRes = await fetch('https://api.ipify.org?format=json');
-      if (ipRes.ok) {
-        const ipData = await ipRes.json();
-        userIp = ipData.ip;
-      }
-    } catch {
-      // IP non critico, continua senza
-    }
-
-    // Salva PDF sul server Next.js
-    let pdfUrl = null;
-    if (data.liberatoriaPdfBlob) {
-      try {
-        // Converti Blob in base64
-        const reader = new FileReader();
-        const base64 = await new Promise<string>((resolve) => {
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.readAsDataURL(data.liberatoriaPdfBlob!);
-        });
-
-        // Salva il PDF sul server Next.js
-        const saveResponse = await fetch('/api/save-pdf', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            pdfBase64: base64,
-            fileName: `liberatoria_${data.nome}_${data.cognome}_${Date.now()}.pdf`,
-          }),
-        });
-
-        if (saveResponse.ok) {
-          const result = await saveResponse.json();
-          pdfUrl = result.url;
-        } else {
-          console.error('Errore salvataggio PDF:', await saveResponse.text());
-        }
-      } catch (error) {
-        console.error('Errore durante salvataggio PDF:', error);
-        // Salvataggio PDF non critico, continua senza
-      }
-    }
-
-    const log_firma_liberatoria = {
-      orario_firmatario: new Date().toISOString(),
-      ip_firmatario: userIp,
-      user_agent_firmatario: userAgent
-    };
-
-    // Prepara i dati del genitore come componente se presenti
-    let dati_genitore = null;
-    if (data.nomeGenitore) {
-      dati_genitore = {
-        nome: data.nomeGenitore,
-        cognome: data.cognomeGenitore || '',
-        luogoNascita: data.luogoNascitaGenitore || '',
-        dataNascita: data.dataNascitaGenitore || '',
-        comuneResidenza: data.comuneResidenzaGenitore || '',
-        viaResidenza: data.viaResidenzaGenitore || '',
-        numeroCivico: data.numeroCivicoGenitore || '',
-        cap: data.capGenitore || '',
-        email: data.emailGenitore || '',
-        tipoDocumento: data.tipoDocumentoGenitore || '',
-        numeroDocumento: data.numeroDocumentoGenitore || '',
-        cittaRilascio: data.cittaRilascioGenitore || '',
-        dataRilascioDocumento: data.dataRilascioDocumentoGenitore || ''
-      };
-    }
-
-    const payload = {
-      // Dati personali
-      nome: data.nome,
-      cognome: data.cognome,
-      luogoNascita: data.luogoNascita,
-      dataNascita: data.dataNascita,
-      comuneResidenza: data.comuneResidenza,
-      residenza: data.residenza,
-      numeroCivico: data.numeroCivico,
-      cap: data.cap,
-      email: data.email,
-      tipoDocumento: data.tipoDocumento,
-      numeroDocumento: data.numeroDocumento,
-      cittaRilascio: data.cittaRilascio,
-      dataRilascioDocumento: data.dataRilascioDocumento,
-      // Dati genitore come componente
-      dati_genitore,
-      // Dati tutore
-      nomeTutore: data.nomeTutore || null,
-      cognomeTutore: data.cognomeTutore || null,
-      // Altri dati
-      tipo_gara: data.tipo_gara,
-      liberatoriaAccettata: data.liberatoriaAccettata,
-      conteggio_pastaparty: data.conteggio_pastaparty,
-      taglia_maglietta: data.taglia_maglietta || null,
-      codice_registrazione,
-      log_firma_liberatoria,
-      pasta_party: data.conteggio_pastaparty > 0,
-      stato_pagamento: 'in_attesa',
-      liberatoriaPdfUrl: pdfUrl,
-      session_token: sessionToken, // NUOVO CAMPO
-      publishedAt: new Date().toISOString()
-    };
-
-    // Prima controlla se esiste già un'iscrizione con questo token
-    try {
-      const checkResponse = await fetch(
-        `${strapiUrl}/api/iscrizionis?filters[session_token][$eq]=${sessionToken}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (checkResponse.ok) {
-        const checkData = await checkResponse.json();
-
-        if (checkData.data && checkData.data.length > 0) {
-          // Esiste già, aggiorna invece di creare
-          const existingRegistration = checkData.data[0];
-          const updateId = existingRegistration.documentId || existingRegistration.id;
-
-          // Mantieni il codice_registrazione esistente
-          codice_registrazione = existingRegistration.codice_registrazione;
-
-          const updateResponse = await fetch(`${strapiUrl}/api/iscrizionis/${updateId}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              data: {
-                ...payload,
-                codice_registrazione // Usa quello esistente
-              }
-            }),
-          });
-
-          if (!updateResponse.ok) {
-            const errorText = await updateResponse.text();
-            throw new Error(`Errore aggiornamento: ${updateResponse.status} - ${errorText}`);
-          }
-
-          const result = await updateResponse.json();
-          return {
-            id: result.data.id,
-            codice_registrazione: codice_registrazione
-          };
-        }
-      }
-    } catch (error) {
-      console.error('Errore durante il check duplicati:', error);
-      // Continua con la creazione normale se il check fallisce
-    }
-
-    // Se non esiste, crea nuova iscrizione
-    const response = await fetch(`${strapiUrl}/api/iscrizionis`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        data: {
-          ...payload,
-          codice_registrazione
-        }
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Errore salvataggio: ${response.status} - ${errorText}`);
-    }
-
-    const result = await response.json();
-
-    return {
-      id: result.data.id,
-      codice_registrazione: codice_registrazione
-    };
-  };
-
-  const onSubmit = async (data: WizardData) => {
+  const saveRegistrationToStrapi = async () => {
     setIsSubmitting(true);
     setErrorMessage('');
     setShowError(false);
 
     try {
-      // Salva iscrizione in Strapi
-      const registrationData = await saveRegistrationToStrapi(data);
-      setRegistrationId(registrationData.id);
+      const data = methods.getValues();
+      const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
 
-      // Mostra messaggio durante i tentativi
-      setErrorMessage('Connessione al sistema di pagamento in corso...');
-      setShowError(true);
+      // Usa il codice esistente se c'è, altrimenti genera nuovo
+      let codice_registrazione = codiceRegistrazione || nanoid();
 
-      // Procedi con pagamento Stripe (con retry automatici)
-      const includeCena = data.conteggio_pastaparty > 0;
-      await createCheckoutSession(
-        registrationData.id,
-        includeCena,
-        data.conteggio_pastaparty,
-        registrationData.codice_registrazione,
-        data.tipo_gara
-      );
+      // Ottieni IP utente
+      let userIp = 'unknown';
+      try {
+        const ipRes = await fetch('https://api.ipify.org?format=json');
+        if (ipRes.ok) {
+          const ipData = await ipRes.json();
+          userIp = ipData.ip;
+        }
+      } catch {
+        // IP non critico
+      }
 
-      // Pulisci localStorage dopo successo
-      localStorage.removeItem('iscrizione');
+      // Salva PDF sul server
+      let pdfUrl = null;
+      if (data.liberatoriaPdfBlob) {
+        try {
+          const reader = new FileReader();
+          const base64 = await new Promise<string>((resolve) => {
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(data.liberatoriaPdfBlob!);
+          });
+
+          const saveResponse = await fetch('/api/save-pdf', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              pdfBase64: base64,
+              fileName: `liberatoria_${data.nome}_${data.cognome}_${Date.now()}.pdf`,
+            }),
+          });
+
+          if (saveResponse.ok) {
+            const result = await saveResponse.json();
+            pdfUrl = result.url;
+          }
+        } catch (error) {
+          console.error('Errore salvataggio PDF:', error);
+        }
+      }
+
+      const log_firma_liberatoria = {
+        orario_firmatario: new Date().toISOString(),
+        ip_firmatario: userIp,
+        user_agent_firmatario: userAgent
+      };
+
+      // Prepara i dati del genitore
+      let dati_genitore = null;
+      if (data.nomeGenitore) {
+        dati_genitore = {
+          nome: data.nomeGenitore,
+          cognome: data.cognomeGenitore || '',
+          luogoNascita: data.luogoNascitaGenitore || '',
+          dataNascita: data.dataNascitaGenitore || '',
+          comuneResidenza: data.comuneResidenzaGenitore || '',
+          viaResidenza: data.viaResidenzaGenitore || '',
+          numeroCivico: data.numeroCivicoGenitore || '',
+          cap: data.capGenitore || '',
+          email: data.emailGenitore || '',
+          tipoDocumento: data.tipoDocumentoGenitore || '',
+          numeroDocumento: data.numeroDocumentoGenitore || '',
+          cittaRilascio: data.cittaRilascioGenitore || '',
+          dataRilascioDocumento: data.dataRilascioDocumentoGenitore || ''
+        };
+      }
+
+      const payload = {
+        nome: data.nome,
+        cognome: data.cognome,
+        luogoNascita: data.luogoNascita,
+        dataNascita: data.dataNascita,
+        comuneResidenza: data.comuneResidenza,
+        residenza: data.residenza,
+        numeroCivico: data.numeroCivico,
+        cap: data.cap,
+        email: data.email,
+        tipoDocumento: data.tipoDocumento,
+        numeroDocumento: data.numeroDocumento,
+        cittaRilascio: data.cittaRilascio,
+        dataRilascioDocumento: data.dataRilascioDocumento,
+        dati_genitore,
+        nomeTutore: data.nomeTutore || null,
+        cognomeTutore: data.cognomeTutore || null,
+        tipo_gara: data.tipo_gara,
+        liberatoriaAccettata: data.liberatoriaAccettata,
+        conteggio_pastaparty: data.conteggio_pastaparty,
+        taglia_maglietta: data.taglia_maglietta || null,
+        codice_registrazione,
+        log_firma_liberatoria,
+        pasta_party: data.conteggio_pastaparty > 0,
+        stato_pagamento: 'in_attesa',
+        liberatoriaPdfUrl: pdfUrl,
+        session_token: sessionToken,
+        publishedAt: new Date().toISOString()
+      };
+
+      // Controlla se esiste già un'iscrizione con questo token
+      try {
+        const checkResponse = await fetch(
+          `${strapiUrl}/api/iscrizionis?filters[session_token][$eq]=${sessionToken}`,
+          { method: 'GET', headers: { 'Content-Type': 'application/json' } }
+        );
+
+        if (checkResponse.ok) {
+          const checkData = await checkResponse.json();
+
+          if (checkData.data && checkData.data.length > 0) {
+            // Esiste già, aggiorna
+            const existingRegistration = checkData.data[0];
+            const updateId = existingRegistration.documentId || existingRegistration.id;
+            codice_registrazione = existingRegistration.codice_registrazione;
+
+            const updateResponse = await fetch(`${strapiUrl}/api/iscrizionis/${updateId}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ data: { ...payload, codice_registrazione } }),
+            });
+
+            if (!updateResponse.ok) {
+              throw new Error('Errore aggiornamento iscrizione');
+            }
+
+            const result = await updateResponse.json();
+            setRegistrationId(result.data.id);
+            setCodiceRegistrazione(codice_registrazione);
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Errore check duplicati:', error);
+      }
+
+      // Crea nuova iscrizione
+      const response = await fetch(`${strapiUrl}/api/iscrizionis`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: { ...payload, codice_registrazione } }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Errore salvataggio iscrizione');
+      }
+
+      const result = await response.json();
+      setRegistrationId(result.data.id);
+      setCodiceRegistrazione(codice_registrazione);
 
     } catch (error: any) {
-      console.error('Errore finale:', error);
-
-      // Solo se TUTTI i tentativi falliscono mostriamo l'errore finale
-      setErrorMessage(
-        'Non è stato possibile collegarsi al sistema di pagamento. ' +
-        'La tua iscrizione è stata salvata. ' +
-        'Puoi riprovare il pagamento o contattare l\'assistenza.'
-      );
+      console.error('Errore:', error);
+      setErrorMessage('Errore durante il salvataggio. Riprova.');
       setShowError(true);
+    } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handlePaymentSuccess = () => {
+    // Pulisci localStorage
+    localStorage.removeItem('iscrizione');
+    localStorage.removeItem(SESSION_KEY);
+    // Redirect alla pagina di conferma
+    router.push('/conferma');
   };
 
   const isLoading = isSubmitting || stripeLoading;
@@ -449,7 +411,7 @@ export default function IscrizioneWizard() {
       </Typography>
 
       {!isMobile && (
-        <OrangeStepper activeStep={activeStep} steps={steps}></OrangeStepper>
+        <OrangeStepper activeStep={activeStep} steps={steps} />
       )}
 
       <FormProvider {...methods}>
@@ -457,108 +419,87 @@ export default function IscrizioneWizard() {
           {activeStep === 0 && <DataForm />}
           {activeStep === 1 && <Liberatoria />}
           {activeStep === 2 && <FinalRegistrationStep />}
+          {activeStep === 3 && registrationId && (
+            <PaymentStep 
+              totalAmount={totalAmount}
+              onSuccess={handlePaymentSuccess}
+              registrationId={registrationId}
+              codiceRegistrazione={codiceRegistrazione}
+              tipoGara={watch('tipo_gara')}
+              pastaPartyCount={watch('conteggio_pastaparty')}
+            />
+          )}
         </Box>
 
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Button
-            disabled={activeStep === 0 || isLoading}
-            onClick={onBack}
-            variant="outlined"
-          >
-            Indietro
-          </Button>
-
-          {isMobile && <Typography>{activeStep + 1}/{steps.length}</Typography>}
-
-          {activeStep < steps.length - 1 ? (
+        {/* Bottoni navigazione */}
+        {activeStep < 4 && (
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Button
-              variant="contained"
-              onClick={onNext}
-              disabled={isLoading}
+              disabled={activeStep === 0 || isLoading}
+              onClick={onBack}
+              variant="outlined"
             >
-              Avanti
+              Indietro
             </Button>
-          ) : (
-            <>
+
+            {isMobile && <Typography>{activeStep + 1}/{steps.length}</Typography>}
+
+            {activeStep < 3 && (
               <Button
                 variant="contained"
-                color="primary"
-                onClick={handleSubmit(onSubmit)}
+                onClick={onNext}
                 disabled={isLoading}
                 startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : null}
               >
-                {isLoading ? 'Elaborazione...' : 'Conferma e Paga'}
+                {isLoading ? 'Salvataggio...' : 'Avanti'}
               </Button>
-              {registrationId && showError && !errorMessage.includes('corso') && (
-                <Box sx={{ mt: 2, textAlign: 'center' }}>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
-                    Problemi con il pagamento?
-                  </Typography>
-                  <Button
-                    variant="outlined"
-                    onClick={async () => {
-                      try {
-                        setShowError(false);
-                        await createCheckoutSession(
-                          registrationId,
-                          watch('conteggio_pastaparty') > 0,
-                          watch('conteggio_pastaparty'),
-                          // Trova il codice registrazione salvato
-                          'retry_' + registrationId,
-                          watch('tipo_gara')
-                        );
-                      } catch (error) {
-                        // Errore già gestito dal hook
-                      }
-                    }}
-                    disabled={stripeLoading}
-                  >
-                    Riprova Pagamento
-                  </Button>
-                </Box>
-              )}
-            </>
-          )}
-        </Box>
+            )}
+          </Box>
+        )}
+
+        {/* Fallback a Stripe Checkout se preferisci */}
+        {/* {activeStep === 3 && registrationId && (
+          <Box sx={{ mt: 3, textAlign: 'center' }}>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              Problemi con il form di pagamento?
+            </Typography>
+            <Button
+              variant="text"
+              onClick={async () => {
+                try {
+                  await createCheckoutSession(
+                    registrationId,
+                    watch('conteggio_pastaparty') > 0,
+                    watch('conteggio_pastaparty'),
+                    codiceRegistrazione,
+                    watch('tipo_gara')
+                  );
+                } catch (error) {
+                  // Errore già gestito
+                }
+              }}
+              disabled={stripeLoading}
+            >
+              Usa pagamento con redirect
+            </Button>
+          </Box>
+        )} */}
       </FormProvider>
 
       <Snackbar
         open={showError}
-        autoHideDuration={10000}
+        autoHideDuration={6000}
         onClose={() => setShowError(false)}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
         <Alert
           onClose={() => setShowError(false)}
-          severity={errorMessage.includes('corso') ? 'info' : 'error'}
-          sx={{ width: '100%', opacity: 1 }}
+          severity="error"
+          sx={{ width: '100%' }}
         >
           {errorMessage}
-          {!errorMessage.includes('corso') && registrationId && (
-            <Box sx={{ mt: 1 }}>
-              <Typography variant="caption" display="block">
-                La tua iscrizione è stata salvata (ID: {registrationId}).
-                Se il problema persiste, contatta uno dei numeri presenti in fondo alla pagina.
-              </Typography>
-            </Box>
-          )}
         </Alert>
       </Snackbar>
-
-      {/* Alert fisso per problemi comuni */}
-      {isSubmitting && (
-        <Alert severity="info" sx={{ mt: 2 }}>
-          <Typography variant="body2" gutterBottom>
-            <strong>Il pagamento non si apre?</strong>
-          </Typography>
-          <Typography variant="caption" component="div">
-            • Verifica che i popup non siano bloccati<br />
-            • Prova con un browser diverso<br />
-            • Disabilita temporaneamente AdBlock<br />
-            • Se usi Safari, verifica le impostazioni privacy
-          </Typography>
-        </Alert>
-      )}
     </Container>
   );
 }

@@ -36,23 +36,18 @@ export const useStripeCheckout = () => {
       });
 
       const data = await response.json();
-      console.log('Risposta API:', data);
-      
       if (!response.ok) {
         throw new Error(data.error || 'Errore creazione sessione');
       }
 
       // 2. Usa l'URL se disponibile
       if (data.url) {
-        console.log('Redirect diretto a:', data.url);
         window.location.href = data.url;
         return;
       }
 
       // 3. Altrimenti usa Stripe.js con il nuovo metodo
       if (data.sessionId) {
-        console.log('Uso Stripe.js con sessionId:', data.sessionId);
-        
         const stripe = await stripePromise;
         if (!stripe) {
           throw new Error('Stripe non caricato');
