@@ -121,6 +121,14 @@ export default function IscrizioneWizard() {
     const pastaPrice = pastaPartyCount * 12;
     const total = racePrice + pastaPrice;
     
+    console.log('Calcolo totale:', {
+      tipoGara,
+      racePrice,
+      pastaPartyCount,
+      pastaPrice,
+      total
+    });
+    
     setTotalAmount(total);
   }, [watch('tipo_gara'), watch('conteggio_pastaparty')]);
 
@@ -427,6 +435,7 @@ export default function IscrizioneWizard() {
               codiceRegistrazione={codiceRegistrazione}
               tipoGara={watch('tipo_gara')}
               pastaPartyCount={watch('conteggio_pastaparty')}
+              userEmail={watch('email')}
             />
           )}
         </Box>

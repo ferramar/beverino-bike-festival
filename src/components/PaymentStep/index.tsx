@@ -25,11 +25,13 @@ function PaymentForm({
   onSuccess,
   registrationId,
   codiceRegistrazione,
+  userEmail,
 }: { 
   totalAmount: number;
   onSuccess: () => void;
   registrationId: number;
   codiceRegistrazione: string;
+  userEmail?: string;
 }) {
   const stripe = useStripe();
   const elements = useElements();
@@ -59,7 +61,9 @@ function PaymentForm({
           metadata: {
             registrationId: String(registrationId),
             codice_registrazione: codiceRegistrazione,
+            email: userEmail || '', // Anche nei metadata per reference
           },
+          receipt_email: userEmail, // Email per la ricevuta Stripe
         }),
       });
 
@@ -280,6 +284,7 @@ export default function PaymentStep({
   codiceRegistrazione,
   tipoGara,
   pastaPartyCount,
+  userEmail,
 }: {
   totalAmount: number;
   onSuccess: () => void;
@@ -287,6 +292,7 @@ export default function PaymentStep({
   codiceRegistrazione: string;
   tipoGara?: string;
   pastaPartyCount?: number;
+  userEmail?: string;
 }) {
   const [stripeLoaded, setStripeLoaded] = useState(false);
   
@@ -379,6 +385,7 @@ export default function PaymentStep({
           onSuccess={onSuccess}
           registrationId={registrationId}
           codiceRegistrazione={codiceRegistrazione}
+          userEmail={userEmail}
         />
       </Elements>
     </Box>
