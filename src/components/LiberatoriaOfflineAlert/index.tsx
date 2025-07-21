@@ -34,8 +34,8 @@ export default function LiberatoriaOfflineAlert() {
   const handleDownload = () => {
     // Scarica la liberatoria vuota
     const link = document.createElement('a');
-    link.href = '/liberatoria.pdf';
-    link.download = 'liberatoria_beverino_bike_festival.pdf';
+    link.href = '/liberatoria-beverino-bike-festival.pdf';
+    link.download = 'liberatoria-beverino-bike-festival.pdf';
     link.click();
   };
 
