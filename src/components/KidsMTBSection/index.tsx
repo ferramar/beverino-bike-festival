@@ -111,6 +111,7 @@ export default function KidsMTBSection() {
                         borderRadius: '50%',
                         backgroundColor: 'primary.main',
                         color: 'white',
+                        flexShrink: 0,
                         mr: 2,
                       }}
                     >
