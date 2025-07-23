@@ -358,28 +358,28 @@ export default function ProgrammaPage() {
           <Grid container spacing={3}>
             {[
               { 
-                km: 40, 
+                km: 32, 
                 difficulty: 'Facile', 
                 color: 'success',
-                elevation: '600m',
+                elevation: '800m',
                 description: 'Percorso ideale per principianti e famiglie',
                 highlights: ['Panorami mozzafiato', 'Strade poco trafficate', '2 punti ristoro']
               },
               { 
-                km: 70, 
+                km: 35, 
                 difficulty: 'Medio', 
                 color: 'warning',
-                elevation: '1200m',
+                elevation: '1150m',
                 description: 'Per ciclisti con buona preparazione',
                 highlights: ['Salite impegnative', 'Discese tecniche', '3 punti ristoro']
               },
               { 
-                km: 100, 
+                km: 50, 
                 difficulty: 'Difficile', 
                 color: 'error',
-                elevation: '2000m',
+                elevation: '1700m',
                 description: 'Sfida per ciclisti esperti',
-                highlights: ['Percorso completo', 'Viste spettacolari', '4 punti ristoro']
+                highlights: ['Percorso completo', 'Viste spettacolari', '3 punti ristoro']
               },
             ].map((route, index) => (
               <Grid size={{ xs: 12, md: 4 }} key={index}>
