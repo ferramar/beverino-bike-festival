@@ -49,6 +49,13 @@ const Footer: React.FC = () => {
                   }}>
                     Home
                   </Link>
+                  <Link href="/percorsi" color="inherit" sx={{
+                    textDecoration: 'none',
+                    opacity: 0.9,
+                    '&:hover': { opacity: 1, textDecoration: 'underline' }
+                  }}>
+                    Percorsi
+                  </Link>
                   {/* da decommentare */}
                   {/* <Link href="/programma" color="inherit" sx={{
                     textDecoration: 'none',
@@ -57,6 +64,17 @@ const Footer: React.FC = () => {
                   }}>
                     Programma
                   </Link> */}
+                  <Link href="/convenzioni" color="inherit" sx={{
+                    textDecoration: 'none',
+                    opacity: 0.9,
+                    '&:hover': { opacity: 1, textDecoration: 'underline' }
+                  }}>
+                    Convenzioni
+                  </Link>
+                </Stack>
+              </Grid>
+              <Grid size={6}>
+                <Stack spacing={1}>
                   <Link href="/galleria" color="inherit" sx={{
                     textDecoration: 'none',
                     opacity: 0.9,
@@ -64,10 +82,6 @@ const Footer: React.FC = () => {
                   }}>
                     Galleria
                   </Link>
-                </Stack>
-              </Grid>
-              <Grid size={6}>
-                <Stack spacing={1}>
                   <Link href="/sponsor" color="inherit" sx={{
                     textDecoration: 'none',
                     opacity: 0.9,

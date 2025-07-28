@@ -28,6 +28,7 @@ import {
   Handshake,
   DirectionsBike,
   HelpOutline,
+  LocalOffer,
 } from '@mui/icons-material';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -71,6 +72,7 @@ export default function ModernHeader() {
   const navItems = [
     { href: "/percorsi", label: "Percorsi", icon: <Timeline /> },
     // { href: "/programma", label: "Programma", icon: <CalendarMonth /> },
+    { href: "/convenzioni", label: "Convenzioni", icon: <LocalOffer /> },
     { href: "/galleria", label: "Galleria", icon: <Collections /> },
     { href: "/sponsor", label: "Sponsor", icon: <Handshake /> },
     // { href: "/faq", label: "FAQ", icon: <HelpOutline /> },
