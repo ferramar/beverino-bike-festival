@@ -287,7 +287,7 @@ export default function LiberatoriaOfflineAlert() {
               </ListItemIcon>
               <ListItemText 
                 primary="4. Completa l'iscrizione"
-                secondary="Paga la quota di partecipazione (€25 gara + €12 pasta party opzionale)"
+                secondary="Paga la quota di partecipazione (€25 raduno + €12 pasta party opzionale)"
                 primaryTypographyProps={{ 
                   variant: 'body2',
                   fontWeight: 600,
@@ -313,7 +313,7 @@ export default function LiberatoriaOfflineAlert() {
               Importante
             </AlertTitle>
             <Typography variant="caption" component="div" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
-              • L'iscrizione il giorno della gara è soggetta a disponibilità posti<br />
+              • L'iscrizione il giorno del raduno è soggetta a disponibilità posti<br />
               • Ti consigliamo di arrivare presto per assicurarti il pettorale<br />
               • Porta un documento d'identità valido<br />
               • Per i minori è necessaria la presenza di un genitore

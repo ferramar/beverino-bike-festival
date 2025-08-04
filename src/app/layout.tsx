@@ -18,7 +18,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Beverino Bike Festival 2025 - Raduno MTB in Liguria",
   description: "Partecipa alla quarta edizione del Beverino Bike Festival. 21 Settembre 2025. Tre percorsi attraverso paesaggi mozzafiato: 30km, 35km e 50km. Iscrizioni aperte!",
-  keywords: "beverino bike festival, gara ciclistica liguria, ciclismo la spezia, mountain bike liguria, granfondo liguria",
+  keywords: "beverino bike festival, raduno ciclistico liguria, ciclismo la spezia, mountain bike liguria, granfondo liguria",
   authors: [{ name: "Beverino Bike Festival" }],
   creator: "Beverino Bike Festival",
   publisher: "Beverino Bike Festival",
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
         url: "https://beverinobikefestival.it/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Beverino Bike Festival - Ciclisti in gara tra le colline liguri",
+        alt: "Beverino Bike Festival - Raduno ciclistico tra le colline liguri",
       },
     ],
     locale: "it_IT",

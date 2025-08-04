@@ -210,7 +210,7 @@ export default function HomeBanner() {
                 color: 'white',
               }}
             >
-              Partecipa alla nostra epica gara ciclistica attraverso paesaggi
+              Partecipa al nostro raduno ciclistico attraverso paesaggi
               mozzafiato e sfida te stesso sui percorsi che abbiamo creato
               per tutti i livelli di esperienza.
             </Typography>
