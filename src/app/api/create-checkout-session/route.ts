@@ -21,7 +21,7 @@ interface CheckoutData {
 
 export async function POST(request: NextRequest) {
   try {
-    const body: CheckoutData= await request.json();
+    const body: CheckoutData = await request.json();
 
     const { 
       registrationId, 
@@ -47,15 +47,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    
-
     // Calcola il prezzo in base al tipo di gara
     const prezzoGara = tipo_gara === 'ciclistica' ? 2000 : 1000; // €20 o €10 in centesimi
 
     const prezzoTotale = numeroPersoneCena > 0 
       ? prezzoGara + (1200 * numeroPersoneCena)
       : prezzoGara;
-
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
@@ -77,8 +74,8 @@ export async function POST(request: NextRequest) {
         },
       ],
       metadata: {
-        registrationId: String(registrationId), // Usa String() invece di toString()
-        ...(codiceRegistrazione && { codice_registrazione: codiceRegistrazione }), // Aggiungi solo se esiste
+        registrationId: String(registrationId),
+        ...(codiceRegistrazione && { codice_registrazione: codiceRegistrazione }),
         includeCena: String(includeCena),
         numeroPersoneCena: String(numeroPersoneCena),
       },
@@ -86,7 +83,13 @@ export async function POST(request: NextRequest) {
       cancel_url: `${request.nextUrl.origin}/iscriviti?step=3`,
     });
 
-    return NextResponse.json({ sessionId: session.id });
+    // IMPORTANTE: Restituisci l'URL invece del sessionId
+    // Questo evita la necessità di caricare Stripe.js lato client
+    return NextResponse.json({ 
+      url: session.url,  // URL diretto per il checkout
+      sessionId: session.id  // Mantieni per compatibilità
+    });
+    
   } catch (error) {
     console.error('Errore creazione sessione Stripe:', error);
     return NextResponse.json(

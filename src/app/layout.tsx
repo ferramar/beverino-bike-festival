@@ -74,6 +74,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="it" className={inter.variable}>
+      <head>
+        <script 
+          src="https://js.stripe.com/v3/" 
+          async
+        />
+      </head>
       <body className={inter.className}>
         <Providers>
           {/* Skip Link - componente client separato */}
