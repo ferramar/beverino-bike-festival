@@ -116,7 +116,7 @@ export default function FinalRegistrationStep() {
               }} 
             />
             <Typography variant="h6" gutterBottom>
-              Gara Ciclistica
+              Raduno ciclistico
             </Typography>
             <Typography variant="h4" color="primary" gutterBottom>
               €20
@@ -161,7 +161,7 @@ export default function FinalRegistrationStep() {
               }} 
             />
             <Typography variant="h6" gutterBottom>
-              Gara Running
+              Raduno running
             </Typography>
             <Typography variant="h4" color="primary" gutterBottom>
               €10
@@ -311,7 +311,7 @@ export default function FinalRegistrationStep() {
           
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
             <Typography>
-              {tipoGara === 'ciclistica' ? 'Gara Ciclistica' : 'Gara Running'}:
+              {tipoGara === 'ciclistica' ? 'Raduno ciclistico' : 'Raduno running'}:
             </Typography>
             <Typography fontWeight="bold">€{prezzoGara}</Typography>
           </Box>
