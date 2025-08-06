@@ -43,7 +43,7 @@ const getFullUrl = (url?: string): string | undefined => {
 };
 
 export async function getAllSponsors(): Promise<SponsorItem[]> {
-  const { data } = await fetcher('/api/sponsors?populate=*');
+  const { data } = await fetcher('/api/sponsors?populate=*&pagination[pageSize]=50');
   if (!data || !Array.isArray(data)) return []
 
   return data.map((item: SponsorStrapi): SponsorItem => {
@@ -60,7 +60,7 @@ export async function getAllSponsors(): Promise<SponsorItem[]> {
 }
 
 export async function getAllSponsorsWithCategories(): Promise<SponsorItem[]> {
-  const { data } = await fetcher('/api/sponsors?populate=*&sort=principale:desc,nome:asc');
+  const { data } = await fetcher('/api/sponsors?populate=*&sort=principale:desc,nome:asc&pagination[pageSize]=50');
   if (!data || !Array.isArray(data)) return []
 
   return data.map((item: SponsorStrapi): SponsorItem => {
@@ -70,7 +70,7 @@ export async function getAllSponsorsWithCategories(): Promise<SponsorItem[]> {
       descrizione: item.descrizione,
       sito: item.sito,
       principale: item.principale || false,
-      logo: item.logo?.formats?.thumbnail?.url || item.logo?.url,
+      logo: getFullUrl(item.logo?.formats?.thumbnail?.url || item.logo?.url),
       categorie_sponsors: item.categorie_sponsors?.map((cat: CategoriaS) => ({
         id: cat.id,
         nome: cat.nome

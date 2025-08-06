@@ -95,6 +95,14 @@ const timelineData = [
     highlight: true,
   },
   {
+    time: '09:15',
+    title: 'Partenza camminata',
+    description: 'Camminata ludico sportiva di 10,50 km non competitiva',
+    icon: <DirectionsBikeIcon />,
+    color: 'warning' as const,
+    highlight: true,
+  },
+  {
     time: '10:00 - 14:00',
     title: 'Ristori sul Percorso',
     description: 'Punti ristoro aperti lungo tutti i percorsi',
@@ -103,21 +111,21 @@ const timelineData = [
   },
   {
     time: '12:00',
-    title: 'Apertura Area Food',
+    title: 'Apertura pasta party',
     description: 'Street food e specialità locali per atleti e accompagnatori',
     icon: <RestaurantIcon />,
     color: 'secondary' as const,
   },
   {
     time: '14:00',
-    title: 'Inizio Premiazioni',
-    description: 'Premiazione dei primi classificati di ogni categoria',
+    title: 'Pranzo tipico locale',
+    description: 'Degustazione menù tipico locale su prenotazione',
     icon: <EmojiEventsIcon />,
     color: 'warning' as const,
     highlight: true,
   },
   {
-    time: '15:00',
+    time: '08:30 - 16:00',
     title: 'Musica Live',
     description: 'Intrattenimento musicale con band locali',
     icon: <MusicNoteIcon />,
@@ -135,8 +143,7 @@ const timelineData = [
 // Servizi disponibili
 const services = [
   { icon: <LocalParkingIcon />, title: 'Parcheggio Gratuito', description: 'Ampio parcheggio riservato ai partecipanti' },
-  { icon: <RestaurantIcon />, title: 'Area Ristoro', description: 'Food truck e stand gastronomici' },
-  { icon: <DirectionsBikeIcon />, title: 'Assistenza Meccanica', description: 'Servizio riparazione bici sul posto' },
+  { icon: <RestaurantIcon />, title: 'Area Ristoro', description: 'Pasta party e menù tipico locale' },
   { icon: <HowToRegIcon />, title: 'Spogliatoi e Docce', description: 'Servizi completi post-gara' },
 ];
 
@@ -359,27 +366,27 @@ export default function ProgrammaPage() {
             {[
               { 
                 km: 32, 
-                difficulty: 'Facile', 
+                difficulty: 'Medio/facile', 
                 color: 'success',
                 elevation: '800m',
                 description: 'Percorso ideale per principianti e famiglie',
-                highlights: ['Panorami mozzafiato', 'Strade poco trafficate', '2 punti ristoro']
+                highlights: ['MTB: full, e-bike, muscolare']
               },
               { 
                 km: 35, 
                 difficulty: 'Medio', 
                 color: 'warning',
                 elevation: '1150m',
-                description: 'Per ciclisti con buona preparazione',
-                highlights: ['Salite impegnative', 'Discese tecniche', '3 punti ristoro']
+                description: 'Per ciclisti con buone capacità',
+                highlights: ['MTB: full, e-bike, muscolare']
               },
               { 
                 km: 50, 
-                difficulty: 'Difficile', 
+                difficulty: 'Medio/alta', 
                 color: 'error',
-                elevation: '1700m',
-                description: 'Sfida per ciclisti esperti',
-                highlights: ['Percorso completo', 'Viste spettacolari', '3 punti ristoro']
+                elevation: '1750m',
+                description: 'Sfida per ciclisti esperti con ottima preparazione fisica',
+                highlights: ['MTB: front, full, e-bike']
               },
             ].map((route, index) => (
               <Grid size={{ xs: 12, md: 4 }} key={index}>
@@ -387,6 +394,7 @@ export default function ProgrammaPage() {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
+                  style={{ height: '100%' }}
                 >
                   <Card 
                     elevation={0}
@@ -438,7 +446,7 @@ export default function ProgrammaPage() {
                         <Typography variant="body1" textAlign="center">
                           {route.description}
                         </Typography>
-                        <List dense>
+                        <List dense >
                           {route.highlights.map((highlight, idx) => (
                             <ListItem key={idx} disablePadding>
                               <ListItemIcon sx={{ minWidth: 32 }}>
@@ -461,7 +469,7 @@ export default function ProgrammaPage() {
         <TabPanel value={tabValue} index={2}>
           <Grid container spacing={3}>
             {services.map((service, index) => (
-              <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   whileInView={{ opacity: 1, scale: 1 }}
@@ -524,7 +532,7 @@ export default function ProgrammaPage() {
                     Come Raggiungerci
                   </Typography>
                   <Typography variant="body2" paragraph>
-                    <strong>Indirizzo:</strong> Centro Sportivo Comunale, Via dello Sport 1, Beverino (SP)
+                    <strong>Indirizzo:</strong> Centro Polivalente, Via val IV, Zona Beverino (SP)
                   </Typography>
                   <Typography variant="body2" paragraph>
                     <strong>Coordinate GPS:</strong> 44.1234, 9.5678

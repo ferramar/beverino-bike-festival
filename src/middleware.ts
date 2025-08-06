@@ -6,7 +6,7 @@ export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   
   // Lista delle pagine da reindirizzare alla home
-  const pagesUnderConstruction = ['/programma', '/faq'];
+  const pagesUnderConstruction = ['/faq'];
   
   // Controlla se il percorso corrente è nella lista
   if (pagesUnderConstruction.includes(pathname)) {
