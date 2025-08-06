@@ -370,7 +370,7 @@ export default function ProgrammaPage() {
                 color: 'success',
                 elevation: '800m',
                 description: 'Percorso ideale per principianti e famiglie',
-                highlights: ['MTB: full, e-bike, muscolare']
+                highlights: ['MTB: full, front, e-bike']
               },
               { 
                 km: 35, 
@@ -378,7 +378,7 @@ export default function ProgrammaPage() {
                 color: 'warning',
                 elevation: '1150m',
                 description: 'Per ciclisti con buone capacità',
-                highlights: ['MTB: full, e-bike, muscolare']
+                highlights: ['MTB: full, front, e-bike']
               },
               { 
                 km: 50, 
@@ -386,7 +386,7 @@ export default function ProgrammaPage() {
                 color: 'error',
                 elevation: '1750m',
                 description: 'Sfida per ciclisti esperti con ottima preparazione fisica',
-                highlights: ['MTB: front, full, e-bike']
+                highlights: ['MTB: full, e-bike']
               },
             ].map((route, index) => (
               <Grid size={{ xs: 12, md: 4 }} key={index}>
