@@ -23,6 +23,7 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import { getAllSponsorsWithCategories, getAllSponsorCategories } from '../../utils/api';
 import { SponsorItem, CategoriaS } from '../../types/sponsor';
 import theme from '../../theme';
+import { normalizeUrl } from '@/hooks/normalizeUrl';
 
 export default function SponsorsPage() {
   const [sponsors, setSponsors] = useState<SponsorItem[]>([]);
@@ -38,7 +39,7 @@ export default function SponsorsPage() {
           getAllSponsorsWithCategories(),
           getAllSponsorCategories()
         ]);
-        
+
         setSponsors(sponsorsData);
         setCategories(categoriesData);
       } catch (error) {
@@ -47,16 +48,16 @@ export default function SponsorsPage() {
         setLoading(false);
       }
     }
-    
+
     fetchData();
   }, []);
 
   // Filtra sponsor
   const filteredSponsors = selectedCategory === 'all'
     ? sponsors
-    : sponsors.filter(sponsor => 
-        sponsor.categorie_sponsors?.some((cat: CategoriaS) => cat.id.toString() === selectedCategory)
-      );
+    : sponsors.filter(sponsor =>
+      sponsor.categorie_sponsors?.some((cat: CategoriaS) => cat.id.toString() === selectedCategory)
+    );
 
   // Separa principali
   const principalSponsors = filteredSponsors.filter(s => s.principale);
@@ -82,11 +83,11 @@ export default function SponsorsPage() {
       <Container maxWidth="lg">
         {/* Header */}
         <Box sx={{ mb: 6, textAlign: 'center' }}>
-          <Typography 
-            variant="h2" 
-            component="h1" 
+          <Typography
+            variant="h2"
+            component="h1"
             gutterBottom
-            sx={{ 
+            sx={{
               fontWeight: 800,
               fontSize: { xs: '2.5rem', md: '3.5rem' },
               mb: 2
@@ -94,8 +95,8 @@ export default function SponsorsPage() {
           >
             I Nostri Sponsor
           </Typography>
-          <Typography 
-            variant="h5" 
+          <Typography
+            variant="h5"
             color="text.secondary"
             sx={{ maxWidth: 700, mx: 'auto' }}
           >
@@ -137,10 +138,10 @@ export default function SponsorsPage() {
         {/* Sponsor Principali */}
         {principalSponsors.length > 0 && (
           <Box sx={{ mb: 8 }}>
-            <Typography 
-              variant="h4" 
-              component="h2" 
-              sx={{ 
+            <Typography
+              variant="h4"
+              component="h2"
+              sx={{
                 mb: 4,
                 textAlign: 'center',
                 display: 'flex',
@@ -168,9 +169,9 @@ export default function SponsorsPage() {
         {normalSponsors.length > 0 && (
           <Box>
             {principalSponsors.length > 0 && (
-              <Typography 
-                variant="h4" 
-                component="h2" 
+              <Typography
+                variant="h4"
+                component="h2"
                 sx={{ mb: 4, textAlign: 'center' }}
               >
                 Altri Partner
@@ -247,7 +248,7 @@ function SponsorCard({ sponsor, isPrincipal = false }: { sponsor: SponsorItem; i
             }}
           />
         )}
-        
+
         {sponsor.logo && !imageError ? (
           <Image
             src={sponsor.logo}
@@ -271,9 +272,9 @@ function SponsorCard({ sponsor, isPrincipal = false }: { sponsor: SponsorItem; i
       </Box>
 
       <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-        <Typography 
-          variant={isPrincipal ? "h5" : "h6"} 
-          component="h3" 
+        <Typography
+          variant={isPrincipal ? "h5" : "h6"}
+          component="h3"
           gutterBottom
           fontWeight={600}
         >
@@ -281,9 +282,9 @@ function SponsorCard({ sponsor, isPrincipal = false }: { sponsor: SponsorItem; i
         </Typography>
 
         {sponsor.descrizione && (
-          <Typography 
-            variant="body2" 
-            color="text.secondary" 
+          <Typography
+            variant="body2"
+            color="text.secondary"
             sx={{ mb: 2, flexGrow: 1 }}
           >
             {sponsor.descrizione}
@@ -292,7 +293,7 @@ function SponsorCard({ sponsor, isPrincipal = false }: { sponsor: SponsorItem; i
 
         {sponsor.sito && (
           <MuiLink
-            href={sponsor.sito}
+            href={normalizeUrl(sponsor.sito)}
             target="_blank"
             rel="noopener noreferrer"
             sx={{

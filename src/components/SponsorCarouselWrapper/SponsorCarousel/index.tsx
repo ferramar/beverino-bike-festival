@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { keyframes } from '@mui/system';
 import { SponsorItem } from '../../../types/sponsor';
+import { normalizeUrl } from '@/hooks/normalizeUrl';
 
 // Animazione di scorrimento continuo
 const scroll = keyframes`
@@ -150,7 +151,7 @@ function SponsorLogo({ sponsor }: { sponsor: SponsorItem }) {
 
   const handleClick = () => {
     if (sponsor.sito) {
-      window.open(sponsor.sito, '_blank', 'noopener,noreferrer');
+      window.open(normalizeUrl(sponsor.sito), '_blank', 'noopener,noreferrer');
     }
   };
 
