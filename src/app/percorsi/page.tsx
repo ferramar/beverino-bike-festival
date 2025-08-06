@@ -187,7 +187,7 @@ const percorsiData = [
     difficolta: "Facile",
     distanza: "32 km",
     dislivello: "800 m",
-    durata: "1-2 ore",
+    durata: "2 ore",
     gpxFile: "https://gpx.studio/embed?options=%7B%22token%22%3A%22pk.eyJ1IjoibG9sbG9tYWciLCJhIjoiY21icjFzbzVzMDU0NjJsczdvcHA5bzh0ZSJ9.Kwsyv3hGs6qC8GP6099UkQ%22%2C%22files%22%3A%5B%22https%3A%2F%2Fstylish-flowers-c12f2e4071.media.strapiapp.com%2Fgiro_corto_17e634af01.gpx%22%5D%2C%22elevation%22%3A%7B%22height%22%3A%22200%22%2C%22fill%22%3A%22slope%22%7D%2C%22distanceMarkers%22%3Atrue%7D",
     descrizione: "Un percorso ideale per chi si avvicina al mondo del mountain bike. Tracciato prevalentemente su sterrato con pendenze dolci e panorami mozzafiato sulla valle. Adatto a famiglie e principianti che vogliono godersi la natura senza troppa fatica.",
     puntiInteresse: [
@@ -222,7 +222,7 @@ const percorsiData = [
     difficolta: "Difficile",
     distanza: "50 km",
     dislivello: "1700 m",
-    durata: "3-4 ore",
+    durata: "4-5 ore",
     gpxFile: "giro_lungo.gpx",
     descrizione: "La sfida definitiva per i biker più esperti. Tracciato tecnico con single track impegnativi, rocce, radici e discese mozzafiato. Solo per chi ha esperienza e allenamento adeguato. La fatica sarà ripagata da panorami unici e dall'adrenalina pura.",
     puntiInteresse: [
