@@ -277,7 +277,7 @@ export default function ModernHeader() {
               <Box
                 component={"nav"}
                 sx={{
-                  display: { xs: 'none', md: 'flex' },
+                  display: { xs: 'none', lg: 'flex' },
                   alignItems: 'center',
                   gap: 4,
                 }}
@@ -350,7 +350,7 @@ export default function ModernHeader() {
                 edge="start"
                 onClick={handleDrawerToggle}
                 sx={{
-                  display: { md: 'none' },
+                  display: { lg: 'none' },
                   color: '#FF5722',
                   bgcolor: 'rgba(255, 87, 34, 0.1)',
                   '&:hover': {
@@ -382,7 +382,7 @@ export default function ModernHeader() {
           },
         }}
         sx={{
-          display: { xs: 'block', md: 'none' },
+          display: { xs: 'block', lg: 'none' },
           '& .MuiDrawer-paper': {
             boxSizing: 'border-box',
             width: 280,
