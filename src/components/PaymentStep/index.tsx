@@ -345,7 +345,7 @@ export default function PaymentStep({
                 Iscrizione gara {tipoGara === 'ciclistica' ? 'ciclistica' : 'running'}
               </Typography>
               <Typography variant="body2">
-                €{tipoGara === 'ciclistica' ? '20.00' : '10.00'}
+                €{tipoGara === 'ciclistica' ? '25.00' : '10.00'}
               </Typography>
             </Box>
           )}

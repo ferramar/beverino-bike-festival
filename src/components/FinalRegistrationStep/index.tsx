@@ -73,7 +73,7 @@ export default function FinalRegistrationStep() {
   };
 
   // Calcolo prezzi
-  const prezzoGara = tipoGara === 'ciclistica' ? 20 : tipoGara === 'running' ? 10 : 0;
+  const prezzoGara = tipoGara === 'ciclistica' ? 25 : tipoGara === 'running' ? 10 : 0;
   const prezzoPastaParty = pastaPartyEnabled ? pastaCount * 12 : 0;
   const prezzoTotale = prezzoGara + prezzoPastaParty;
 
@@ -119,7 +119,7 @@ export default function FinalRegistrationStep() {
               Raduno ciclistico
             </Typography>
             <Typography variant="h4" color="primary" gutterBottom>
-              €20
+              €25
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Percorsi attraverso paesaggi mozzafiato

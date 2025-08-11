@@ -115,7 +115,7 @@ export default function IscrizioneWizard() {
     const pastaPartyCount = watch('conteggio_pastaparty') || 0;
     
     let racePrice = 0;
-    if (tipoGara === 'ciclistica') racePrice = 20;
+    if (tipoGara === 'ciclistica') racePrice = 25;
     else if (tipoGara === 'running') racePrice = 10;
     
     const pastaPrice = pastaPartyCount * 12;
