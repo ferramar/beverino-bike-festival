@@ -33,5 +33,5 @@ export default function SponsorsCarouselWrapper() {
     return null;
   }
 
-  return <SponsorsCarousel sponsors={sponsors} speed={30} />;
+  return <SponsorsCarousel sponsors={sponsors} speed={100} />;
 }
