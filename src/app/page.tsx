@@ -1,3 +1,4 @@
+import PricingSection from "@/components/PricingSection";
 import { Countdown } from "../components/countdown";
 // import EventHighlights from "../components/EventHighlights";
 import FeaturesSection from "../components/FeatureSection";
@@ -10,6 +11,7 @@ export default function Home() {
     <>
       <HomeBanner />
       <Countdown />
+      <PricingSection />
       <KidsMTBSection />
       <FeaturesSection />
       <SponsorsCarouselWrapper />
