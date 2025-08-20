@@ -26,7 +26,7 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 export default function FinalRegistrationStep() {
-  const { watch, setValue, formState: { errors }, register } = useFormContext();
+  const { watch, setValue, formState: { errors }, register, getValues } = useFormContext();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
@@ -41,11 +41,17 @@ export default function FinalRegistrationStep() {
       required: 'Seleziona il tipo di gara' 
     });
     register('taglia_maglietta', { 
-      required: 'Seleziona una taglia per la maglietta' 
+      validate: (value: string | null | undefined) => {
+        const tipo = getValues('tipo_gara');
+        if (tipo === 'ciclistica') {
+          return !!value || 'Seleziona una taglia per la maglietta';
+        }
+        return true;
+      }
     });
     register('pasta_party_enabled');
     register('conteggio_pastaparty');
-  }, [register]);
+  }, [register, getValues]);
 
   const handleGaraSelection = (tipo: 'ciclistica' | 'running') => {
     setValue('tipo_gara', tipo, { shouldValidate: true });
@@ -190,7 +196,7 @@ export default function FinalRegistrationStep() {
       )}
 
       {/* Sezione 2: Taglia maglietta - visibile solo se è stata scelta la gara */}
-      {tipoGara && (
+      {tipoGara === 'ciclistica' && (
         <>
           <Divider sx={{ my: 3 }} />
           

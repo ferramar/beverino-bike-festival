@@ -212,12 +212,21 @@ export default function IscrizioneWizard() {
       'cittaRilascioGenitore', 'dataRilascioDocumentoGenitore'
     ],
     1: ['liberatoriaAccettata'],
-    2: ['tipo_gara', 'taglia_maglietta'],
+    2: ['tipo_gara'],
     3: [], // Step pagamento non ha campi da validare
   };
 
   const onNext = async () => {
-    const toValidate = fieldsPerStep[activeStep];
+    const baseToValidate = fieldsPerStep[activeStep];
+    let toValidate = baseToValidate;
+
+    if (activeStep === 2) {
+      const tipoGara = methods.getValues('tipo_gara');
+      if (tipoGara === 'ciclistica') {
+        toValidate = [...baseToValidate, 'taglia_maglietta'];
+      }
+    }
+
     if (await trigger(toValidate)) {
       // Se siamo allo step 2 (opzioni), salva i dati su Strapi prima del pagamento
       if (activeStep === 2) {
