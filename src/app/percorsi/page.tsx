@@ -28,6 +28,9 @@ import {
   Straighten,
   TrendingUp,
   Download,
+  Star,
+  StarBorder,
+  StarHalf,
 } from '@mui/icons-material';
 import dynamic from 'next/dynamic';
 
@@ -185,6 +188,8 @@ const percorsiData = [
     id: 1,
     nome: "Bici in Comune",
     difficolta: "Facile",
+    difficoltaTecnica: 1.5,
+    preparazioneFisica: 2,
     distanza: "32 km",
     dislivello: "800 m",
     durata: "2 ore",
@@ -202,6 +207,8 @@ const percorsiData = [
     id: 2,
     nome: "Percorso Medio",
     difficolta: "Medio",
+    difficoltaTecnica: 3,
+    preparazioneFisica: 3,
     distanza: "35 km",
     dislivello: "1150 m",
     durata: "2-3 ore",
@@ -220,6 +227,8 @@ const percorsiData = [
     id: 3,
     nome: "Percorso Lungo",
     difficolta: "Difficile",
+    difficoltaTecnica: 4,
+    preparazioneFisica: 4.5,
     distanza: "50 km",
     dislivello: "1700 m",
     durata: "4-5 ore",
@@ -297,17 +306,31 @@ export default function PercorsiPage() {
       </Box>
 
       {/* Tabs per selezione percorso */}
-      <Box sx={{ mb: 4 }}>
+      <Box
+        sx={{
+          mb: 4,
+          overflowX: 'auto',
+          scrollSnapType: { xs: 'x mandatory', md: 'none' },
+          WebkitOverflowScrolling: 'touch',
+        }}
+      >
         <Tabs
           value={selectedTab}
           onChange={handleTabChange}
-          centered
+          variant="scrollable"
+          scrollButtons="auto"
+          allowScrollButtonsMobile
           sx={{
+            '& .MuiTabs-flexContainer': {
+              flexWrap: 'nowrap',
+              justifyContent: { xs: 'flex-start', md: 'center' },
+            },
             '& .MuiTab-root': {
               fontWeight: 600,
               fontSize: '1.1rem',
               textTransform: 'none',
-              minWidth: 200,
+              minWidth: { xs: 120, sm: 200 },
+              scrollSnapAlign: 'center',
             },
             '& .Mui-selected': {
               color: '#A52D0C',
@@ -388,6 +411,67 @@ export default function PercorsiPage() {
               </Grid>
 
               <Divider sx={{ my: 3 }} />
+
+              {/* Caratteristiche con stelle */}
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="h6" gutterBottom fontWeight={600}>
+                  Caratteristiche
+                </Typography>
+                <Stack spacing={1}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        minWidth: { xs: 140, sm: 170, md: 220 },
+                        fontSize: { xs: '0.875rem', md: '1.365rem' },
+                        flexShrink: 0,
+                      }}
+                    >
+                      Difficoltà tecnica
+                    </Typography>
+                    <Box>
+                      {Array.from({ length: 5 }).map((_, i) => {
+                        const rating = (selectedPercorso as any).difficoltaTecnica as number;
+                        const full = i + 1 <= rating;
+                        const half = !full && i + 0.5 <= rating;
+                        return full ? (
+                          <Star key={i} sx={{ color: '#A52D0C', fontSize: { xs: 20, md: 31 } }} />
+                        ) : half ? (
+                          <StarHalf key={i} sx={{ color: '#A52D0C', fontSize: { xs: 20, md: 31 } }} />
+                        ) : (
+                          <StarBorder key={i} sx={{ color: '#A52D0C', fontSize: { xs: 20, md: 31 } }} />
+                        );
+                      })}
+                    </Box>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        minWidth: { xs: 140, sm: 170, md: 220 },
+                        fontSize: { xs: '0.875rem', md: '1.365rem' },
+                        flexShrink: 0,
+                      }}
+                    >
+                      Preparazione fisica
+                    </Typography>
+                    <Box>
+                      {Array.from({ length: 5 }).map((_, i) => {
+                        const rating = (selectedPercorso as any).preparazioneFisica as number;
+                        const full = i + 1 <= rating;
+                        const half = !full && i + 0.5 <= rating;
+                        return full ? (
+                          <Star key={i} sx={{ color: '#A52D0C', fontSize: { xs: 20, md: 31 } }} />
+                        ) : half ? (
+                          <StarHalf key={i} sx={{ color: '#A52D0C', fontSize: { xs: 20, md: 31 } }} />
+                        ) : (
+                          <StarBorder key={i} sx={{ color: '#A52D0C', fontSize: { xs: 20, md: 31 } }} />
+                        );
+                      })}
+                    </Box>
+                  </Box>
+                </Stack>
+              </Box>
 
               {/* Descrizione */}
               <Typography variant="body1" sx={{ mb: 3, lineHeight: 1.7 }}>
