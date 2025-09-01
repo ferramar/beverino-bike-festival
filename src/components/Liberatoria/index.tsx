@@ -13,11 +13,16 @@ import {
   useMediaQuery,
   CircularProgress,
   Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
 import DownloadIcon from '@mui/icons-material/Download';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
 
 /**
  * Liberatoria Step:
@@ -45,6 +50,15 @@ export default function Liberatoria() {
   const [pdfGenerated, setPdfGenerated] = useState(false);
   const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  
+  // Stato per gestione errori
+  const [errorDialog, setErrorDialog] = useState(false);
+  const [errorDetails, setErrorDetails] = useState<{
+    title: string;
+    message: string;
+    code?: string;
+    details?: string;
+  } | null>(null);
 
   // Genera il PDF quando il componente viene montato
   useEffect(() => {
@@ -83,7 +97,49 @@ export default function Liberatoria() {
       
     } catch (error) {
       console.error('Errore generazione PDF:', error);
-      alert('Errore durante la generazione del PDF. Riprova.');
+      
+      let errorTitle = 'Errore Generazione PDF';
+      let errorMessage = 'Si è verificato un errore durante la generazione del PDF.';
+      let errorCode = 'ERR_GENERIC';
+      let errorDetails = '';
+      
+      if (error instanceof Error) {
+        // Log dettagliato per debugging
+        console.error('Dettagli errore PDF:', {
+          message: error.message,
+          stack: error.stack,
+          formData: getValues()
+        });
+        
+        // Analizza il tipo di errore per messaggi specifici
+        if (error.message.includes('400')) {
+          errorTitle = 'Dati Mancanti';
+          errorMessage = 'Alcuni dati obbligatori non sono stati compilati correttamente.';
+          errorCode = 'ERR_MISSING_DATA';
+          errorDetails = 'Verifica di aver compilato tutti i campi obbligatori, specialmente nome e cognome.';
+        } else if (error.message.includes('fetch') || error.message.includes('network')) {
+          errorTitle = 'Problema di Connessione';
+          errorMessage = 'Impossibile connettersi al server per generare il PDF.';
+          errorCode = 'ERR_NETWORK';
+          errorDetails = 'Verifica la tua connessione internet e riprova. Se il problema persiste, riprova più tardi.';
+        } else if (error.message.includes('500')) {
+          errorTitle = 'Errore del Server';
+          errorMessage = 'Il server ha riscontrato un problema interno.';
+          errorCode = 'ERR_SERVER';
+          errorDetails = 'Il problema è temporaneo. Riprova tra qualche minuto. Se persiste, contatta il supporto.';
+        } else {
+          errorDetails = `Dettagli tecnici: ${error.message}`;
+        }
+      }
+      
+      // Mostra dialog con errori dettagliati
+      setErrorDetails({
+        title: errorTitle,
+        message: errorMessage,
+        code: errorCode,
+        details: errorDetails
+      });
+      setErrorDialog(true);
     } finally {
       setIsGenerating(false);
     }
@@ -291,6 +347,62 @@ export default function Liberatoria() {
           />
         </>
       )}
+      
+      {/* Dialog per errori dettagliati */}
+      <Dialog 
+        open={errorDialog} 
+        onClose={() => setErrorDialog(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <ErrorIcon color="error" />
+          {errorDetails?.title || 'Errore'}
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" sx={{ mb: 2 }}>
+            {errorDetails?.message}
+          </Typography>
+          
+          {errorDetails?.details && (
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              {errorDetails.details}
+            </Typography>
+          )}
+          
+          {errorDetails?.code && (
+            <Box sx={{ 
+              backgroundColor: 'grey.100', 
+              p: 2, 
+              borderRadius: 1,
+              fontFamily: 'monospace',
+              fontSize: '0.875rem'
+            }}>
+              <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>
+                Codice Errore (da comunicare al supporto):
+              </Typography>
+              <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                {errorDetails.code}
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setErrorDialog(false)} variant="outlined">
+            Chiudi
+          </Button>
+          <Button 
+            onClick={() => {
+              setErrorDialog(false);
+              generatePDF(); // Riprova
+            }} 
+            variant="contained"
+            color="primary"
+          >
+            Riprova
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

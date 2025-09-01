@@ -159,9 +159,20 @@ export interface LiberatoriaData {
 // Funzione helper per creare il documento
 export const createLiberatoriaPDF = (data: LiberatoriaData) => {
   const formatDate = (dateString: string) => {
-    if (!dateString) return '___________';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('it-IT');
+    if (!dateString || dateString.trim() === '') return '___________';
+    
+    try {
+      const date = new Date(dateString);
+      // Verifica se la data è valida
+      if (isNaN(date.getTime())) {
+        console.warn('Data non valida ricevuta:', dateString);
+        return '___________';
+      }
+      return date.toLocaleDateString('it-IT');
+    } catch (error) {
+      console.error('Errore nel parsing della data:', dateString, error);
+      return '___________';
+    }
   };
 
   return (
