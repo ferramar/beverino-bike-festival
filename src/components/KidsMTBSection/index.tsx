@@ -83,7 +83,6 @@ export default function KidsMTBSection() {
                 {[
                   { icon: <Groups />, text: "Età: 6-14 anni" },
                   { icon: <AccessTime />, text: "Durata: 2 ore circa" },
-                  { icon: <DirectionsBike />, text: "Bici e casco noleggiabili in anticipo presso <a href='https://www.pressbike.it/' target='_blank' rel='noopener noreferrer'>PressBike</a>" },
                 ].map((item, index) => (
                   <Box
                     key={index}
