@@ -3,7 +3,7 @@ import React, { useMemo, useState } from 'react';
 import { useWatch, useFormContext } from 'react-hook-form';
 import { Box, FormControl, FormHelperText, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, Typography } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
-import LiberatoriaOfflineAlert from '../LiberatoriaOfflineAlert';
+// import LiberatoriaOfflineAlert from '../LiberatoriaOfflineAlert';
 
 interface FormData {
   nome: string;
@@ -89,7 +89,7 @@ export default function DataForm() {
       <Typography sx={visuallyHidden}>Inserisci i dati personali</Typography>
       
       {/* Alert per liberatoria offline */}
-      <LiberatoriaOfflineAlert />
+      {/* <LiberatoriaOfflineAlert /> */}
 
       {/* Sezione dati partecipante */}
       <Typography variant="h6" sx={{ mb: 2 }}>
