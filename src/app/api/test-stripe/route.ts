@@ -15,7 +15,7 @@ export async function GET() {
     
     // Test connessione Stripe
     const stripe = new Stripe(key, {
-      apiVersion: '2025-07-30.basil',
+      apiVersion: '2025-08-27.basil',
     });
     
     // Prova a fare una chiamata semplice
