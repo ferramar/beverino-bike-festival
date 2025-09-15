@@ -150,7 +150,7 @@ const ContestPopup: React.FC = () => {
               borderRadius: { xs: 2, sm: 3 },
               overflow: 'hidden',
               position: 'relative',
-              maxHeight: { xs: '85vh', sm: '85vh' },
+              maxHeight: { xs: '85vh', sm: '85p vh' },
               width: { xs: 'calc(100vw - 16px)', sm: 'auto' },
               height: 'auto',
               maxWidth: { xs: 'calc(100vw - 16px)', sm: 'max-content' },
