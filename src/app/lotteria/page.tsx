@@ -379,6 +379,15 @@ const LotteriaPage: React.FC = () => {
                     primaryTypographyProps={{ variant: 'body1' }}
                   />
                 </ListItem>
+                <ListItem sx={{ px: 0, alignItems: 'flex-start' }}>
+                  <ListItemIcon sx={{ minWidth: 40, mt: 0.5 }}>
+                    <CheckCircleIcon color="primary" />
+                  </ListItemIcon>
+                  <ListItemText 
+                    primary="La mattina dell'evento è necessario confermare la propria iscrizione mostrando la mail di registrazione a Bici in Comune prima della partenza al desk dedicato."
+                    primaryTypographyProps={{ variant: 'body1' }}
+                  />
+                </ListItem>
               </List>
             </CardContent>
           </Card>
