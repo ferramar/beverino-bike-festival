@@ -1,23 +1,16 @@
 // components/SkipLink.tsx
 'use client';
 
-import { useState } from 'react';
 import { Box } from '@mui/material';
 
 export default function SkipLink() {
-  const [isVisible, setIsVisible] = useState(false);
-
   return (
     <Box
       component="a"
       href="#main-content"
-      onFocus={() => setIsVisible(true)}
-      onBlur={() => setIsVisible(false)}
       sx={{
         position: 'absolute',
-        left: isVisible ? '50%' : '-9999px',
-        transform: isVisible ? 'translateX(-50%)' : 'none',
-        top: isVisible ? '1rem' : 'auto',
+        left: '-9999px',
         zIndex: 9999,
         padding: '1em 2em',
         backgroundColor: 'primary.main',
@@ -31,6 +24,9 @@ export default function SkipLink() {
           backgroundColor: 'primary.dark',
         },
         '&:focus': {
+          left: '50%',
+          transform: 'translateX(-50%)',
+          top: '1rem',
           outline: '3px solid',
           outlineColor: 'orange.500',
           outlineOffset: '2px',

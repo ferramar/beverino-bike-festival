@@ -5,6 +5,7 @@ import { Providers } from "./providers";
 import Header from "../components/header";
 import Footer from "../components/footer";
 import SkipLink from "../components/SkipLink";
+import ContestPopup from "../components/ContestPopup";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next"
 
@@ -62,6 +63,16 @@ export const metadata: Metadata = {
   },
   themeColor: "#A52D0C",
   manifest: "/site.webmanifest",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/favicon-512x512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/favicon-192x192.png", sizes: "192x192", type: "image/png" },
+    ],
+  },
   alternates: {
     canonical: "https://beverinobikefestival.it",
   },
@@ -149,6 +160,9 @@ export default function RootLayout({
             
             <Footer />
           </div>
+          
+          {/* Pop-up del concorso Damiani Ottica */}
+          <ContestPopup />
         </Providers>
 
         <Script id="iubenda-cs-configuration" strategy="beforeInteractive">
