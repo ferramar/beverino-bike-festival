@@ -199,7 +199,7 @@ const percorsiData = [
     distanza: "32 km",
     dislivello: "800 m",
     durata: "2 ore",
-    gpxFile: "", // Temporaneamente rimosso - in attesa del GPX
+    gpxFile: "https://gpx.studio/embed?options=%7B%22token%22%3A%22pk.eyJ1IjoibG9sbG9tYWciLCJhIjoiY21mbzNuNWRlMDFxYjJpcXJjb2Izdnd5MyJ9.FPWeAeSWVuuYwXpmHK71MQ%22%2C%22files%22%3A%5B%22https%3A%2F%2Fstylish-flowers-c12f2e4071.media.strapiapp.com%2Fbici_in_comune_b55a613f57.gpx%22%5D%7D",
     descrizione: "Un percorso ideale per chi si avvicina al mondo del mountain bike. Tracciato prevalentemente su sterrato con pendenze dolci e panorami mozzafiato sulla valle. Adatto a famiglie e principianti che vogliono godersi la natura senza troppa fatica.",
     puntiInteresse: [
       "Punto panoramico Monte Verde",
@@ -514,7 +514,8 @@ export default function PercorsiPage() {
                     const gpxUrl = selectedPercorso.gpxFile;
                     const fileName = gpxUrl.includes('giro_corto') ? 'giro_corto.gpx' :
                                     gpxUrl.includes('Giro_Medio_2024') ? 'giro_medio.gpx' :
-                                    gpxUrl.includes('giro_lungo') ? 'giro_lungo.gpx' : 'percorso.gpx';
+                                    gpxUrl.includes('giro_lungo') ? 'giro_lungo.gpx' :
+                                    gpxUrl.includes('bici_in_comune') ? 'bici_in_comune.gpx' : 'percorso.gpx';
                     
                     const link = document.createElement('a');
                     link.href = `/gpx/${fileName}`;
