@@ -39,9 +39,6 @@ function GPXMap({ gpxFile, height = 400 }: { gpxFile: string; height?: number })
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // URL ottimizzato per GPX Studio con parametri per nascondere UI
-  const gpxFileUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/gpx/${gpxFile}`;
-
   const handleIframeLoad = () => {
     setIsLoading(false);
   };
@@ -61,6 +58,34 @@ function GPXMap({ gpxFile, height = 400 }: { gpxFile: string; height?: number })
 
     return () => clearTimeout(timer);
   }, [isLoading]);
+
+  // Se non c'è un file GPX, mostra un messaggio
+  if (!gpxFile || gpxFile.trim() === '') {
+    return (
+      <Box
+        sx={{
+          width: '100%',
+          height: height,
+          bgcolor: '#f5f5f5',
+          borderRadius: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          border: '2px dashed #ddd',
+          p: 3,
+        }}
+      >
+        <DirectionsBike sx={{ fontSize: 48, mb: 2, opacity: 0.5, color: '#A52D0C' }} />
+        <Typography variant="h6" color="text.secondary" textAlign="center" sx={{ mb: 1 }}>
+          Mappa in arrivo
+        </Typography>
+        <Typography variant="body2" color="text.secondary" textAlign="center">
+          Il tracciato GPX per questo percorso sarà disponibile a breve
+        </Typography>
+      </Box>
+    );
+  }
 
   if (error) {
     return (
@@ -84,29 +109,10 @@ function GPXMap({ gpxFile, height = 400 }: { gpxFile: string; height?: number })
         </Typography>
         <Stack direction="row" spacing={2}>
           <Button
-            variant="contained"
-            size="small"
-            startIcon={<Download />}
-            onClick={() => {
-              const link = document.createElement('a');
-              link.href = `/gpx/${gpxFile}`;
-              link.download = gpxFile;
-              link.click();
-            }}
-            sx={{
-              backgroundColor: '#A52D0C',
-              '&:hover': {
-                backgroundColor: '#D32F2F',
-              },
-            }}
-          >
-            Scarica GPX
-          </Button>
-          <Button
             variant="outlined"
             size="small"
             onClick={() => {
-              window.open(`https://gpx.studio/?state=${encodeURIComponent(JSON.stringify({ urls: [gpxFileUrl] }))}`, '_blank');
+              window.open(gpxFile, '_blank');
             }}
             sx={{
               borderColor: '#A52D0C',
@@ -163,7 +169,7 @@ function GPXMap({ gpxFile, height = 400 }: { gpxFile: string; height?: number })
       )}
 
       <iframe 
-        src={"https://gpx.studio/embed?options=%7B%22token%22%3A%22pk.eyJ1IjoibG9sbG9tYWciLCJhIjoiY21icjFzbzVzMDU0NjJsczdvcHA5bzh0ZSJ9.Kwsyv3hGs6qC8GP6099UkQ%22%2C%22files%22%3A%5B%22https%3A%2F%2Fstylish-flowers-c12f2e4071.media.strapiapp.com%2Fgiro_corto_17e634af01.gpx%22%5D%2C%22elevation%22%3A%7B%22height%22%3A%22200%22%2C%22fill%22%3A%22slope%22%7D%2C%22distanceMarkers%22%3Atrue%7D"}
+        src={gpxFile}
         width="100%" 
         height="100%" 
         style={{
@@ -173,7 +179,7 @@ function GPXMap({ gpxFile, height = 400 }: { gpxFile: string; height?: number })
         }}
         onLoad={handleIframeLoad}
         onError={handleIframeError}
-        title={`Mappa del percorso ${gpxFile}`}
+        title={`Mappa del percorso`}
         allow="geolocation"
         loading="lazy"
         sandbox="allow-scripts allow-same-origin allow-popups"
@@ -193,7 +199,7 @@ const percorsiData = [
     distanza: "32 km",
     dislivello: "800 m",
     durata: "2 ore",
-    gpxFile: "https://gpx.studio/embed?options=%7B%22token%22%3A%22pk.eyJ1IjoibG9sbG9tYWciLCJhIjoiY21icjFzbzVzMDU0NjJsczdvcHA5bzh0ZSJ9.Kwsyv3hGs6qC8GP6099UkQ%22%2C%22files%22%3A%5B%22https%3A%2F%2Fstylish-flowers-c12f2e4071.media.strapiapp.com%2Fgiro_corto_17e634af01.gpx%22%5D%2C%22elevation%22%3A%7B%22height%22%3A%22200%22%2C%22fill%22%3A%22slope%22%7D%2C%22distanceMarkers%22%3Atrue%7D",
+    gpxFile: "", // Temporaneamente rimosso - in attesa del GPX
     descrizione: "Un percorso ideale per chi si avvicina al mondo del mountain bike. Tracciato prevalentemente su sterrato con pendenze dolci e panorami mozzafiato sulla valle. Adatto a famiglie e principianti che vogliono godersi la natura senza troppa fatica.",
     puntiInteresse: [
       "Punto panoramico Monte Verde",
@@ -212,7 +218,7 @@ const percorsiData = [
     distanza: "35 km",
     dislivello: "1150 m",
     durata: "2-3 ore",
-    gpxFile: "giro_medio.gpx",
+    gpxFile: "https://gpx.studio/embed?options=%7B%22token%22%3A%22pk.eyJ1IjoibG9sbG9tYWciLCJhIjoiY21mbzNuNWRlMDFxYjJpcXJjb2Izdnd5MyJ9.FPWeAeSWVuuYwXpmHK71MQ%22%2C%22files%22%3A%5B%22https%3A%2F%2Fstylish-flowers-c12f2e4071.media.strapiapp.com%2FGiro_Medio_2024_2dbbdd6b4e.gpx%22%5D%7D",
     descrizione: "Un tracciato che mette alla prova le vostre capacità tecniche con single track divertenti e alcuni passaggi più impegnativi. Attraversa boschi secolari e antichi sentieri dei carbonari, offrendo un perfetto equilibrio tra sfida e divertimento.",
     puntiInteresse: [
       "Sentiero dei Carbonari",
@@ -232,7 +238,7 @@ const percorsiData = [
     distanza: "50 km",
     dislivello: "1700 m",
     durata: "4-5 ore",
-    gpxFile: "giro_lungo.gpx",
+    gpxFile: "https://gpx.studio/embed?options=%7B%22token%22%3A%22pk.eyJ1IjoibG9sbG9tYWciLCJhIjoiY21mbzNuNWRlMDFxYjJpcXJjb2Izdnd5MyJ9.FPWeAeSWVuuYwXpmHK71MQ%22%2C%22files%22%3A%5B%22https%3A%2F%2Fstylish-flowers-c12f2e4071.media.strapiapp.com%2Fgiro_lungo_195e8b9353.gpx%22%5D%7D",
     descrizione: "La sfida definitiva per i biker più esperti. Tracciato tecnico con single track impegnativi, rocce, radici e discese mozzafiato. Solo per chi ha esperienza e allenamento adeguato. La fatica sarà ripagata da panorami unici e dall'adrenalina pura.",
     puntiInteresse: [
       "Cresta del Diavolo",
@@ -358,7 +364,7 @@ export default function PercorsiPage() {
       {/* Dettaglio percorso selezionato */}
       <Grid container spacing={4} justifyContent={'center'}>
         {/* Colonna sinistra - Info percorso */}
-        <Grid size={{ xs: 12, lg: 8 }}>
+        <Grid size={{ xs: 12, lg: 5 }}>
           <Card elevation={3}>
             <CardContent sx={{ p: 4 }}>
               <Box sx={{ mb: 3 }}>
@@ -497,33 +503,41 @@ export default function PercorsiPage() {
               </Accordion> */}
 
               {/* Download GPX */}
-              {/* <Button
-                variant="contained"
-                fullWidth
-                size="large"
-                startIcon={<Download />}
-                onClick={() => {
-                  const link = document.createElement('a');
-                  link.href = `/gpx/${selectedPercorso.gpxFile}`;
-                  link.download = selectedPercorso.gpxFile;
-                  link.click();
-                }}
-                sx={{
-                  mt: 3,
-                  backgroundColor: '#A52D0C',
-                  '&:hover': {
-                    backgroundColor: '#D32F2F',
-                  },
-                }}
-              >
-                Scarica tracciato GPX
-              </Button> */}
+              {selectedPercorso.gpxFile && selectedPercorso.gpxFile.trim() !== '' && (
+                <Button
+                  variant="contained"
+                  fullWidth
+                  size="large"
+                  startIcon={<Download />}
+                  onClick={() => {
+                    // Estrai il nome del file GPX dall'URL
+                    const gpxUrl = selectedPercorso.gpxFile;
+                    const fileName = gpxUrl.includes('giro_corto') ? 'giro_corto.gpx' :
+                                    gpxUrl.includes('Giro_Medio_2024') ? 'giro_medio.gpx' :
+                                    gpxUrl.includes('giro_lungo') ? 'giro_lungo.gpx' : 'percorso.gpx';
+                    
+                    const link = document.createElement('a');
+                    link.href = `/gpx/${fileName}`;
+                    link.download = fileName;
+                    link.click();
+                  }}
+                  sx={{
+                    mt: 3,
+                    backgroundColor: '#A52D0C',
+                    '&:hover': {
+                      backgroundColor: '#D32F2F',
+                    },
+                  }}
+                >
+                  Scarica tracciato GPX
+                </Button>
+              )}
             </CardContent>
           </Card>
         </Grid>
 
         {/* Colonna destra - Mappa */}
-        {/* <Grid size={{ xs: 12, lg: 7 }}>
+        <Grid size={{ xs: 12, lg: 7 }}>
           <Card elevation={3} sx={{ height: 'auto', minHeight: 300 }}>
             <CardContent sx={{ height: '100%', p: "0 !important" }}>
               <Typography variant="h6" sx={visuallyHidden} >
@@ -532,7 +546,7 @@ export default function PercorsiPage() {
               <GPXMap gpxFile={selectedPercorso.gpxFile} height={500} />
             </CardContent>
           </Card>
-        </Grid> */}
+        </Grid>
       </Grid>
 
       {/* Sezione info aggiuntive */}
