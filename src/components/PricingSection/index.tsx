@@ -306,7 +306,7 @@ export default function PricingSection() {
 							<Stack direction="row" spacing={1} alignItems="center">
 								<Timer color="warning" />
 								<Typography variant="body1">
-									Iscrizioni aperte fino al 18 settembre
+									Iscrizioni aperte fino al 20 settembre ore 23:59
 								</Typography>
 							</Stack>
 						</Box>
