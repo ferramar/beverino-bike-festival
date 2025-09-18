@@ -195,20 +195,7 @@ export default function ConvenzioniPage() {
             Per usufruire degli sconti, presenta la mail di conferma iscrizione al Beverino Bike Festival 
             presso le attività convenzionate. Gli sconti sono personali e non cedibili.
           </Typography>
-          <Button
-            variant="contained"
-            size="large"
-            href="/iscriviti"
-            sx={{
-              mt: 2,
-              backgroundColor: '#A52D0C',
-              '&:hover': {
-                backgroundColor: '#D32F2F',
-              },
-            }}
-          >
-            Iscriviti ora
-          </Button>
+          {/* Link iscrizioni rimosso quando chiuse */}
         </Box>
       </Container>
     </Box>

@@ -28,6 +28,7 @@ import {
 	Security,
 } from '@mui/icons-material';
 import Link from 'next/link';
+import { isRegistrationOpen } from '../../utils/isRegistrationOpen';
 import { motion } from 'framer-motion';
 
 interface PricingCardProps {
@@ -290,7 +291,7 @@ export default function PricingSection() {
 							Scegli la formula più adatta a te e unisciti a noi per questa straordinaria avventura
 						</Typography>
 
-						{/* Info box */}
+                        {/* Info box */}
 						<Box
 							sx={{
 								display: 'inline-flex',
@@ -298,15 +299,15 @@ export default function PricingSection() {
 								gap: 3,
 								p: 2,
 								borderRadius: 2,
-								backgroundColor: 'success.lighter',
+                                backgroundColor: isRegistrationOpen() ? 'success.lighter' : 'error.lighter',
 								border: '1px solid',
-								borderColor: 'success.light',
+                                borderColor: isRegistrationOpen() ? 'success.light' : 'error.light',
 							}}
 						>
 							<Stack direction="row" spacing={1} alignItems="center">
-								<Timer color="warning" />
+                                <Timer color={isRegistrationOpen() ? 'warning' : 'error'} />
 								<Typography variant="body1">
-									Iscrizioni aperte fino al 20 settembre ore 23:59
+                                    {isRegistrationOpen() ? 'Iscrizioni aperte fino al 20 settembre ore 23:59' : 'Iscrizioni chiuse - Iscrizione sul posto il 21 settembre'}
 								</Typography>
 							</Stack>
 						</Box>

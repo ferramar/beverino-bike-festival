@@ -5,6 +5,7 @@ import Link from "next/link";
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { keyframes } from '@mui/system';
+import { isRegistrationOpen } from '../../utils/isRegistrationOpen';
 
 // Animazioni
 const fadeInUp = keyframes`
@@ -224,31 +225,33 @@ export default function HomeBanner() {
               opacity: 0,
               mb: { xs: 3, md: 0 },
             }}>
-              <Button
-                component={Link}
-                href='/iscriviti'
-                variant="contained"
-                size="medium" // Ridotto da large
-                aria-label="Iscriviti ora al Beverino Bike Festival 2025"
-                sx={{
-                  px: { xs: 2.5, md: 3 }, // Ridotto
-                  py: { xs: 0.75, md: 1 }, // Ridotto
-                  fontSize: { xs: "0.875rem", md: "1rem" }, // Ridotto
-                  fontWeight: 600,
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
-                  transition: "all 0.3s ease",
-                  "&:hover": {
-                    transform: "translateY(-2px)",
-                    boxShadow: "0 6px 25px rgba(0,0,0,0.3)",
-                  },
-                  "&:focus-visible": {
-                    outline: "3px solid #FB6616",
-                    outlineOffset: "2px",
-                  }
-                }}
-              >
-                Iscriviti Ora
-              </Button>
+              {isRegistrationOpen() && (
+                <Button
+                  component={Link}
+                  href='/iscriviti'
+                  variant="contained"
+                  size="medium"
+                  aria-label="Iscriviti ora al Beverino Bike Festival 2025"
+                  sx={{
+                    px: { xs: 2.5, md: 3 },
+                    py: { xs: 0.75, md: 1 },
+                    fontSize: { xs: "0.875rem", md: "1rem" },
+                    fontWeight: 600,
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+                    transition: "all 0.3s ease",
+                    "&:hover": {
+                      transform: "translateY(-2px)",
+                      boxShadow: "0 6px 25px rgba(0,0,0,0.3)",
+                    },
+                    "&:focus-visible": {
+                      outline: "3px solid #FB6616",
+                      outlineOffset: "2px",
+                    }
+                  }}
+                >
+                  Iscriviti Ora
+                </Button>
+              )}
               {/* da decommentare */}
               {/* <Button
                 component={Link}

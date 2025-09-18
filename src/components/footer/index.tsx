@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Container, Grid, Link, Typography, IconButton, Stack } from '@mui/material';
 import { Facebook, Instagram, Email, Phone } from '@mui/icons-material';
 import { visuallyHidden } from '@mui/utils';
+import { isRegistrationOpen } from '../../utils/isRegistrationOpen';
 
 
 const Footer: React.FC = () => {
@@ -104,13 +105,15 @@ const Footer: React.FC = () => {
                   }}>
                     FAQ
                   </Link> */}
-                  <Link href="/iscriviti" color="inherit" sx={{
-                    textDecoration: 'none',
-                    opacity: 0.9,
-                    '&:hover': { opacity: 1, textDecoration: 'underline' }
-                  }}>
-                    Iscriviti
-                  </Link>
+                  {isRegistrationOpen() && (
+                    <Link href="/iscriviti" color="inherit" sx={{
+                      textDecoration: 'none',
+                      opacity: 0.9,
+                      '&:hover': { opacity: 1, textDecoration: 'underline' }
+                    }}>
+                      Iscriviti
+                    </Link>
+                  )}
                 </Stack>
               </Grid>
             </Grid>

@@ -32,6 +32,7 @@ import {
   CardGiftcard,
 } from '@mui/icons-material';
 import Link from 'next/link';
+import { isRegistrationOpen } from '../../utils/isRegistrationOpen';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 
@@ -161,31 +162,33 @@ export default function ModernHeader() {
       </List>
 
       {/* CTA Button nel drawer */}
-      <Box sx={{ p: 3 }}>
-        <Button
-          component={Link}
-          href="/iscriviti"
-          variant="contained"
-          fullWidth
-          size="large"
-          onClick={handleDrawerToggle}
-          sx={{
-            background: isActive('/iscriviti')
-              ? 'linear-gradient(135deg, #D32F2F 0%, #E53935 100%)'
-              : 'linear-gradient(135deg, #A52D0C 0%, #D32F2F 100%)',
-            borderRadius: 3,
-            py: 1.5,
-            boxShadow: '0 4px 15px rgba(191, 54, 12, 0.3)',
-            '&:hover': {
-              transform: 'translateY(-1px)',
-              boxShadow: '0 6px 20px rgba(191, 54, 12, 0.4)',
-            },
-            transition: 'all 0.3s ease',
-          }}
-        >
-          Iscriviti ora
-        </Button>
-      </Box>
+      {isRegistrationOpen() && (
+        <Box sx={{ p: 3 }}>
+          <Button
+            component={Link}
+            href="/iscriviti"
+            variant="contained"
+            fullWidth
+            size="large"
+            onClick={handleDrawerToggle}
+            sx={{
+              background: isActive('/iscriviti')
+                ? 'linear-gradient(135deg, #D32F2F 0%, #E53935 100%)'
+                : 'linear-gradient(135deg, #A52D0C 0%, #D32F2F 100%)',
+              borderRadius: 3,
+              py: 1.5,
+              boxShadow: '0 4px 15px rgba(191, 54, 12, 0.3)',
+              '&:hover': {
+                transform: 'translateY(-1px)',
+                boxShadow: '0 6px 20px rgba(191, 54, 12, 0.4)',
+              },
+              transition: 'all 0.3s ease',
+            }}
+          >
+            Iscriviti ora
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 
@@ -321,30 +324,32 @@ export default function ModernHeader() {
                 ))}
 
                 {/* CTA Button */}
-                <Button
-                  component={Link}
-                  href="/iscriviti"
-                  variant="contained"
-                  sx={{
-                    ml: 2,
-                    backgroundColor: isActive('/iscriviti') ? '#D32F2F' : '#A52D0C',
-                    borderRadius: 2,
-                    px: 3,
-                    py: 1,
-                    fontWeight: 600,
-                    textTransform: 'none',
-                    boxShadow: isActive('/iscriviti') ? '0 0 0 2px rgba(211, 47, 47, 0.3)' : 'none',
-                    '&:hover': {
-                      backgroundColor: '#D32F2F',
-                      transform: 'translateY(-1px)',
-                      boxShadow: '0 4px 12px rgba(165, 45, 12, 0.25)',
-                    },
-                    transition: 'all 0.2s ease',
-                  }}
-                  aria-label="Iscriviti ora"
-                >
-                  Iscriviti ora
-                </Button>
+                {isRegistrationOpen() && (
+                  <Button
+                    component={Link}
+                    href="/iscriviti"
+                    variant="contained"
+                    sx={{
+                      ml: 2,
+                      backgroundColor: isActive('/iscriviti') ? '#D32F2F' : '#A52D0C',
+                      borderRadius: 2,
+                      px: 3,
+                      py: 1,
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      boxShadow: isActive('/iscriviti') ? '0 0 0 2px rgba(211, 47, 47, 0.3)' : 'none',
+                      '&:hover': {
+                        backgroundColor: '#D32F2F',
+                        transform: 'translateY(-1px)',
+                        boxShadow: '0 4px 12px rgba(165, 45, 12, 0.25)',
+                      },
+                      transition: 'all 0.2s ease',
+                    }}
+                    aria-label="Iscriviti ora"
+                  >
+                    Iscriviti ora
+                  </Button>
+                )}
               </Box>
 
               {/* Mobile menu button */}
