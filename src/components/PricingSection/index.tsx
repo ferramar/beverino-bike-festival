@@ -307,7 +307,7 @@ export default function PricingSection() {
 							<Stack direction="row" spacing={1} alignItems="center">
                                 <Timer color={isRegistrationOpen() ? 'warning' : 'error'} />
 								<Typography variant="body1">
-                                    {isRegistrationOpen() ? 'Iscrizioni aperte fino al 20 settembre ore 23:59' : 'Iscrizioni chiuse - Iscrizione sul posto il 21 settembre'}
+                                    {isRegistrationOpen() ? 'Iscrizioni aperte fino al 20 settembre ore 22' : 'Iscrizioni chiuse - Iscrizione sul posto il 21 settembre'}
 								</Typography>
 							</Stack>
 						</Box>

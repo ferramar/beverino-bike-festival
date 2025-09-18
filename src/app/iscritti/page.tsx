@@ -108,8 +108,8 @@ export default function IscrittiPage() {
 
   const onExportExcel = () => {
     // Prepara i dati per Excel
-    const excelData = items.map(r => ({
-      'ID': r.id,
+    const excelData = items.map((r, index) => ({
+      '#': index + 1,
       'Nome': r.nome || '',
       'Cognome': r.cognome || '',
       'Email': r.email || '',
@@ -130,7 +130,7 @@ export default function IscrittiPage() {
     
     // Imposta larghezza colonne
     const colWidths = [
-      { wch: 8 },   // ID
+      { wch: 6 },   // #
       { wch: 15 },  // Nome
       { wch: 15 },  // Cognome
       { wch: 25 },  // Email
@@ -201,9 +201,9 @@ export default function IscrittiPage() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {items.map((r) => (
+            {items.map((r, index) => (
               <TableRow key={r.id}>
-                <TableCell>{r.id}</TableCell>
+                <TableCell>{index + 1}</TableCell>
                 <TableCell>{r.nome}</TableCell>
                 <TableCell>{r.cognome}</TableCell>
                 <TableCell>{r.email}</TableCell>
