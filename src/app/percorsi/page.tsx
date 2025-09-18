@@ -510,16 +510,37 @@ export default function PercorsiPage() {
                   size="large"
                   startIcon={<Download />}
                   onClick={() => {
-                    // Estrai il nome del file GPX dall'URL
+                    // Estrai il nome del file e, se possibile, l'URL GPX originale dall'embed di gpx.studio
                     const gpxUrl = selectedPercorso.gpxFile;
+
+                    // Filename amichevole per il download
                     const fileName = gpxUrl.includes('giro_corto') ? 'giro_corto.gpx' :
                                     gpxUrl.includes('Giro_Medio_2024') ? 'giro_medio.gpx' :
                                     gpxUrl.includes('giro_lungo') ? 'giro_lungo.gpx' :
                                     gpxUrl.includes('bici_in_comune') ? 'bici_in_comune.gpx' : 'percorso.gpx';
-                    
+
+                    // Prova a leggere l'URL originale del file GPX dall'iframe embed (param options.files[0])
+                    let externalGpxHref: string | null = null;
+                    try {
+                      const urlObj = new URL(gpxUrl);
+                      const optionsParam = urlObj.searchParams.get('options');
+                      if (optionsParam) {
+                        const decoded = decodeURIComponent(optionsParam);
+                        const parsed = JSON.parse(decoded);
+                        if (parsed && Array.isArray(parsed.files) && parsed.files[0]) {
+                          externalGpxHref = parsed.files[0];
+                        }
+                      }
+                    } catch (_) {
+                      // Ignora e fallback su file locale se disponibile
+                    }
+
                     const link = document.createElement('a');
-                    link.href = `/gpx/${fileName}`;
+                    // Se abbiamo l'URL esterno (es. Strapi), usiamolo; altrimenti fallback al file locale nella cartella public/gpx
+                    link.href = externalGpxHref ?? `/gpx/${fileName}`;
                     link.download = fileName;
+                    link.rel = 'noopener';
+                    link.target = '_blank';
                     link.click();
                   }}
                   sx={{
