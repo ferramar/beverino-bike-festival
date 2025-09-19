@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { Container, Typography, Box, TextField, Button, Table, TableBody, TableCell, TableHead, TableRow, Paper, Stack, Alert, FormControlLabel, Checkbox } from '@mui/material';
+import { Container, Typography, Box, TextField, Button, Table, TableBody, TableCell, TableHead, TableRow, Paper, Stack, Alert, FormControlLabel, Checkbox, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import * as XLSX from 'xlsx';
 
 type Item = {
@@ -54,6 +54,8 @@ export default function IscrittiPage() {
   const [onlyPastaParty, setOnlyPastaParty] = useState<boolean>(false);
   const [onlyMinors, setOnlyMinors] = useState<boolean>(false);
   const [authorized, setAuthorized] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [tipoGaraFilter, setTipoGaraFilter] = useState<string>('tutti');
 
   useEffect(() => {
   // Auto-login da sessionStorage, se presente
@@ -71,35 +73,69 @@ export default function IscrittiPage() {
     setError('');
     setInfo('');
     try {
-      const res = await fetch('/api/iscritti', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: pass }),
+      // Chiamata DIRETTA a Strapi dal client
+      const strapiUrl = 'https://stylish-flowers-c12f2e4071.strapiapp.com';
+      
+      const params = new URLSearchParams();
+      // Strapi v5 syntax - solo filtro, niente paginazione
+      params.set('filters[stato_pagamento][$eq]', 'completato');
+      
+      const url = `${strapiUrl}/api/iscrizionis?${params.toString()}`;
+      console.log('Chiamata a:', url);
+      
+      const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
       });
-      const text = await res.text();
-      let data: any = null;
-      try { data = text ? JSON.parse(text) : {}; } catch { data = { raw: text }; }
+      
       if (!res.ok) {
-        const message = data?.error || 'Errore';
-        setError(`${message} (status ${res.status})`);
+        const errorText = await res.text();
+        console.error('Errore Strapi:', res.status, res.statusText, errorText);
+        setError(`Errore Strapi: ${res.status} ${res.statusText} - ${errorText}`);
         setItems([]);
         setAuthorized(false);
-      } else {
-        let rows: Item[] = data.data || [];
-        // Applica filtri client-side
-        if (onlyPastaParty) {
-          rows = rows.filter(r => !!r.pasta_party || (r.conteggio_pastaparty ?? 0) > 0);
-        }
-        if (onlyMinors) {
-          rows = rows.filter(r => !!r.dati_genitore || !!r.nomeTutore);
-        }
-        setItems(rows);
-        setInfo(`Caricati ${rows.length} record`);
-        setAuthorized(true);
-        try { sessionStorage.setItem('iscritti_password', pass); } catch {}
+        return;
       }
+      
+      const data = await res.json();
+      const allRows: Item[] = data.data || [];
+      
+      // Applica filtri client-side
+      let rows = allRows;
+      
+      // Filtro per tipo gara
+      if (tipoGaraFilter !== 'tutti') {
+        rows = rows.filter(r => r.tipo_gara === tipoGaraFilter);
+      }
+      
+      // Filtro per pasta party
+      if (onlyPastaParty) {
+        rows = rows.filter(r => !!r.pasta_party || (r.conteggio_pastaparty ?? 0) > 0);
+      }
+      
+      // Filtro per minorenni
+      if (onlyMinors) {
+        rows = rows.filter(r => !!r.dati_genitore || !!r.nomeTutore);
+      }
+      
+      // Filtro per ricerca nome/cognome
+      if (searchTerm.trim()) {
+        const term = searchTerm.toLowerCase().trim();
+        rows = rows.filter(r => 
+          (r.nome?.toLowerCase().includes(term)) || 
+          (r.cognome?.toLowerCase().includes(term))
+        );
+      }
+      
+      setItems(rows);
+      setInfo(`Caricati ${allRows.length} record totali, ${rows.length} dopo filtri`);
+      setAuthorized(true);
+      try { sessionStorage.setItem('iscritti_password', pass); } catch {}
+      
     } catch (e: any) {
-      setError(String(e?.message || e));
+      setError(`Errore: ${e?.message || e}`);
       setItems([]);
     } finally {
       setLoading(false);
@@ -169,20 +205,39 @@ export default function IscrittiPage() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
-      <Typography variant="h4" gutterBottom fontWeight={700}>
-        Elenco iscritti (pagamento completato)
-      </Typography>
+             <Typography variant="h4" gutterBottom fontWeight={700}>
+               Elenco Iscritti
+             </Typography>
       <Box component={Paper} sx={{ p: 2, mb: 3 }}>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'stretch', sm: 'center' }}>
           <Button variant="contained" onClick={() => fetchList(password)} disabled={loading}>{loading ? 'Carico…' : 'Ricarica'}</Button>
           <Button variant="outlined" onClick={onExportExcel} disabled={items.length === 0}>Esporta Excel</Button>
           {info && <Typography variant="body2" color="text.secondary">{info}</Typography>}
         </Stack>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'stretch', sm: 'center' }} sx={{ mt: 2 }}>
-          <FormControlLabel control={<Checkbox checked={onlyPastaParty} onChange={(e) => setOnlyPastaParty(e.target.checked)} />} label="Solo con Pasta Party" />
-          <FormControlLabel control={<Checkbox checked={onlyMinors} onChange={(e) => setOnlyMinors(e.target.checked)} />} label="Solo minorenni (con genitore/tutore)" />
-          <Button size="small" onClick={() => fetchList(password)} disabled={!password || loading}>Applica filtri</Button>
-        </Stack>
+               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'stretch', sm: 'center' }} sx={{ mt: 2 }}>
+                 <TextField 
+                   label="Cerca per nome/cognome" 
+                   value={searchTerm} 
+                   onChange={(e) => setSearchTerm(e.target.value)} 
+                   size="small" 
+                   sx={{ minWidth: 200 }}
+                 />
+                 <FormControl size="small" sx={{ minWidth: 120 }}>
+                   <InputLabel>Tipo gara</InputLabel>
+                   <Select
+                     value={tipoGaraFilter}
+                     label="Tipo gara"
+                     onChange={(e) => setTipoGaraFilter(e.target.value)}
+                   >
+                     <MenuItem value="tutti">Tutti</MenuItem>
+                     <MenuItem value="ciclistica">Ciclistica</MenuItem>
+                     <MenuItem value="running">Running</MenuItem>
+                   </Select>
+                 </FormControl>
+                 <FormControlLabel control={<Checkbox checked={onlyPastaParty} onChange={(e) => setOnlyPastaParty(e.target.checked)} />} label="Solo Pasta Party" />
+                 <FormControlLabel control={<Checkbox checked={onlyMinors} onChange={(e) => setOnlyMinors(e.target.checked)} />} label="Solo minorenni" />
+                 <Button size="small" onClick={() => fetchList(password)} disabled={!password || loading}>Aggiorna</Button>
+               </Stack>
       </Box>
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
       {info && <Alert severity="info" sx={{ mb: 2 }}>{info}</Alert>}
@@ -194,7 +249,7 @@ export default function IscrittiPage() {
               <TableCell>Nome</TableCell>
               <TableCell>Cognome</TableCell>
               <TableCell>Email</TableCell>
-              <TableCell>Tipo raduno</TableCell>
+                     <TableCell>Tipo gara</TableCell>
               <TableCell>Pasta party</TableCell>
               <TableCell>Maglietta</TableCell>
               <TableCell>Codice</TableCell>
