@@ -73,9 +73,9 @@ export default function ModernHeader() {
 
   const navItems = [
     { href: "/percorsi", label: "Percorsi", icon: <Timeline /> },
-    { href: "/programma", label: "Programma", icon: <CalendarMonth /> },
-    { href: "/convenzioni", label: "Convenzioni", icon: <LocalOffer /> },
-    { href: "/lotteria", label: "Lotteria", icon: <CardGiftcard /> },
+    // { href: "/programma", label: "Programma", icon: <CalendarMonth /> }, // Pausa - evento passato
+    // { href: "/convenzioni", label: "Convenzioni", icon: <LocalOffer /> }, // Pausa - evento passato
+    // { href: "/lotteria", label: "Lotteria", icon: <CardGiftcard /> }, // Pausa - evento passato
     { href: "/galleria", label: "Galleria", icon: <Collections /> },
     { href: "/sponsor", label: "Sponsor", icon: <Handshake /> },
     // { href: "/faq", label: "FAQ", icon: <HelpOutline /> },

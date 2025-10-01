@@ -65,20 +65,20 @@ const Footer: React.FC = () => {
                   }}>
                     Programma
                   </Link> */}
-                  <Link href="/convenzioni" color="inherit" sx={{
+                  {/* <Link href="/convenzioni" color="inherit" sx={{
                     textDecoration: 'none',
                     opacity: 0.9,
                     '&:hover': { opacity: 1, textDecoration: 'underline' }
                   }}>
                     Convenzioni
-                  </Link>
-                  <Link href="/lotteria" color="inherit" sx={{
+                  </Link> */}
+                  {/* <Link href="/lotteria" color="inherit" sx={{
                     textDecoration: 'none',
                     opacity: 0.9,
                     '&:hover': { opacity: 1, textDecoration: 'underline' }
                   }}>
                     Lotteria
-                  </Link>
+                  </Link> */}
                 </Stack>
               </Grid>
               <Grid size={6}>

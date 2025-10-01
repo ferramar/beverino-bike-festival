@@ -11,13 +11,13 @@ const highlights = [
     link: '/percorsi',
     linkText: 'Esplora i percorsi'
   },
-  {
-    image: '/festa.jpg',
-    title: 'Il Festival',
-    description: 'Non solo gara: musica, cibo locale, stand espositivi e attività per tutta la famiglia nel cuore di Beverino.',
-    link: '/programma',
-    linkText: 'Scopri il programma'
-  },
+  // {
+  //   image: '/festa.jpg',
+  //   title: 'Il Festival',
+  //   description: 'Non solo gara: musica, cibo locale, stand espositivi e attività per tutta la famiglia nel cuore di Beverino.',
+  //   link: '/programma',
+  //   linkText: 'Scopri il programma'
+  // }, // Pausa - evento passato
   {
     image: '/sponsor.jpg',
     title: 'I Partner',
