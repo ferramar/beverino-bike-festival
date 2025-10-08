@@ -5,7 +5,7 @@ import { Providers } from "./providers";
 import Header from "../components/header";
 import Footer from "../components/footer";
 import SkipLink from "../components/SkipLink";
-import ContestPopup from "../components/ContestPopup";
+// import ContestPopup from "../components/ContestPopup"; // Pausa - evento passato
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next"
 
@@ -162,7 +162,7 @@ export default function RootLayout({
           </div>
           
           {/* Pop-up del concorso Damiani Ottica */}
-          <ContestPopup />
+          {/* <ContestPopup /> */} {/* Pausa - evento passato */}
         </Providers>
 
         <Script id="iubenda-cs-configuration" strategy="beforeInteractive">
