@@ -9,6 +9,7 @@ import {
   Image,
   Font,
 } from '@react-pdf/renderer';
+import { EVENT } from '../../config/event';
 
 // Registra font personalizzati se necessario
 // Font.register({
@@ -196,7 +197,7 @@ export const createLiberatoriaPDF = (data: LiberatoriaData) => {
 
         {/* Titolo modulo */}
         <Text style={[styles.title, { marginBottom: 20 }]}>
-          MODULO DI ISCRIZIONE ALL'EVENTO SPORTIVO "BEVERINO BIKE FESTIVAL" 21/09/2025{'\n'}
+          MODULO DI ISCRIZIONE ALL'EVENTO SPORTIVO "BEVERINO BIKE FESTIVAL" {EVENT.eventDateShort}{'\n'}
           E CONTESTUALE LIBERATORIA PER IL PARTECIPANTE
         </Text>
 
@@ -279,7 +280,7 @@ export const createLiberatoriaPDF = (data: LiberatoriaData) => {
         </Text>
         <Text style={[styles.title, { fontSize: 13 }]}>chiede</Text>
         <Text style={styles.text}>
-          l'iscrizione, all'evento sportivo Beverino Bike Festival, che si svolgerà in data 21/09/2025 presso Beverino (SP)
+          l'iscrizione, all'evento sportivo Beverino Bike Festival, che si svolgerà in data {EVENT.eventDateShort} presso {EVENT.location}
         </Text>
 
         {/* Sezione minore - SEMPRE VISIBILE */}
@@ -480,11 +481,11 @@ export const createLiberatoriaPDF = (data: LiberatoriaData) => {
           </Text>
 
           <Text style={styles.listItem}>
-            - di accettare, con l'iscrizione, tutte le condizioni richieste dall'organizzazione pena l'esclusione. Autorizza la pubblicazione di foto (con la propria immagine) effettuate durante il "Beverino Bike Festival 21/09/2025" nei mezzi di comunicazione usati dall'organizzazione.
+            - di accettare, con l'iscrizione, tutte le condizioni richieste dall'organizzazione pena l'esclusione. Autorizza la pubblicazione di foto (con la propria immagine) effettuate durante il "Beverino Bike Festival {EVENT.eventDateShort}" nei mezzi di comunicazione usati dall'organizzazione.
           </Text>
 
           <Text style={styles.listItem}>
-            - Di aver letto, sottoscritto e accettato integralmente il regolamento del evento B.B.F. 2025
+            - Di aver letto, sottoscritto e accettato integralmente il regolamento del evento B.B.F. {EVENT.year}
           </Text>
         </View>
 
@@ -497,7 +498,7 @@ export const createLiberatoriaPDF = (data: LiberatoriaData) => {
         </Text>
 
         <Text style={styles.text}>
-          Il/La sottoscritto/a, preso atto del D.Lgs. 196/03 e s.m.i., autorizza l'organizzazione dell'evento "Beverino Bike Festival 21/09/2025" al trattamento dei dati personali che lo riguardano; tale trattamento, cautelato da opportune misure idonee a garantire la sicurezza e la riservatezza dei dati stessi, avverrà esclusivamente per finalità legate all'evento/gara/manifestazione.
+          Il/La sottoscritto/a, preso atto del D.Lgs. 196/03 e s.m.i., autorizza l'organizzazione dell'evento "Beverino Bike Festival {EVENT.eventDateShort}" al trattamento dei dati personali che lo riguardano; tale trattamento, cautelato da opportune misure idonee a garantire la sicurezza e la riservatezza dei dati stessi, avverrà esclusivamente per finalità legate all'evento/gara/manifestazione.
         </Text>
 
         <Text style={[styles.text, { marginTop: 20 }]}>

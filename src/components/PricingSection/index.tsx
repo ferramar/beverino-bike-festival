@@ -29,6 +29,7 @@ import {
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { isRegistrationOpen } from '../../utils/isRegistrationOpen';
+import { PRICING } from '../../config/event';
 import { motion } from 'framer-motion';
 
 interface PricingCardProps {
@@ -193,7 +194,7 @@ export default function PricingSection() {
 	const pricingData = [
 		{
 			title: 'Raduno Running',
-			price: 10,
+			price: PRICING.running,
 			description: 'Perfetto per chi ama correre tra i sentieri della Val di Vara',
 			icon: <DirectionsRun sx={{ fontSize: 40 }} />,
 			features: [
@@ -207,7 +208,7 @@ export default function PricingSection() {
 		},
 		{
 			title: 'Raduno Ciclistico',
-			price: 25,
+			price: PRICING.ciclistica,
 			description: 'L\'esperienza completa per gli amanti del ciclismo',
 			icon: <DirectionsBike sx={{ fontSize: 40 }} />,
 			features: [
@@ -222,7 +223,7 @@ export default function PricingSection() {
 		},
 		{
 			title: 'Pasta Party',
-			price: 12,
+			price: PRICING.pastaParty,
 			description: 'Festeggia con noi dopo la gara con prodotti locali',
 			icon: <Restaurant sx={{ fontSize: 40 }} />,
 			features: [

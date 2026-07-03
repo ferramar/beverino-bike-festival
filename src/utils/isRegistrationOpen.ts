@@ -1,16 +1,16 @@
+import { EVENT } from '../config/event';
+
 export function isRegistrationOpen(): boolean {
   if (typeof window !== 'undefined') {
     const sp = new URLSearchParams(window.location.search);
     if (sp.get('debugClose') === '1') return false;
     if (sp.get('debugOpen') === '1') return true;
   }
-  const iso = process.env.NEXT_PUBLIC_REG_CLOSING_ISO || '2025-09-20T23:59:59';
-  const closing = new Date(iso);
+  const closing = new Date(EVENT.registrationClosingISO);
   return new Date() <= closing;
 }
 
 export function getRegistrationClosingDate(): Date {
-  const iso = process.env.NEXT_PUBLIC_REG_CLOSING_ISO || '2025-09-20T23:59:59';
-  return new Date(iso);
+  return new Date(EVENT.registrationClosingISO);
 }
 

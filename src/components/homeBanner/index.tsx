@@ -6,6 +6,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { keyframes } from '@mui/system';
 import { isRegistrationOpen } from '../../utils/isRegistrationOpen';
+import { EVENT } from '../../config/event';
 
 // Animazioni
 const fadeInUp = keyframes`
@@ -34,7 +35,7 @@ export default function HomeBanner() {
   return (
     <Box
       component="section"
-      aria-label="Banner principale - Beverino Bike Festival 2025"
+      aria-label={`Banner principale - Beverino Bike Festival ${EVENT.year}`}
       sx={{
         minHeight: "700px",
         height: { xs: "100svh", lg: "90svh" },
@@ -153,7 +154,7 @@ export default function HomeBanner() {
                 <CalendarMonthIcon sx={{ color: 'white', fontSize: { xs: 20, md: 24 } }} aria-hidden="true" />
                 <Typography
                   component="time"
-                  dateTime="2025-09-21"
+                  dateTime={EVENT.eventDateISO.slice(0, 10)}
                   variant="h6"
                   sx={{
                     fontWeight: 500,
@@ -161,7 +162,7 @@ export default function HomeBanner() {
                     fontSize: { xs: '0.875rem', md: '1.25rem' },
                   }}
                 >
-                  21 Settembre 2025
+                  {EVENT.eventDateLabel}
                 </Typography>
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -231,7 +232,7 @@ export default function HomeBanner() {
                   href='/iscriviti'
                   variant="contained"
                   size="medium"
-                  aria-label="Iscriviti ora al Beverino Bike Festival 2025"
+                  aria-label={`Iscriviti ora al Beverino Bike Festival ${EVENT.year}`}
                   sx={{
                     px: { xs: 2.5, md: 3 },
                     py: { xs: 0.75, md: 1 },

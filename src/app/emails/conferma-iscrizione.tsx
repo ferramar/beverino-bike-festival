@@ -14,6 +14,7 @@ import {
   Button,
 } from '@react-email/components';
 import * as React from 'react';
+import { EVENT, PRICING } from '../../config/event';
 
 interface ConfermaIscrizioneEmailProps {
   nome: string;
@@ -36,7 +37,9 @@ export const ConfermaIscrizioneEmail = ({
 }: ConfermaIscrizioneEmailProps) => {
   const previewText = `Conferma iscrizione Beverino Bike Festival - ${nome} ${cognome}`;
   const tipoGaraText = tipo_gara === 'ciclistica' ? 'Raduno ciclistico' : 'Raduno running';
-  const prezzoGara = tipo_gara === 'ciclistica' ? 25 : 10;
+  const prezzoGara = tipo_gara === 'ciclistica' ? PRICING.ciclistica : PRICING.running;
+  // NOTA: qui il Pasta Party è calcolato a €10/persona, mentre il prezzo reale è PRICING.pastaParty (€12).
+  // Mantenuto invariato per non alterare il contenuto: da verificare/allineare con l'organizzazione.
   const prezzoPastaParty = numeroPartecipantiPastaParty * 10;
 
   return (
@@ -64,8 +67,8 @@ export const ConfermaIscrizioneEmail = ({
           </Text>
           
           <Text style={paragraph}>
-            La tua iscrizione al <strong>Beverino Bike Festival 2025</strong> è stata confermata con successo!
-            Ti sei iscritto alla <strong>{tipoGaraText}</strong> del 21 Settembre 2025.
+            La tua iscrizione al <strong>Beverino Bike Festival {EVENT.year}</strong> è stata confermata con successo!
+            Ti sei iscritto alla <strong>{tipoGaraText}</strong> del {EVENT.eventDateLabel}.
           </Text>
 
           {/* Box riepilogo */}
@@ -122,7 +125,7 @@ export const ConfermaIscrizioneEmail = ({
             </Heading>
             
             <Text style={paragraph}>
-              <strong>📅 Data:</strong> 21 Settembre 2025
+              <strong>📅 Data:</strong> {EVENT.eventDateLabel}
             </Text>
             
             <Text style={paragraph}>

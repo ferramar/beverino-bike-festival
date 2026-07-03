@@ -24,6 +24,7 @@ import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { PRICING } from '../../config/event';
 
 export default function FinalRegistrationStep() {
   const { watch, setValue, formState: { errors }, register, getValues } = useFormContext();
@@ -79,8 +80,8 @@ export default function FinalRegistrationStep() {
   };
 
   // Calcolo prezzi
-  const prezzoGara = tipoGara === 'ciclistica' ? 25 : tipoGara === 'running' ? 10 : 0;
-  const prezzoPastaParty = pastaPartyEnabled ? pastaCount * 12 : 0;
+  const prezzoGara = tipoGara === 'ciclistica' ? PRICING.ciclistica : tipoGara === 'running' ? PRICING.running : 0;
+  const prezzoPastaParty = pastaPartyEnabled ? pastaCount * PRICING.pastaParty : 0;
   const prezzoTotale = prezzoGara + prezzoPastaParty;
 
   return (
@@ -125,7 +126,7 @@ export default function FinalRegistrationStep() {
               Raduno ciclistico
             </Typography>
             <Typography variant="h4" color="primary" gutterBottom>
-              €25
+              €{PRICING.ciclistica}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Percorsi attraverso paesaggi mozzafiato
@@ -170,7 +171,7 @@ export default function FinalRegistrationStep() {
               Raduno running
             </Typography>
             <Typography variant="h4" color="primary" gutterBottom>
-              €10
+              €{PRICING.running}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Corri attraverso i sentieri di Beverino
@@ -252,7 +253,7 @@ export default function FinalRegistrationStep() {
               }
               label={
                 <Typography>
-                  Voglio partecipare al Pasta Party (€12 a persona)
+                  Voglio partecipare al Pasta Party (€{PRICING.pastaParty} a persona)
                 </Typography>
               }
             />

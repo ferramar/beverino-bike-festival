@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-08-27.basil',
-});
+import { stripe } from '@/lib/stripe-server';
+import { EVENT } from '@/config/event';
 
 export async function POST(request: NextRequest) {
   try {
     const { amount, metadata, receipt_email } = await request.json();
 
     // Crea una descrizione dettagliata per la ricevuta
-    let description = 'Iscrizione Beverino Bike Festival 2025';
+    let description = `Iscrizione Beverino Bike Festival ${EVENT.year}`;
     if (metadata.tipo_gara) {
       description += ` - Gara ${metadata.tipo_gara === 'ciclistica' ? 'Ciclistica' : 'Running'}`;
     }

@@ -1,12 +1,8 @@
 // app/api/verify-payment/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
 import { Resend } from 'resend';
 import { ConfermaIscrizioneEmail } from '@/app/emails/conferma-iscrizione';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-08-27.basil',
-});
+import { stripe } from '@/lib/stripe-server';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 

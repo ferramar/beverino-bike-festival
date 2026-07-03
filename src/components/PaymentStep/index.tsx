@@ -18,6 +18,7 @@ import {
 import { getStripe } from '../../lib/stripe';
 import LockIcon from '@mui/icons-material/Lock';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { PRICING } from '../../config/event';
 
 // Componente interno che usa gli hooks di Stripe
 function PaymentForm({ 
@@ -345,7 +346,7 @@ export default function PaymentStep({
                 Iscrizione gara {tipoGara === 'ciclistica' ? 'ciclistica' : 'running'}
               </Typography>
               <Typography variant="body2">
-                €{tipoGara === 'ciclistica' ? '25.00' : '10.00'}
+                €{(tipoGara === 'ciclistica' ? PRICING.ciclistica : PRICING.running).toFixed(2)}
               </Typography>
             </Box>
           )}
@@ -355,7 +356,7 @@ export default function PaymentStep({
                 Pasta Party ({pastaPartyCount} {pastaPartyCount === 1 ? 'persona' : 'persone'})
               </Typography>
               <Typography variant="body2">
-                €{(pastaPartyCount * 12).toFixed(2)}
+                €{(pastaPartyCount * PRICING.pastaParty).toFixed(2)}
               </Typography>
             </Box>
           )}

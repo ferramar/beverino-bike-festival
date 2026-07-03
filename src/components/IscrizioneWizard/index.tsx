@@ -20,6 +20,7 @@ import PaymentStep from '../PaymentStep';
 import { customAlphabet } from 'nanoid';
 import { useStripeCheckout } from '../../hooks/useStripeCheckout';
 import { OrangeStepper } from '../CustomStepper';
+import { PRICING } from '../../config/event';
 
 interface DatiGenitore {
   nome: string;
@@ -115,10 +116,10 @@ export default function IscrizioneWizard() {
     const pastaPartyCount = watch('conteggio_pastaparty') || 0;
     
     let racePrice = 0;
-    if (tipoGara === 'ciclistica') racePrice = 25;
-    else if (tipoGara === 'running') racePrice = 10;
+    if (tipoGara === 'ciclistica') racePrice = PRICING.ciclistica;
+    else if (tipoGara === 'running') racePrice = PRICING.running;
     
-    const pastaPrice = pastaPartyCount * 12;
+    const pastaPrice = pastaPartyCount * PRICING.pastaParty;
     const total = racePrice + pastaPrice;
     
     console.log('Calcolo totale:', {

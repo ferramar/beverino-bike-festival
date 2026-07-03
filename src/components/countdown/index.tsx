@@ -3,6 +3,7 @@
 import { Box, Container, Typography, Paper } from '@mui/material';
 import React, { useState, useEffect } from 'react';
 import { keyframes } from '@mui/system';
+import { EVENT } from '../../config/event';
 
 interface TimeLeft {
   days: number;
@@ -23,7 +24,7 @@ const fadeIn = keyframes`
 `;
 
 export function Countdown() {
-  const targetDate = "2025-09-21T00:00:00";
+  const targetDate = EVENT.eventDateISO;
 
   const calculateTimeLeft = (): TimeLeft => {
     const now = new Date().getTime();

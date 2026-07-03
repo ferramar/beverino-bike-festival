@@ -1,10 +1,7 @@
 // src/app/api/create-checkout-session/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-08-27.basil',
-});
+import { stripe } from '@/lib/stripe-server';
+import { EVENT, PRICING, toCents } from '@/config/event';
 
 interface CheckoutData {
   registrationId: string;
@@ -28,7 +25,6 @@ export async function POST(request: NextRequest) {
       includeCena, 
       numeroPersoneCena = 0,
       codiceRegistrazione,
-      prezzoCena = 15,
       tipo_gara,
     } = body;
     
@@ -47,11 +43,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Calcola il prezzo in base al tipo di gara
-    const prezzoGara = tipo_gara === 'ciclistica' ? 2500 : 1000; // €25 o €10 in centesimi
+    // Calcola il prezzo in base al tipo di gara (in centesimi per Stripe)
+    const prezzoGara = tipo_gara === 'ciclistica'
+      ? toCents(PRICING.ciclistica)
+      : toCents(PRICING.running);
 
     const prezzoTotale = numeroPersoneCena > 0 
-      ? prezzoGara + (1200 * numeroPersoneCena)
+      ? prezzoGara + (toCents(PRICING.pastaParty) * numeroPersoneCena)
       : prezzoGara;
 
     const session = await stripe.checkout.sessions.create({
@@ -66,7 +64,7 @@ export async function POST(request: NextRequest) {
               name: includeCena 
                 ? `Beverino Bike Festival - Gara + Cena (${numeroPersoneCena} persone)`
                 : 'Beverino Bike Festival - Solo Gara',
-              description: 'Iscrizione al Beverino Bike Festival 2025'
+              description: `Iscrizione al Beverino Bike Festival ${EVENT.year}`
             },
             unit_amount: prezzoTotale, // Stripe usa centesimi
           },

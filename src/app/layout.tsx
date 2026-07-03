@@ -8,6 +8,7 @@ import SkipLink from "../components/SkipLink";
 // import ContestPopup from "../components/ContestPopup"; // Pausa - evento passato
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next"
+import { EVENT } from "../config/event";
 
 // Inter è più moderno e leggibile di Roboto per UI
 const inter = Inter({
@@ -17,8 +18,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Beverino Bike Festival 2025 - Raduno MTB in Liguria",
-  description: "Partecipa alla quarta edizione del Beverino Bike Festival. 21 Settembre 2025. Tre percorsi attraverso paesaggi mozzafiato: 30km, 35km e 50km. Iscrizioni aperte!",
+  title: `Beverino Bike Festival ${EVENT.year} - Raduno MTB in Liguria`,
+  description: `Partecipa alla ${EVENT.editionLabel} edizione del Beverino Bike Festival. ${EVENT.eventDateLabel}. Tre percorsi attraverso paesaggi mozzafiato: 30km, 35km e 50km. Iscrizioni aperte!`,
   keywords: "beverino bike festival, raduno ciclistico liguria, ciclismo la spezia, mountain bike liguria, granfondo liguria",
   authors: [{ name: "Beverino Bike Festival" }],
   creator: "Beverino Bike Festival",
@@ -35,13 +36,13 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "Beverino Bike Festival 2025",
-    description: "Partecipa alla quarta edizione del Beverino Bike Festival. 21 Settembre 2025.",
-    url: "https://beverinobikefestival.it",
+    title: `Beverino Bike Festival ${EVENT.year}`,
+    description: `Partecipa alla ${EVENT.editionLabel} edizione del Beverino Bike Festival. ${EVENT.eventDateLabel}.`,
+    url: EVENT.siteUrl,
     siteName: "Beverino Bike Festival",
     images: [
       {
-        url: "https://beverinobikefestival.it/og-image.jpg",
+        url: `${EVENT.siteUrl}/og-image.jpg`,
         width: 1200,
         height: 630,
         alt: "Beverino Bike Festival - Raduno ciclistico tra le colline liguri",
@@ -52,9 +53,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Beverino Bike Festival 2025",
-    description: "21 Settembre 2025 - Tre percorsi attraverso paesaggi mozzafiato",
-    images: ["https://beverinobikefestival.it/twitter-image.jpg"],
+    title: `Beverino Bike Festival ${EVENT.year}`,
+    description: `${EVENT.eventDateLabel} - Tre percorsi attraverso paesaggi mozzafiato`,
+    images: [`${EVENT.siteUrl}/twitter-image.jpg`],
   },
   viewport: {
     width: "device-width",
@@ -74,7 +75,7 @@ export const metadata: Metadata = {
     ],
   },
   alternates: {
-    canonical: "https://beverinobikefestival.it",
+    canonical: EVENT.siteUrl,
   },
 };
 
