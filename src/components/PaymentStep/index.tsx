@@ -19,6 +19,7 @@ import { getStripe } from '../../lib/stripe';
 import LockIcon from '@mui/icons-material/Lock';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { PRICING } from '../../config/event';
+import { getGaraDisplayName } from '../../config/liberatorie';
 
 // Componente interno che usa gli hooks di Stripe
 function PaymentForm({ 
@@ -343,7 +344,7 @@ export default function PaymentStep({
           {tipoGara && (
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
               <Typography variant="body2">
-                Iscrizione gara {tipoGara === 'ciclistica' ? 'ciclistica' : 'running'}
+                Iscrizione {getGaraDisplayName(tipoGara)}
               </Typography>
               <Typography variant="body2">
                 €{(tipoGara === 'ciclistica' ? PRICING.ciclistica : PRICING.running).toFixed(2)}

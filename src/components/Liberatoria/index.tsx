@@ -1,5 +1,5 @@
 // src/components/Liberatoria/index.tsx
-import React, { useState, useRef, useEffect, UIEvent } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
 import {
   Box,
@@ -8,27 +8,29 @@ import {
   FormControlLabel,
   FormHelperText,
   Typography,
-  Paper,
-  useTheme,
-  useMediaQuery,
   CircularProgress,
   Alert,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
+  Stack,
 } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
 import DownloadIcon from '@mui/icons-material/Download';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
+import {
+  formatAccettazioneDigitale,
+  getGaraDisplayName,
+  getLiberatoriaCopy,
+} from '../../config/liberatorie';
 
 /**
  * Liberatoria Step:
- * - Genera PDF con React PDF lato server
- * - Mostra in iframe su desktop o embed su mobile con react-pdf
- * - Checkbox abilitata dopo visualizzazione/scroll
+ * - Genera PDF lato server con i dati anagrafici e il tipo di gara scelto
+ * - Flusso unificato: l'utente deve visualizzare il PDF prima di poter accettare
  */
 export default function Liberatoria() {
   const {
@@ -39,19 +41,15 @@ export default function Liberatoria() {
     formState: { errors },
   } = useFormContext();
 
-  const theme = useTheme();
-  const isTouch = useMediaQuery('(pointer: coarse)');
-  const isBelowLg = useMediaQuery(theme.breakpoints.down('lg'));
-  const useButtonFlow = isTouch || isBelowLg;
+  const tipoGara = watch('tipo_gara') as string;
+  const garaLabel = getGaraDisplayName(tipoGara);
+  const regulationLabel = getLiberatoriaCopy(tipoGara).regulationLabel;
 
   const [pdfUrl, setPdfUrl] = useState<string>();
   const [isGenerating, setIsGenerating] = useState(false);
   const [canAccept, setCanAccept] = useState(false);
   const [pdfGenerated, setPdfGenerated] = useState(false);
-  const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  
-  // Stato per gestione errori
+
   const [errorDialog, setErrorDialog] = useState(false);
   const [errorDetails, setErrorDetails] = useState<{
     title: string;
@@ -60,142 +58,150 @@ export default function Liberatoria() {
     details?: string;
   } | null>(null);
 
-  // Genera il PDF quando il componente viene montato
+  const resetAcceptanceState = () => {
+    setCanAccept(false);
+    setPdfGenerated(false);
+    setValue('liberatoriaAccettata', false, { shouldValidate: false });
+    setValue('liberatoriaPdfBlob', undefined, { shouldValidate: false });
+  };
+
+  const generatePDF = useCallback(
+    async (accettazioneDigitale?: string) => {
+      setIsGenerating(true);
+      if (!accettazioneDigitale) {
+        resetAcceptanceState();
+      }
+
+      try {
+        const formData = getValues();
+
+        const response = await fetch('/api/generate-pdf', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...formData,
+            accettazioneDigitale,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Errore generazione PDF (${response.status})`);
+        }
+
+        const pdfBlob = await response.blob();
+        setValue('liberatoriaPdfBlob', pdfBlob, { shouldValidate: false });
+
+        const url = URL.createObjectURL(pdfBlob);
+        setPdfUrl((prev) => {
+          if (prev) URL.revokeObjectURL(prev);
+          return url;
+        });
+        setPdfGenerated(true);
+        if (accettazioneDigitale) {
+          setCanAccept(true);
+        }
+      } catch (error) {
+        console.error('Errore generazione PDF:', error);
+
+        let errorTitle = 'Errore Generazione PDF';
+        let errorMessage = 'Si è verificato un errore durante la generazione del PDF.';
+        let errorCode = 'ERR_GENERIC';
+        let errorDetailsText = '';
+
+        if (error instanceof Error) {
+          if (error.message.includes('400')) {
+            errorTitle = 'Dati Mancanti';
+            errorMessage = 'Alcuni dati obbligatori non sono stati compilati correttamente.';
+            errorCode = 'ERR_MISSING_DATA';
+            errorDetailsText =
+              'Verifica di aver compilato tutti i campi obbligatori nello step precedente.';
+          } else if (error.message.includes('fetch') || error.message.includes('network')) {
+            errorTitle = 'Problema di Connessione';
+            errorMessage = 'Impossibile connettersi al server per generare il PDF.';
+            errorCode = 'ERR_NETWORK';
+            errorDetailsText =
+              'Verifica la tua connessione internet e riprova. Se il problema persiste, riprova più tardi.';
+          } else if (error.message.includes('500')) {
+            errorTitle = 'Errore del Server';
+            errorMessage = 'Il server ha riscontrato un problema interno.';
+            errorCode = 'ERR_SERVER';
+            errorDetailsText =
+              'Il problema è temporaneo. Riprova tra qualche minuto. Se persiste, contatta il supporto.';
+          } else {
+            errorDetailsText = `Dettagli tecnici: ${error.message}`;
+          }
+        }
+
+        setErrorDetails({
+          title: errorTitle,
+          message: errorMessage,
+          code: errorCode,
+          details: errorDetailsText,
+        });
+        setErrorDialog(true);
+      } finally {
+        setIsGenerating(false);
+      }
+    },
+    [getValues, setValue]
+  );
+
   useEffect(() => {
     generatePDF();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tipoGara]);
 
-  const generatePDF = async () => {
-    setIsGenerating(true);
-    try {
-      // Ottieni tutti i dati del form
-      const formData = getValues();
-      
-      // Chiama l'API per generare il PDF
-      const response = await fetch('/api/generate-pdf', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+  useEffect(() => {
+    return () => {
+      if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+    };
+  }, [pdfUrl]);
 
-      if (!response.ok) {
-        throw new Error('Errore generazione PDF');
-      }
-
-      // Converti la risposta in blob
-      const pdfBlob = await response.blob();
-      
-      // Salva il blob nel form per l'invio successivo
-      setValue('liberatoriaPdfBlob', pdfBlob, { shouldValidate: false });
-      
-      // Crea URL per visualizzazione
-      const url = URL.createObjectURL(pdfBlob);
-      setPdfUrl(url);
-      setPdfGenerated(true);
-      
-    } catch (error) {
-      console.error('Errore generazione PDF:', error);
-      
-      let errorTitle = 'Errore Generazione PDF';
-      let errorMessage = 'Si è verificato un errore durante la generazione del PDF.';
-      let errorCode = 'ERR_GENERIC';
-      let errorDetails = '';
-      
-      if (error instanceof Error) {
-        // Log dettagliato per debugging
-        console.error('Dettagli errore PDF:', {
-          message: error.message,
-          stack: error.stack,
-          formData: getValues()
-        });
-        
-        // Analizza il tipo di errore per messaggi specifici
-        if (error.message.includes('400')) {
-          errorTitle = 'Dati Mancanti';
-          errorMessage = 'Alcuni dati obbligatori non sono stati compilati correttamente.';
-          errorCode = 'ERR_MISSING_DATA';
-          errorDetails = 'Verifica di aver compilato tutti i campi obbligatori, specialmente nome e cognome.';
-        } else if (error.message.includes('fetch') || error.message.includes('network')) {
-          errorTitle = 'Problema di Connessione';
-          errorMessage = 'Impossibile connettersi al server per generare il PDF.';
-          errorCode = 'ERR_NETWORK';
-          errorDetails = 'Verifica la tua connessione internet e riprova. Se il problema persiste, riprova più tardi.';
-        } else if (error.message.includes('500')) {
-          errorTitle = 'Errore del Server';
-          errorMessage = 'Il server ha riscontrato un problema interno.';
-          errorCode = 'ERR_SERVER';
-          errorDetails = 'Il problema è temporaneo. Riprova tra qualche minuto. Se persiste, contatta il supporto.';
-        } else {
-          errorDetails = `Dettagli tecnici: ${error.message}`;
-        }
-      }
-      
-      // Mostra dialog con errori dettagliati
-      setErrorDetails({
-        title: errorTitle,
-        message: errorMessage,
-        code: errorCode,
-        details: errorDetails
-      });
-      setErrorDialog(true);
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  // Scroll handler per desktop (abilita checkbox quando scrollato fino in fondo)
-  const handleScroll = (e: UIEvent<HTMLDivElement>) => {
-    const el = e.currentTarget;
-    const isAtBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 10;
-    if (isAtBottom && !hasScrolledToBottom) {
-      setHasScrolledToBottom(true);
-      setCanAccept(true);
-    }
-  };
-
-  // Handler per download
   const handleDownload = () => {
     if (!pdfUrl) return;
-    
-    // Crea link per download
+    const formData = getValues();
     const link = document.createElement('a');
     link.href = pdfUrl;
-    const formData = getValues();
     link.download = `liberatoria_${formData.nome}_${formData.cognome}.pdf`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  // Handler per visualizzazione in nuova finestra
   const handleView = () => {
     if (!pdfUrl) return;
     window.open(pdfUrl, '_blank', 'noopener,noreferrer');
     setCanAccept(true);
   };
 
-  // Cleanup URL quando il componente viene smontato
-  useEffect(() => {
-    return () => {
-      if (pdfUrl) {
-        URL.revokeObjectURL(pdfUrl);
-      }
-    };
-  }, [pdfUrl]);
+  const handleAcceptanceChange = async (
+    checked: boolean,
+    onChange: (value: boolean) => void
+  ) => {
+    if (!checked) {
+      onChange(false);
+      await generatePDF();
+      return;
+    }
+
+    const timestamp = formatAccettazioneDigitale();
+    onChange(true);
+    await generatePDF(timestamp);
+  };
 
   return (
     <Box sx={{ py: 2 }}>
       <Typography variant="h5" gutterBottom fontWeight={600}>
         Liberatoria e Consenso
       </Typography>
-      
+
+      <Typography variant="body1" sx={{ mb: 1 }}>
+        Liberatoria per: <strong>{garaLabel}</strong>
+      </Typography>
+
       <Typography variant="body1" sx={{ mb: 3 }}>
-        La liberatoria è stata generata automaticamente con i tuoi dati. 
-        {useButtonFlow 
-          ? ' Visualizzala per poter procedere con l\'accettazione.'
-          : ' Scorri fino in fondo per poter procedere con l\'accettazione.'}
+        Il documento è stato generato automaticamente con i tuoi dati. Visualizzalo per
+        intero prima di procedere con l&apos;accettazione.
       </Typography>
 
       <Typography sx={visuallyHidden} component="span">
@@ -209,103 +215,36 @@ export default function Liberatoria() {
         </Box>
       ) : (
         <>
-          {/* Pulsante download solo su desktop */}
-          {pdfGenerated && !useButtonFlow && (
-            <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
-              <Button 
-                variant="outlined" 
-                size="small"
-                onClick={handleDownload} 
-                startIcon={<DownloadIcon />}
-              >
-                Scarica PDF
-              </Button>
-            </Box>
-          )}
-
-          {useButtonFlow ? (
-            // Mobile/Touch: solo pulsante visualizza
-            <>
-              <Box sx={{ 
-                my: 4, 
-                display: 'flex', 
-                justifyContent: 'center',
-                maxWidth: 400,
-                mx: 'auto'
-              }}>
-                <Button 
-                  variant="contained" 
-                  onClick={handleView}
-                  startIcon={<VisibilityIcon />}
-                  disabled={!pdfGenerated}
-                  fullWidth
-                  size="large"
-                >
-                  Visualizza Liberatoria
-                </Button>
-              </Box>
-              
-              {canAccept && (
-                <Alert severity="success" icon={<CheckCircleIcon />} sx={{ mb: 2 }}>
-                  Perfetto! Ora puoi procedere con l'accettazione.
-                </Alert>
-              )}
-            </>
-          ) : (
-            // Desktop: mostra PDF embedded
-            <Paper
-              ref={containerRef}
-              onScroll={handleScroll}
-              variant="outlined"
-              sx={{ 
-                height: 600, 
-                overflowY: 'auto', 
-                p: 0,
-                mt: 2, 
-                mb: 3,
-                position: 'relative',
-                backgroundColor: 'grey.100',
-              }}
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={2}
+            sx={{ my: 3, maxWidth: 520, mx: 'auto' }}
+          >
+            <Button
+              variant="contained"
+              onClick={handleView}
+              startIcon={<VisibilityIcon />}
+              disabled={!pdfGenerated}
+              fullWidth
+              size="large"
             >
-              {pdfUrl ? (
-                <>
-                  <iframe
-                    src={`${pdfUrl}#toolbar=0&navpanes=0&scrollbar=1`}
-                    width="100%"
-                    height="100%"
-                    style={{ border: 0 }}
-                    title="Liberatoria PDF"
-                  />
-                  {!hasScrolledToBottom && (
-                    <Box
-                      sx={{
-                        position: 'absolute',
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        background: 'linear-gradient(to top, rgba(255,255,255,0.9), transparent)',
-                        p: 2,
-                        textAlign: 'center',
-                      }}
-                    >
-                      <Typography variant="body2" color="text.secondary">
-                        ↓ Scorri fino in fondo per abilitare l'accettazione
-                      </Typography>
-                    </Box>
-                  )}
-                </>
-              ) : (
-                <Box display="flex" justifyContent="center" alignItems="center" height="100%">
-                  <Typography>Caricamento PDF...</Typography>
-                </Box>
-              )}
-            </Paper>
-          )}
+              Visualizza Liberatoria
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={handleDownload}
+              startIcon={<DownloadIcon />}
+              disabled={!pdfGenerated}
+              fullWidth
+              size="large"
+            >
+              Scarica PDF
+            </Button>
+          </Stack>
 
-          {/* Alert informativo */}
           {canAccept && (
             <Alert severity="success" icon={<CheckCircleIcon />} sx={{ mb: 2 }}>
-              Ottimo! Hai letto tutta la liberatoria. Ora puoi accettare.
+              Perfetto! Ora puoi procedere con l&apos;accettazione.
             </Alert>
           )}
 
@@ -318,23 +257,27 @@ export default function Liberatoria() {
                 <FormControlLabel
                   control={
                     <Checkbox
-                      {...field}
                       checked={field.value || false}
-                      disabled={!canAccept}
+                      disabled={!canAccept || isGenerating}
                       color="primary"
+                      onChange={(event) => {
+                        void handleAcceptanceChange(event.target.checked, field.onChange);
+                      }}
                     />
                   }
                   label={
                     <Typography variant="body1">
-                      Ho letto e accetto integralmente la liberatoria e il regolamento dell'evento
+                      Ho letto e accetto integralmente la liberatoria, il regolamento{' '}
+                      {regulationLabel}, la dichiarazione di esonero di responsabilità
+                      (inclusi gli artt. 1341 e 1342 c.c.), l&apos;informativa privacy e
+                      l&apos;autorizzazione all&apos;uso di immagini, come nel documento
+                      visualizzato.
                     </Typography>
                   }
                 />
                 {!canAccept && (
                   <FormHelperText>
-                    {useButtonFlow
-                      ? 'Visualizza la liberatoria per poter accettare'
-                      : 'Scorri il documento fino in fondo per poter accettare'}
+                    Visualizza la liberatoria per poter accettare
                   </FormHelperText>
                 )}
                 {errors.liberatoriaAccettata && (
@@ -347,10 +290,9 @@ export default function Liberatoria() {
           />
         </>
       )}
-      
-      {/* Dialog per errori dettagliati */}
-      <Dialog 
-        open={errorDialog} 
+
+      <Dialog
+        open={errorDialog}
         onClose={() => setErrorDialog(false)}
         maxWidth="md"
         fullWidth
@@ -363,21 +305,23 @@ export default function Liberatoria() {
           <Typography variant="body1" sx={{ mb: 2 }}>
             {errorDetails?.message}
           </Typography>
-          
+
           {errorDetails?.details && (
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
               {errorDetails.details}
             </Typography>
           )}
-          
+
           {errorDetails?.code && (
-            <Box sx={{ 
-              backgroundColor: 'grey.100', 
-              p: 2, 
-              borderRadius: 1,
-              fontFamily: 'monospace',
-              fontSize: '0.875rem'
-            }}>
+            <Box
+              sx={{
+                backgroundColor: 'grey.100',
+                p: 2,
+                borderRadius: 1,
+                fontFamily: 'monospace',
+                fontSize: '0.875rem',
+              }}
+            >
               <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>
                 Codice Errore (da comunicare al supporto):
               </Typography>
@@ -391,11 +335,11 @@ export default function Liberatoria() {
           <Button onClick={() => setErrorDialog(false)} variant="outlined">
             Chiudi
           </Button>
-          <Button 
+          <Button
             onClick={() => {
               setErrorDialog(false);
-              generatePDF(); // Riprova
-            }} 
+              void generatePDF();
+            }}
             variant="contained"
             color="primary"
           >

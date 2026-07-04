@@ -267,7 +267,7 @@ export default function LiberatoriaOfflineAlert() {
                 <CheckCircleIcon color="success" fontSize="small" />
               </ListItemIcon>
               <ListItemText 
-                primary="3. Porta il modulo il 21 settembre"
+                primary="3. Porta il modulo il 20 settembre"
                 secondary="Presentati alla segreteria dalle ore 8:00 con il modulo compilato"
                 primaryTypographyProps={{ 
                   variant: 'body2',

@@ -25,6 +25,7 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { PRICING } from '../../config/event';
+import { getGaraDisplayName } from '../../config/liberatorie';
 
 export default function FinalRegistrationStep() {
   const { watch, setValue, formState: { errors }, register, getValues } = useFormContext();
@@ -123,7 +124,7 @@ export default function FinalRegistrationStep() {
               }} 
             />
             <Typography variant="h6" gutterBottom>
-              Raduno ciclistico
+              Beverino Bike Festival
             </Typography>
             <Typography variant="h4" color="primary" gutterBottom>
               €{PRICING.ciclistica}
@@ -168,7 +169,7 @@ export default function FinalRegistrationStep() {
               }} 
             />
             <Typography variant="h6" gutterBottom>
-              Raduno running
+              Beverino Walk Festival
             </Typography>
             <Typography variant="h4" color="primary" gutterBottom>
               €{PRICING.running}
@@ -318,7 +319,7 @@ export default function FinalRegistrationStep() {
           
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
             <Typography>
-              {tipoGara === 'ciclistica' ? 'Raduno ciclistico' : 'Raduno running'}:
+              {getGaraDisplayName(tipoGara)}:
             </Typography>
             <Typography fontWeight="bold">€{prezzoGara}</Typography>
           </Box>

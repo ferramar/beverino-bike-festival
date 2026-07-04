@@ -2,25 +2,33 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { createLiberatoriaPDF } from '@/components/Liberatoria/LiberatoriaPDF';
+import { isOnlineTipoGara } from '@/config/liberatorie';
 
 export async function POST(request: NextRequest) {
   try {
-    // Ottieni i dati dal body della richiesta
     const data = await request.json();
-    
-    // Validazione base dei dati obbligatori
+
     if (!data.nome || !data.cognome) {
       console.error('Dati obbligatori mancanti:', { nome: data.nome, cognome: data.cognome });
       return NextResponse.json(
-        { 
+        {
           error: 'Nome e cognome sono obbligatori per generare il PDF',
-          code: 'ERR_MISSING_REQUIRED_FIELDS'
+          code: 'ERR_MISSING_REQUIRED_FIELDS',
         },
         { status: 400 }
       );
     }
-    
-    // Genera il PDF usando la funzione helper
+
+    if (data.tipo_gara && !isOnlineTipoGara(data.tipo_gara)) {
+      return NextResponse.json(
+        {
+          error: 'Tipo gara non valido',
+          code: 'ERR_INVALID_TIPO_GARA',
+        },
+        { status: 400 }
+      );
+    }
+
     const document = createLiberatoriaPDF(data);
     const pdfBuffer = await renderToBuffer(document);
 

@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { useTheme } from '@mui/material/styles';
 import {
@@ -83,7 +83,7 @@ interface SessionData {
   codiceRegistrazione?: string;
 }
 
-const steps = ['Dati Personali', 'Liberatoria', 'Opzioni', 'Pagamento'];
+const steps = ['Opzioni', 'Dati Personali', 'Liberatoria', 'Pagamento'];
 const SESSION_KEY = 'beverino_registration_session';
 const SESSION_TTL = 24 * 60 * 60 * 1000; // 24 ore
 
@@ -97,7 +97,7 @@ export default function IscrizioneWizard() {
     mode: 'onTouched',
     defaultValues: {},
   });
-  const { watch, trigger, handleSubmit, reset } = methods;
+  const { watch, trigger, reset, setValue, getValues } = methods;
   const [activeStep, setActiveStep] = useState(0);
   const [userAgent, setUserAgent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -122,16 +122,23 @@ export default function IscrizioneWizard() {
     const pastaPrice = pastaPartyCount * PRICING.pastaParty;
     const total = racePrice + pastaPrice;
     
-    console.log('Calcolo totale:', {
-      tipoGara,
-      racePrice,
-      pastaPartyCount,
-      pastaPrice,
-      total
-    });
-    
     setTotalAmount(total);
   }, [watch('tipo_gara'), watch('conteggio_pastaparty')]);
+
+  // Invalida liberatoria se l'utente cambia tipo di gara (tornando allo step Opzioni)
+  const tipoGara = watch('tipo_gara');
+  const prevTipoGaraRef = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (
+      prevTipoGaraRef.current &&
+      prevTipoGaraRef.current !== tipoGara &&
+      tipoGara
+    ) {
+      setValue('liberatoriaAccettata', false, { shouldValidate: false });
+      setValue('liberatoriaPdfBlob', undefined, { shouldValidate: false });
+    }
+    prevTipoGaraRef.current = tipoGara;
+  }, [tipoGara, setValue]);
 
   useEffect(() => {
     if (typeof navigator !== 'undefined') {
@@ -200,54 +207,55 @@ export default function IscrizioneWizard() {
     return () => subscription.unsubscribe();
   }, [watch, reset]);
 
-  // Validazione per step
+  // Validazione per step (0: Opzioni, 1: Dati, 2: Liberatoria, 3: Pagamento)
   const fieldsPerStep: Record<number, (keyof WizardData)[]> = {
-    0: [
+    0: ['tipo_gara'],
+    1: [
       'nome', 'cognome', 'luogoNascita', 'dataNascita',
       'comuneResidenza', 'residenza', 'numeroCivico', 'cap', 'email',
       'tipoDocumento', 'numeroDocumento', 'cittaRilascio', 'dataRilascioDocumento',
-      // Campi genitore (validati solo se minore)
       'nomeGenitore', 'cognomeGenitore', 'luogoNascitaGenitore', 'dataNascitaGenitore',
       'comuneResidenzaGenitore', 'viaResidenzaGenitore', 'numeroCivicoGenitore', 'capGenitore',
       'emailGenitore', 'tipoDocumentoGenitore', 'numeroDocumentoGenitore',
-      'cittaRilascioGenitore', 'dataRilascioDocumentoGenitore'
+      'cittaRilascioGenitore', 'dataRilascioDocumentoGenitore',
     ],
-    1: ['liberatoriaAccettata'],
-    2: ['tipo_gara'],
-    3: [], // Step pagamento non ha campi da validare
+    2: ['liberatoriaAccettata'],
+    3: [],
   };
 
   const onNext = async () => {
     const baseToValidate = fieldsPerStep[activeStep];
     let toValidate = baseToValidate;
 
-    if (activeStep === 2) {
-      const tipoGara = methods.getValues('tipo_gara');
-      if (tipoGara === 'ciclistica') {
+    if (activeStep === 0) {
+      const selectedGara = getValues('tipo_gara');
+      if (selectedGara === 'ciclistica') {
         toValidate = [...baseToValidate, 'taglia_maglietta'];
       }
     }
 
-    if (await trigger(toValidate)) {
-      // Se siamo allo step 2 (opzioni), salva i dati su Strapi prima del pagamento
-      if (activeStep === 2) {
-        await saveRegistrationToStrapi();
-      }
-      setActiveStep(s => s + 1);
+    if (!(await trigger(toValidate))) return;
+
+    // Dopo liberatoria accettata: salva su Strapi prima del pagamento
+    if (activeStep === 2) {
+      const saved = await saveRegistrationToStrapi();
+      if (!saved) return;
     }
+
+    setActiveStep((s) => s + 1);
   };
 
   const onBack = () => {
     setActiveStep(s => s - 1);
   };
 
-  const saveRegistrationToStrapi = async () => {
+  const saveRegistrationToStrapi = async (): Promise<boolean> => {
     setIsSubmitting(true);
     setErrorMessage('');
     setShowError(false);
 
     try {
-      const data = methods.getValues();
+      const data = getValues();
       const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
 
       // Usa il codice esistente se c'è, altrimenti genera nuovo
@@ -378,7 +386,7 @@ export default function IscrizioneWizard() {
             const result = await updateResponse.json();
             setRegistrationId(result.data.id);
             setCodiceRegistrazione(codice_registrazione);
-            return;
+            return true;
           }
         }
       } catch (error) {
@@ -399,11 +407,13 @@ export default function IscrizioneWizard() {
       const result = await response.json();
       setRegistrationId(result.data.id);
       setCodiceRegistrazione(codice_registrazione);
+      return true;
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Errore:', error);
       setErrorMessage('Errore durante il salvataggio. Riprova.');
       setShowError(true);
+      return false;
     } finally {
       setIsSubmitting(false);
     }
@@ -434,11 +444,11 @@ export default function IscrizioneWizard() {
 
       <FormProvider {...methods}>
         <Box sx={{ mb: 4 }}>
-          {activeStep === 0 && <DataForm />}
-          {activeStep === 1 && <Liberatoria />}
-          {activeStep === 2 && <FinalRegistrationStep />}
+          {activeStep === 0 && <FinalRegistrationStep />}
+          {activeStep === 1 && <DataForm />}
+          {activeStep === 2 && <Liberatoria />}
           {activeStep === 3 && registrationId && (
-            <PaymentStep 
+            <PaymentStep
               totalAmount={totalAmount}
               onSuccess={handlePaymentSuccess}
               registrationId={registrationId}
@@ -447,6 +457,11 @@ export default function IscrizioneWizard() {
               pastaPartyCount={watch('conteggio_pastaparty')}
               userEmail={watch('email')}
             />
+          )}
+          {activeStep === 3 && !registrationId && !isSubmitting && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              Impossibile procedere al pagamento: iscrizione non salvata. Torna indietro e riprova.
+            </Alert>
           )}
         </Box>
 

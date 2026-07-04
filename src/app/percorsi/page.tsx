@@ -235,7 +235,7 @@ const percorsiData = [
     difficolta: "Difficile",
     difficoltaTecnica: 4,
     preparazioneFisica: 4.5,
-    distanza: "50 km",
+    distanza: "55 km",
     dislivello: "1700 m",
     durata: "4-5 ore",
     gpxFile: "https://gpx.studio/embed?options=%7B%22token%22%3A%22pk.eyJ1IjoibG9sbG9tYWciLCJhIjoiY21mbzNuNWRlMDFxYjJpcXJjb2Izdnd5MyJ9.FPWeAeSWVuuYwXpmHK71MQ%22%2C%22files%22%3A%5B%22https%3A%2F%2Fstylish-flowers-c12f2e4071.media.strapiapp.com%2Fgiro_lungo_195e8b9353.gpx%22%5D%7D",
@@ -279,7 +279,7 @@ export default function PercorsiPage() {
             <Card elevation={2} sx={{ p: 2, textAlign: 'center' }}>
               <Straighten sx={{ fontSize: 40, color: '#A52D0C', mb: 1 }} />
               <Typography variant="h4" fontWeight={700} color="#A52D0C">
-                117 km
+                122 km
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Distanza totale

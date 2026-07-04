@@ -15,6 +15,7 @@ import {
 } from '@react-email/components';
 import * as React from 'react';
 import { EVENT, PRICING } from '../../config/event';
+import { getGaraDisplayName } from '../../config/liberatorie';
 
 interface ConfermaIscrizioneEmailProps {
   nome: string;
@@ -36,11 +37,9 @@ export const ConfermaIscrizioneEmail = ({
   codiceRegistrazione,
 }: ConfermaIscrizioneEmailProps) => {
   const previewText = `Conferma iscrizione Beverino Bike Festival - ${nome} ${cognome}`;
-  const tipoGaraText = tipo_gara === 'ciclistica' ? 'Raduno ciclistico' : 'Raduno running';
+  const tipoGaraText = getGaraDisplayName(tipo_gara);
   const prezzoGara = tipo_gara === 'ciclistica' ? PRICING.ciclistica : PRICING.running;
-  // NOTA: qui il Pasta Party è calcolato a €10/persona, mentre il prezzo reale è PRICING.pastaParty (€12).
-  // Mantenuto invariato per non alterare il contenuto: da verificare/allineare con l'organizzazione.
-  const prezzoPastaParty = numeroPartecipantiPastaParty * 10;
+  const prezzoPastaParty = numeroPartecipantiPastaParty * PRICING.pastaParty;
 
   return (
     <Html>

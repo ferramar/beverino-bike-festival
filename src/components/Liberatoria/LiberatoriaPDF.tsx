@@ -7,9 +7,13 @@ import {
   View,
   StyleSheet,
   Image,
-  Font,
 } from '@react-pdf/renderer';
 import { EVENT } from '../../config/event';
+import {
+  getLiberatoriaCopy,
+  buildLuogoEData,
+  type OnlineTipoGara,
+} from '../../config/liberatorie';
 
 // Registra font personalizzati se necessario
 // Font.register({
@@ -22,18 +26,36 @@ const styles = StyleSheet.create({
   page: {
     flexDirection: 'column',
     backgroundColor: '#FFFFFF',
-    padding: 40,
+    paddingTop: 102,
+    paddingBottom: 40,
+    paddingHorizontal: 40,
     fontSize: 11,
     fontFamily: 'Helvetica',
   },
-  header: {
-    marginBottom: 30,
-    alignItems: 'center',
+  pageHeaderFixed: {
+    position: 'absolute',
+    top: 18,
+    left: 40,
+    right: 40,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
   },
   logo: {
-    width: 80,
-    height: 80,
-    marginBottom: 10,
+    width: 40,
+    height: 40,
+  },
+  headerTextBlock: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  headerOrgName: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginBottom: 2,
+  },
+  headerOrgLine: {
+    fontSize: 10,
+    lineHeight: 1.35,
   },
   title: {
     fontSize: 14,
@@ -124,6 +146,77 @@ const styles = StyleSheet.create({
   },
 });
 
+const LOGO_SRC =
+  process.env.NODE_ENV === 'production'
+    ? `${process.env.NEXT_PUBLIC_SITE_URL || EVENT.siteUrl}/logo.png`
+    : 'http://localhost:3000/logo.png';
+
+/** Intestazione fissa: logo + dati ASD su ogni pagina (anche overflow). */
+function PdfPageHeader() {
+  return (
+    <View fixed style={styles.pageHeaderFixed}>
+      <Image style={styles.logo} src={LOGO_SRC} />
+      <View style={styles.headerTextBlock}>
+        <Text style={styles.headerOrgName}>A.S.D. Beverino Bikers</Text>
+        <Text style={styles.headerOrgLine}>V. S. Maurizio, 24</Text>
+        <Text style={styles.headerOrgLine}>19020 Beverino (SP)</Text>
+      </View>
+    </View>
+  );
+}
+
+/** Numerazione dinamica su ogni foglio del documento. */
+function PdfPageNumber() {
+  return (
+    <Text
+      fixed
+      style={styles.pageNumber}
+      render={({ pageNumber }) => `${pageNumber}`}
+    />
+  );
+}
+
+/** Evita che label e valore finiscano su pagine diverse. */
+function FormRow({
+  children,
+  style,
+}: {
+  children: React.ReactNode;
+  style?: typeof styles.row | Array<typeof styles.row | Record<string, unknown>>;
+}) {
+  return (
+    <View wrap={false} style={style ? [styles.row, ...(Array.isArray(style) ? style : [style])] : styles.row}>
+      {children}
+    </View>
+  );
+}
+
+function FormField({
+  label,
+  value,
+  width,
+}: {
+  label: string;
+  value: string;
+  width?: string;
+}) {
+  return (
+    <View wrap={false} style={width ? { width } : styles.halfRow}>
+      <Text style={styles.label}>{label}</Text>
+      <Text style={styles.value}>{value}</Text>
+    </View>
+  );
+}
+
+function FormRowInline({ label, value }: { label: string; value: string }) {
+  return (
+    <View wrap={false} style={styles.row}>
+      <Text style={styles.label}>{label}</Text>
+      <Text style={styles.value}>{value}</Text>
+    </View>
+  );
+}
+
 export interface LiberatoriaData {
   nome: string;
   cognome: string;
@@ -155,10 +248,25 @@ export interface LiberatoriaData {
   // Dati tutore
   nomeTutore?: string;
   cognomeTutore?: string;
+  /** Slug gara per copy variabile (ciclistica | running). */
+  tipo_gara?: OnlineTipoGara;
+  /** Timestamp accettazione digitale (es. "04/07/2026, 16:30"). */
+  accettazioneDigitale?: string;
 }
 
 // Funzione helper per creare il documento
 export const createLiberatoriaPDF = (data: LiberatoriaData) => {
+  const copy = getLiberatoriaCopy(data.tipo_gara || 'ciclistica');
+
+  const compilationDate = data.accettazioneDigitale
+    ? data.accettazioneDigitale.split(',')[0].trim()
+    : undefined;
+  const luogoEData = buildLuogoEData(data.comuneResidenza, compilationDate);
+  const luogoEDataGenitore = buildLuogoEData(
+    data.comuneResidenzaGenitore || data.comuneResidenza,
+    compilationDate
+  );
+
   const formatDate = (dateString: string) => {
     if (!dateString || dateString.trim() === '') return '___________';
     
@@ -180,24 +288,12 @@ export const createLiberatoriaPDF = (data: LiberatoriaData) => {
     <Document>
       {/* Pagina 1 - Modulo di iscrizione */}
       <Page size="A4" style={styles.page}>
-        {/* Header con logo */}
-        <View style={styles.header}>
-          {/* Logo - usa path assoluto o base64 */}
-          <Image 
-            style={styles.logo} 
-            src={process.env.NODE_ENV === 'production' 
-              ? `${process.env.NEXT_PUBLIC_SITE_URL}/logo.png`
-              : 'http://localhost:3000/logo.png'
-            } 
-          />
-          <Text style={styles.title}>A.S.D. Beverino Bikers</Text>
-          <Text>V. S. Maurizio, 24</Text>
-          <Text>19020 Beverino (SP)</Text>
-        </View>
+        <PdfPageHeader />
+        <PdfPageNumber />
 
         {/* Titolo modulo */}
         <Text style={[styles.title, { marginBottom: 20 }]}>
-          MODULO DI ISCRIZIONE ALL'EVENTO SPORTIVO "BEVERINO BIKE FESTIVAL" {EVENT.eventDateShort}{'\n'}
+          MODULO DI ISCRIZIONE ALL&apos;EVENTO SPORTIVO &quot;{copy.moduleTitle}&quot; {EVENT.eventDateShort}{'\n'}
           E CONTESTUALE LIBERATORIA PER IL PARTECIPANTE
         </Text>
 
@@ -205,74 +301,47 @@ export const createLiberatoriaPDF = (data: LiberatoriaData) => {
         <Text style={{ marginBottom: 10 }}>Il/la sottoscritto/a</Text>
         
         <View style={styles.section}>
-          <View style={styles.row}>
-            <View style={styles.halfRow}>
-              <Text style={styles.label}>Nome</Text>
-              <Text style={styles.value}>{data.nome || '________________________'}</Text>
-            </View>
-            <View style={styles.halfRow}>
-              <Text style={styles.label}>Cognome</Text>
-              <Text style={styles.value}>{data.cognome || '________________________'}</Text>
-            </View>
-          </View>
+          <FormRow>
+            <FormField label="Nome" value={data.nome || '________________________'} />
+            <FormField label="Cognome" value={data.cognome || '________________________'} />
+          </FormRow>
 
-          <View style={styles.row}>
-            <View style={styles.halfRow}>
-              <Text style={styles.label}>Nato a</Text>
-              <Text style={styles.value}>{data.luogoNascita || '________________________'}</Text>
-            </View>
-            <View style={styles.halfRow}>
-              <Text style={styles.label}>il</Text>
-              <Text style={styles.value}>{formatDate(data.dataNascita)}</Text>
-            </View>
-          </View>
+          <FormRow>
+            <FormField label="Nato a" value={data.luogoNascita || '________________________'} />
+            <FormField label="il" value={formatDate(data.dataNascita)} />
+          </FormRow>
 
-          <View style={styles.row}>
-            <Text style={styles.label}>Residente in</Text>
-            <Text style={styles.value}>{data.comuneResidenza || '________________________'}</Text>
-          </View>
+          <FormRowInline
+            label="Residente in"
+            value={data.comuneResidenza || '________________________'}
+          />
 
-          <View style={styles.row}>
-            <View style={styles.halfRow}>
-              <Text style={styles.label}>Via</Text>
-              <Text style={styles.value}>{data.residenza || '________________________'}</Text>
-            </View>
-            <View style={{ width: '25%' }}>
-              <Text style={styles.label}>n°</Text>
-              <Text style={styles.value}>{data.numeroCivico || '____'}</Text>
-            </View>
-            <View style={{ width: '25%' }}>
-              <Text style={styles.label}>C.A.P.</Text>
-              <Text style={styles.value}>{data.cap || '_________'}</Text>
-            </View>
-          </View>
+          <FormRow>
+            <FormField label="Via" value={data.residenza || '________________________'} width="48%" />
+            <FormField label="n°" value={data.numeroCivico || '____'} width="25%" />
+            <FormField label="C.A.P." value={data.cap || '_________'} width="25%" />
+          </FormRow>
 
-          <View style={styles.row}>
-            <Text style={styles.label}>E-mail</Text>
-            <Text style={styles.value}>{data.email || '________________________'}</Text>
-          </View>
+          <FormRowInline label="E-mail" value={data.email || '________________________'} />
 
-          <View style={styles.row}>
-            <View style={styles.halfRow}>
-              <Text style={styles.label}>Tipo</Text>
-              <Text style={styles.value}>{data.tipoDocumento === 'cartaIdentita' ? "Carta d'identità" : data.tipoDocumento === 'patente' ? 'Patente' : data.tipoDocumento || '________________________'}</Text>
-            </View>
-            <View style={styles.halfRow}>
-              <Text style={styles.label}>N°</Text>
-              <Text style={styles.value}>{data.numeroDocumento || '________________________'}</Text>
-            </View>
-          </View>
+          <FormRow>
+            <FormField
+              label="Tipo"
+              value={
+                data.tipoDocumento === 'cartaIdentita'
+                  ? "Carta d'identità"
+                  : data.tipoDocumento === 'patente'
+                    ? 'Patente'
+                    : data.tipoDocumento || '________________________'
+              }
+            />
+            <FormField label="N°" value={data.numeroDocumento || '________________________'} />
+          </FormRow>
 
-          <View style={styles.row}>
-            <View style={styles.halfRow}>
-              <Text style={styles.label}>Luogo</Text>
-              <Text style={styles.value}>{data.cittaRilascio || '________________________'}</Text>
-            </View>
-            <View style={styles.halfRow}>
-              <Text style={styles.label}>Data di rilascio</Text>
-              <Text style={styles.value}>{formatDate(data.dataRilascioDocumento)}</Text>
-            </View>
-          </View>
+          <FormRow>
+            <FormField label="Luogo" value={data.cittaRilascio || '________________________'} />
+            <FormField label="Data di rilascio" value={formatDate(data.dataRilascioDocumento)} />
+          </FormRow>
         </View>
 
         <Text style={[styles.text, { marginTop: 20, marginBottom: 10 }]}>
@@ -280,7 +349,7 @@ export const createLiberatoriaPDF = (data: LiberatoriaData) => {
         </Text>
         <Text style={[styles.title, { fontSize: 13 }]}>chiede</Text>
         <Text style={styles.text}>
-          l'iscrizione, all'evento sportivo Beverino Bike Festival, che si svolgerà in data {EVENT.eventDateShort} presso {EVENT.location}
+          l&apos;iscrizione, all&apos;evento sportivo {copy.enrollmentEventName}, che si svolgerà in data {EVENT.eventDateShort} presso {EVENT.location}
         </Text>
 
         {/* Sezione minore - SEMPRE VISIBILE */}
@@ -289,87 +358,73 @@ export const createLiberatoriaPDF = (data: LiberatoriaData) => {
         </Text>
         
         <View style={styles.section}>
-          <View style={styles.row}>
-            <View style={styles.halfRow}>
-              <Text style={styles.label}>Nome</Text>
-              <Text style={styles.value}>{data.nomeGenitore || '________________________'}</Text>
-            </View>
-            <View style={styles.halfRow}>
-              <Text style={styles.label}>Cognome</Text>
-              <Text style={styles.value}>{data.cognomeGenitore || '________________________'}</Text>
-            </View>
-          </View>
+          <FormRow>
+            <FormField label="Nome" value={data.nomeGenitore || '________________________'} />
+            <FormField label="Cognome" value={data.cognomeGenitore || '________________________'} />
+          </FormRow>
 
-          <View style={styles.row}>
-            <View style={styles.halfRow}>
-              <Text style={styles.label}>Nato a</Text>
-              <Text style={styles.value}>{data.luogoNascitaGenitore || '________________________'}</Text>
-            </View>
-            <View style={styles.halfRow}>
-              <Text style={styles.label}>il</Text>
-              <Text style={styles.value}>{formatDate(data.dataNascitaGenitore || '')}</Text>
-            </View>
-          </View>
+          <FormRow>
+            <FormField label="Nato a" value={data.luogoNascitaGenitore || '________________________'} />
+            <FormField label="il" value={formatDate(data.dataNascitaGenitore || '')} />
+          </FormRow>
 
-          <View style={styles.row}>
-            <Text style={styles.label}>Residente in</Text>
-            <Text style={styles.value}>{data.comuneResidenzaGenitore || '________________________'}</Text>
-          </View>
+          <FormRowInline
+            label="Residente in"
+            value={data.comuneResidenzaGenitore || '________________________'}
+          />
 
-          <View style={styles.row}>
-            <View style={styles.halfRow}>
-              <Text style={styles.label}>Via</Text>
-              <Text style={styles.value}>{data.viaResidenzaGenitore || '________________________'}</Text>
-            </View>
-            <View style={{ width: '25%' }}>
-              <Text style={styles.label}>n°</Text>
-              <Text style={styles.value}>{data.numeroCivicoGenitore || '____'}</Text>
-            </View>
-            <View style={{ width: '25%' }}>
-              <Text style={styles.label}>C.A.P.</Text>
-              <Text style={styles.value}>{data.capGenitore || '_________'}</Text>
-            </View>
-          </View>
+          <FormRow>
+            <FormField label="Via" value={data.viaResidenzaGenitore || '________________________'} width="48%" />
+            <FormField label="n°" value={data.numeroCivicoGenitore || '____'} width="25%" />
+            <FormField label="C.A.P." value={data.capGenitore || '_________'} width="25%" />
+          </FormRow>
 
-          <View style={styles.row}>
-            <Text style={styles.label}>E-mail</Text>
-            <Text style={styles.value}>{data.emailGenitore || '________________________'}</Text>
-          </View>
+          <FormRowInline label="E-mail" value={data.emailGenitore || '________________________'} />
 
-          <View style={styles.row}>
-            <View style={styles.halfRow}>
-              <Text style={styles.label}>Doc. D'Identità</Text>
-              <Text style={styles.value}>{data.tipoDocumentoGenitore === 'cartaIdentita' ? "Carta d'identità" : data.tipoDocumentoGenitore === 'patente' ? 'Patente' : '________________________'}</Text>
-            </View>
-          </View>
+          <FormRow>
+            <FormField
+              label="Doc. D'Identità"
+              value={
+                data.tipoDocumentoGenitore === 'cartaIdentita'
+                  ? "Carta d'identità"
+                  : data.tipoDocumentoGenitore === 'patente'
+                    ? 'Patente'
+                    : '________________________'
+              }
+            />
+          </FormRow>
 
-          <View style={styles.row}>
-            <View style={styles.halfRow}>
-              <Text style={styles.label}>Tipo</Text>
-              <Text style={styles.value}>{data.tipoDocumentoGenitore === 'cartaIdentita' ? "Carta d'identità" : data.tipoDocumentoGenitore === 'patente' ? 'Patente' : '________________________'}</Text>
-            </View>
-            <View style={styles.halfRow}>
-              <Text style={styles.label}>N°</Text>
-              <Text style={styles.value}>{data.numeroDocumentoGenitore || '________________________'}</Text>
-            </View>
-          </View>
+          <FormRow>
+            <FormField
+              label="Tipo"
+              value={
+                data.tipoDocumentoGenitore === 'cartaIdentita'
+                  ? "Carta d'identità"
+                  : data.tipoDocumentoGenitore === 'patente'
+                    ? 'Patente'
+                    : '________________________'
+              }
+            />
+            <FormField label="N°" value={data.numeroDocumentoGenitore || '________________________'} />
+          </FormRow>
 
-          <View style={styles.row}>
-            <View style={styles.halfRow}>
-              <Text style={styles.label}>Luogo</Text>
-              <Text style={styles.value}>{data.cittaRilascioGenitore || '________________________'}</Text>
-            </View>
-            <View style={styles.halfRow}>
-              <Text style={styles.label}>Data di rilascio</Text>
-              <Text style={styles.value}>{data.dataRilascioDocumentoGenitore ? formatDate(data.dataRilascioDocumentoGenitore) : '________________________'}</Text>
-            </View>
-          </View>
+          <FormRow>
+            <FormField label="Luogo" value={data.cittaRilascioGenitore || '________________________'} />
+            <FormField
+              label="Data di rilascio"
+              value={
+                data.dataRilascioDocumentoGenitore
+                  ? formatDate(data.dataRilascioDocumentoGenitore)
+                  : '________________________'
+              }
+            />
+          </FormRow>
         </View>
 
         {/* Firma */}
-        <View style={styles.signature}>
+        <View wrap={false} style={styles.signature}>
           <View style={styles.signatureBox}>
-            <Text>Luogo e Data, _____________________</Text>
+            <Text>{luogoEData}</Text>
           </View>
           <View style={styles.signatureBox}>
             <View style={styles.signatureLine} />
@@ -377,11 +432,13 @@ export const createLiberatoriaPDF = (data: LiberatoriaData) => {
           </View>
         </View>
 
-        <Text style={styles.pageNumber}>1</Text>
       </Page>
 
       {/* Pagina 2 - Dichiarazione di esonero */}
       <Page size="A4" style={styles.page}>
+        <PdfPageHeader />
+        <PdfPageNumber />
+
         <Text style={styles.declarationTitle}>
           DICHIARAZIONE DI ESONERO DI RESPONSABILITA' DEGLI ORGANIZZATORI
         </Text>
@@ -391,16 +448,10 @@ export const createLiberatoriaPDF = (data: LiberatoriaData) => {
           Nel caso in cui il genitore del minore non partecipasse al raduno indicare generalità di un tutore maggiorenne che ne partecipi
         </Text>
         
-        <View style={[styles.row, { marginBottom: 30 }]}>
-          <View style={styles.halfRow}>
-            <Text style={styles.label}>Nome</Text>
-            <Text style={styles.value}>{data.nomeTutore || '________________________'}</Text>
-          </View>
-          <View style={styles.halfRow}>
-            <Text style={styles.label}>Cognome</Text>
-            <Text style={styles.value}>{data.cognomeTutore || '________________________'}</Text>
-          </View>
-        </View>
+        <FormRow style={{ marginBottom: 30 }}>
+          <FormField label="Nome" value={data.nomeTutore || '________________________'} />
+          <FormField label="Cognome" value={data.cognomeTutore || '________________________'} />
+        </FormRow>
 
         <View style={styles.section}>
           <Text style={styles.listItem}>
@@ -425,9 +476,9 @@ export const createLiberatoriaPDF = (data: LiberatoriaData) => {
         </Text>
 
         {/* Firma */}
-        <View style={styles.signature}>
+        <View wrap={false} style={styles.signature}>
           <View style={styles.signatureBox}>
-            <Text>Luogo e Data _______________</Text>
+            <Text>{luogoEData}</Text>
           </View>
           <View style={styles.signatureBox}>
             <View style={styles.signatureLine} />
@@ -446,9 +497,9 @@ export const createLiberatoriaPDF = (data: LiberatoriaData) => {
         </View>
 
         {/* Firma privacy */}
-        <View style={styles.signature}>
+        <View wrap={false} style={styles.signature}>
           <View style={styles.signatureBox}>
-            <Text>Luogo e Data _______________</Text>
+            <Text>{luogoEData}</Text>
           </View>
           <View style={styles.signatureBox}>
             <View style={styles.signatureLine} />
@@ -456,11 +507,13 @@ export const createLiberatoriaPDF = (data: LiberatoriaData) => {
           </View>
         </View>
 
-        <Text style={styles.pageNumber}>2</Text>
       </Page>
 
       {/* Pagina 3 - Liberatoria finale */}
       <Page size="A4" style={styles.page}>
+        <PdfPageHeader />
+        <PdfPageNumber />
+
         <Text style={[styles.declarationTitle, { marginBottom: 20 }]}>
           LIBERATORIA DI RESPONSABILITA' PER PARTECIPAZIONE AD EVENTI SPORTIVI
         </Text>
@@ -481,11 +534,11 @@ export const createLiberatoriaPDF = (data: LiberatoriaData) => {
           </Text>
 
           <Text style={styles.listItem}>
-            - di accettare, con l'iscrizione, tutte le condizioni richieste dall'organizzazione pena l'esclusione. Autorizza la pubblicazione di foto (con la propria immagine) effettuate durante il "Beverino Bike Festival {EVENT.eventDateShort}" nei mezzi di comunicazione usati dall'organizzazione.
+            - di accettare, con l&apos;iscrizione, tutte le condizioni richieste dall&apos;organizzazione pena l&apos;esclusione. Autorizza la pubblicazione di foto (con la propria immagine) effettuate durante il &quot;{copy.photoAuthorizationLabel}&quot; nei mezzi di comunicazione usati dall&apos;organizzazione.
           </Text>
 
           <Text style={styles.listItem}>
-            - Di aver letto, sottoscritto e accettato integralmente il regolamento del evento B.B.F. {EVENT.year}
+            - Di aver letto, sottoscritto e accettato integralmente il regolamento del evento {copy.regulationLabel}
           </Text>
         </View>
 
@@ -498,7 +551,7 @@ export const createLiberatoriaPDF = (data: LiberatoriaData) => {
         </Text>
 
         <Text style={styles.text}>
-          Il/La sottoscritto/a, preso atto del D.Lgs. 196/03 e s.m.i., autorizza l'organizzazione dell'evento "Beverino Bike Festival {EVENT.eventDateShort}" al trattamento dei dati personali che lo riguardano; tale trattamento, cautelato da opportune misure idonee a garantire la sicurezza e la riservatezza dei dati stessi, avverrà esclusivamente per finalità legate all'evento/gara/manifestazione.
+          Il/La sottoscritto/a, preso atto del D.Lgs. 196/03 e s.m.i., autorizza l&apos;organizzazione dell&apos;evento &quot;{copy.privacyOrganizationLabel}&quot; al trattamento dei dati personali che lo riguardano; tale trattamento, cautelato da opportune misure idonee a garantire la sicurezza e la riservatezza dei dati stessi, avverrà esclusivamente per finalità legate all&apos;evento/gara/manifestazione.
         </Text>
 
         <Text style={[styles.text, { marginTop: 20 }]}>
@@ -506,9 +559,9 @@ export const createLiberatoriaPDF = (data: LiberatoriaData) => {
         </Text>
 
         {/* Firma finale */}
-        <View style={[styles.signature, { marginTop: 40 }]}>
+        <View wrap={false} style={[styles.signature, { marginTop: 40 }]}>
           <View style={styles.signatureBox}>
-            <Text>Luogo e Data _______________</Text>
+            <Text>{luogoEData}</Text>
           </View>
           <View style={styles.signatureBox}>
             <View style={styles.signatureLine} />
@@ -521,9 +574,9 @@ export const createLiberatoriaPDF = (data: LiberatoriaData) => {
         </Text>
 
         {/* Firma genitore - SEMPRE VISIBILE */}
-        <View style={[styles.signature, { marginTop: 30 }]}>
+        <View wrap={false} style={[styles.signature, { marginTop: 30 }]}>
           <View style={styles.signatureBox}>
-            <Text>Luogo e Data _______________</Text>
+            <Text>{luogoEDataGenitore}</Text>
           </View>
           <View style={styles.signatureBox}>
             <View style={styles.signatureLine} />
@@ -531,7 +584,6 @@ export const createLiberatoriaPDF = (data: LiberatoriaData) => {
           </View>
         </View>
 
-        <Text style={styles.pageNumber}>3</Text>
       </Page>
     </Document>
   );

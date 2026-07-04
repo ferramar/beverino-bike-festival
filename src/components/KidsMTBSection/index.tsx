@@ -52,7 +52,7 @@ export default function KidsMTBSection() {
               WebkitTextFillColor: 'transparent',
             }}
           >
-            Corso MTB per Bambini
+            2° Open Day MTB per Bambini
           </Typography>
 
           <Typography
@@ -74,7 +74,7 @@ export default function KidsMTBSection() {
 
               <Typography variant="body1" paragraph sx={{ fontSize: '1.1rem', lineHeight: 1.8 }}>
                 Durante il Beverino Bike Festival, i bambini potranno partecipare
-                gratuitamente a un corso di mountain bike tenuto da istruttori qualificati.
+                gratuitamente a un open day di mountain bike con istruttori qualificati.
                 Un modo divertente e sicuro per avvicinarsi a questo sport!
               </Typography>
 
@@ -193,7 +193,7 @@ export default function KidsMTBSection() {
                       textDecoration: 'underline',
                     }
                   }}>
-                    <strong>Orario corso:</strong> 10:00 - 12:00<br />
+                    <strong>Orario:</strong> 10:00 - 12:00<br />
                     <strong>Punto di ritrovo:</strong>  <a href="https://www.google.com/maps/place/Centro+polivalente/@44.1889504,9.7845131,820m/data=!3m2!1e3!4b1!4m6!3m5!1s0x12d4e500267e88d5:0xb3caafcdd521e82c!8m2!3d44.1889504!4d9.787088!16s%2Fg%2F11whhkcj68?entry=ttu&g_ep=EgoyMDI1MDcxNi4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer">Centro polivalente Beverino</a>
                   </Typography>
                 </Alert>

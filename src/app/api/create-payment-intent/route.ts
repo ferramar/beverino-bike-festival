@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe-server';
 import { EVENT } from '@/config/event';
+import { getGaraDisplayName } from '@/config/liberatorie';
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,7 +10,7 @@ export async function POST(request: NextRequest) {
     // Crea una descrizione dettagliata per la ricevuta
     let description = `Iscrizione Beverino Bike Festival ${EVENT.year}`;
     if (metadata.tipo_gara) {
-      description += ` - Gara ${metadata.tipo_gara === 'ciclistica' ? 'Ciclistica' : 'Running'}`;
+      description += ` - ${getGaraDisplayName(metadata.tipo_gara)}`;
     }
     if (metadata.pasta_party_count && parseInt(metadata.pasta_party_count) > 0) {
       description += ` + Pasta Party (${metadata.pasta_party_count} persone)`;

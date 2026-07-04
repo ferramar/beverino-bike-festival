@@ -7,24 +7,25 @@
  */
 
 export const EVENT = {
-  /** Numero dell'edizione (es. 4 = quarta edizione). */
-  edition: 4,
-  /** Ordinale testuale dell'edizione, usato nei testi ("quarta edizione"). */
-  editionLabel: "quarta",
+  /** Numero dell'edizione (es. 5 = quinta edizione). */
+  edition: 5,
+  /** Ordinale testuale dell'edizione, usato nei testi ("quinta edizione"). */
+  editionLabel: "quinta",
   /** Anno dell'evento. */
-  year: 2025,
+  year: 2026,
   /** Data/ora di inizio evento in formato ISO, usata per il countdown. */
-  eventDateISO: "2025-09-21T00:00:00",
+  eventDateISO: "2026-09-20T00:00:00",
   /** Data evento in formato breve (documenti/liberatoria). */
-  eventDateShort: "21/09/2025",
+  eventDateShort: "20/09/2026",
   /** Data evento in formato esteso, usata nei testi visibili. */
-  eventDateLabel: "21 Settembre 2025",
+  eventDateLabel: "20 Settembre 2026",
   /**
    * Chiusura iscrizioni online (ISO). Configurabile via env NEXT_PUBLIC_REG_CLOSING_ISO,
-   * con fallback al valore storico per non alterare il comportamento se la env manca.
+   * con fallback al valore di default se la env manca.
+   * NB: in produzione il valore effettivo arriva dalla env di Vercel.
    */
   registrationClosingISO:
-    process.env.NEXT_PUBLIC_REG_CLOSING_ISO || "2025-09-20T23:59:59",
+    process.env.NEXT_PUBLIC_REG_CLOSING_ISO || "2026-09-19T23:59:59",
   /** Località dell'evento. */
   location: "Beverino (SP)",
   /** URL canonico del sito. */
@@ -41,7 +42,7 @@ export const PRICING = {
   /** Iscrizione raduno running/podistico. */
   running: 10,
   /** Pasta Party, prezzo per persona. */
-  pastaParty: 12,
+  pastaParty: 13,
 } as const;
 
 /** Converte un importo in euro nei centesimi richiesti da Stripe. */

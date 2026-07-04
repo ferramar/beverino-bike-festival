@@ -193,7 +193,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
 export default function PricingSection() {
 	const pricingData = [
 		{
-			title: 'Raduno Running',
+			title: 'Beverino Walk Festival',
 			price: PRICING.running,
 			description: 'Perfetto per chi ama correre tra i sentieri della Val di Vara',
 			icon: <DirectionsRun sx={{ fontSize: 40 }} />,
@@ -207,7 +207,7 @@ export default function PricingSection() {
 			popular: false,
 		},
 		{
-			title: 'Raduno Ciclistico',
+			title: 'Beverino Bike Festival',
 			price: PRICING.ciclistica,
 			description: 'L\'esperienza completa per gli amanti del ciclismo',
 			icon: <DirectionsBike sx={{ fontSize: 40 }} />,
@@ -308,7 +308,7 @@ export default function PricingSection() {
 							<Stack direction="row" spacing={1} alignItems="center">
                                 <Timer color={isRegistrationOpen() ? 'warning' : 'error'} />
 								<Typography variant="body1">
-                                    {isRegistrationOpen() ? 'Iscrizioni aperte fino al 20 settembre ore 22' : 'Iscrizioni chiuse - Iscrizione sul posto il 21 settembre'}
+                                    {isRegistrationOpen() ? 'Iscrizioni aperte fino al 19 settembre' : 'Iscrizioni chiuse - Iscrizione sul posto il 20 settembre'}
 								</Typography>
 							</Stack>
 						</Box>
