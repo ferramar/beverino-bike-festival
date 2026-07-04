@@ -12,7 +12,7 @@ export const EVENT = {
   /** Ordinale testuale dell'edizione, usato nei testi ("quinta edizione"). */
   editionLabel: "quinta",
   /** Anno dell'evento. */
-  year: 2026,
+  year: 2026, 
   /** Data/ora di inizio evento in formato ISO, usata per il countdown. */
   eventDateISO: "2026-09-20T00:00:00",
   /** Data evento in formato breve (documenti/liberatoria). */
