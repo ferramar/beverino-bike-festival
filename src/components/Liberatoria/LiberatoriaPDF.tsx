@@ -177,15 +177,9 @@ function PdfPageNumber() {
 }
 
 /** Evita che label e valore finiscano su pagine diverse. */
-function FormRow({
-  children,
-  style,
-}: {
-  children: React.ReactNode;
-  style?: typeof styles.row | Array<typeof styles.row | Record<string, unknown>>;
-}) {
+function FormRow({ children }: { children: React.ReactNode }) {
   return (
-    <View wrap={false} style={style ? [styles.row, ...(Array.isArray(style) ? style : [style])] : styles.row}>
+    <View wrap={false} style={styles.row}>
       {children}
     </View>
   );
@@ -448,10 +442,10 @@ export const createLiberatoriaPDF = (data: LiberatoriaData) => {
           Nel caso in cui il genitore del minore non partecipasse al raduno indicare generalità di un tutore maggiorenne che ne partecipi
         </Text>
         
-        <FormRow style={{ marginBottom: 30 }}>
+        <View wrap={false} style={[styles.row, { marginBottom: 30 }]}>
           <FormField label="Nome" value={data.nomeTutore || '________________________'} />
           <FormField label="Cognome" value={data.cognomeTutore || '________________________'} />
-        </FormRow>
+        </View>
 
         <View style={styles.section}>
           <Text style={styles.listItem}>
