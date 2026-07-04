@@ -2,7 +2,8 @@
 'use client'
 
 import { ReactNode } from 'react'
-import { ThemeProvider, CssBaseline } from '@mui/material'
+import { ThemeProvider } from '@mui/material/styles'
+import CssBaseline from '@mui/material/CssBaseline'
 import theme from '../theme'
 
 export function Providers({ children }: { children: ReactNode }) {

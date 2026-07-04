@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+"use client"
+import React, { useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
 import {
   Box,
-  Button,
   Card,
   CardContent,
   FormControl,
@@ -16,8 +16,6 @@ import {
   Checkbox,
   IconButton,
   Paper,
-  useTheme,
-  useMediaQuery,
 } from '@mui/material';
 import DirectionsBikeIcon from '@mui/icons-material/DirectionsBike';
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
@@ -29,8 +27,6 @@ import { getGaraDisplayName } from '../../config/liberatorie';
 
 export default function FinalRegistrationStep() {
   const { watch, setValue, formState: { errors }, register, getValues } = useFormContext();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
   const tipoGara = watch('tipo_gara', '');
   const pastaPartyEnabled = watch('pasta_party_enabled', false);
