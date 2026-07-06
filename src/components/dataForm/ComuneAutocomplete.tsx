@@ -81,7 +81,7 @@ export default function ComuneAutocomplete({
           helperText={helperText || 'Cerca e seleziona il comune'}
           InputLabelProps={{
             ...params.InputLabelProps,
-            shrink: Boolean(inputValue) || Boolean(selected),
+            shrink: Boolean(inputValue) || Boolean(selected) || Boolean(value),
           }}
           inputProps={{
             ...params.inputProps,

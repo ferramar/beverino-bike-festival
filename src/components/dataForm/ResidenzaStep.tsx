@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Grid, TextField, Typography } from '@mui/material';
 import { useFormContext } from 'react-hook-form';
 import ComuneAutocomplete from './ComuneAutocomplete';
@@ -15,6 +15,12 @@ export default function ResidenzaStep() {
 
   const comuneResidenza = watch('comuneResidenza') || '';
   const cap = watch('cap');
+  const residenza = watch('residenza') || '';
+  const numeroCivico = watch('numeroCivico') || '';
+
+  useEffect(() => {
+    register('comuneResidenza', { required: 'Inserisci il comune di residenza' });
+  }, [register]);
 
   return (
     <>
@@ -38,6 +44,7 @@ export default function ResidenzaStep() {
             label="Via/Corso/Piazza*"
             placeholder="Via Roma, Corso Italia, ..."
             fullWidth
+            InputLabelProps={{ shrink: Boolean(residenza) }}
             inputProps={{ autoComplete: 'street-address' }}
             {...register('residenza', { required: 'Inserisci la via di residenza' })}
             error={!!errors.residenza}
@@ -48,6 +55,7 @@ export default function ResidenzaStep() {
           <TextField
             label="Numero civico*"
             fullWidth
+            InputLabelProps={{ shrink: Boolean(numeroCivico) }}
             inputProps={{ autoComplete: 'off' }}
             {...register('numeroCivico', { required: 'Inserisci il numero civico' })}
             error={!!errors.numeroCivico}

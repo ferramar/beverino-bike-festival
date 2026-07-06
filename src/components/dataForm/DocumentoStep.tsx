@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Box,
   Checkbox,
@@ -22,6 +22,7 @@ export default function DocumentoStep() {
     register,
     control,
     setValue,
+    getValues,
     watch,
     formState: { errors },
   } = useFormContext();
@@ -31,8 +32,14 @@ export default function DocumentoStep() {
   const birthDateValue = useWatch({ control, name: 'dataNascita' });
   const tipoDocumentoValue = watch('tipoDocumento');
   const tipoDocumentoGenitoreValue = watch('tipoDocumentoGenitore');
+  const cittaRilascio = watch('cittaRilascio') || '';
   const comuneResidenzaGenitore = watch('comuneResidenzaGenitore') || '';
-  const capGenitore = watch('capGenitore');
+  const viaResidenzaGenitore = watch('viaResidenzaGenitore') || '';
+  const numeroCivicoGenitore = watch('numeroCivicoGenitore') || '';
+  const capGenitore = watch('capGenitore') || '';
+  const emailGenitore = watch('emailGenitore') || '';
+  const luogoNascitaGenitore = watch('luogoNascitaGenitore') || '';
+  const cittaRilascioGenitore = watch('cittaRilascioGenitore') || '';
 
   const isMinor = useMemo(() => {
     if (!birthDateValue) return false;
@@ -48,6 +55,7 @@ export default function DocumentoStep() {
     setSameResidenceAsParticipant(checked);
     if (!checked) return;
 
+    const current = getValues();
     const fields = [
       ['comuneResidenza', 'comuneResidenzaGenitore'],
       ['residenza', 'viaResidenzaGenitore'],
@@ -57,8 +65,8 @@ export default function DocumentoStep() {
     ] as const;
 
     fields.forEach(([from, to]) => {
-      const val = watch(from);
-      if (val) setValue(to, val, { shouldValidate: true });
+      const val = current[from];
+      if (val) setValue(to, val, { shouldValidate: true, shouldDirty: true });
     });
   };
 
@@ -66,6 +74,23 @@ export default function DocumentoStep() {
     setValue('comuneResidenzaGenitore', nome, { shouldValidate: true });
     setSameResidenceAsParticipant(false);
   };
+
+  useEffect(() => {
+    register('cittaRilascio', { required: 'Inserisci la città di rilascio del documento' });
+  }, [register]);
+
+  useEffect(() => {
+    if (!isMinor) return;
+    register('luogoNascitaGenitore', {
+      required: 'Inserisci la città di nascita del genitore',
+    });
+    register('comuneResidenzaGenitore', {
+      required: 'Inserisci il comune di residenza del genitore',
+    });
+    register('cittaRilascioGenitore', {
+      required: 'Inserisci la città di rilascio del documento del genitore',
+    });
+  }, [register, isMinor]);
 
   return (
     <>
@@ -102,12 +127,11 @@ export default function DocumentoStep() {
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
-          <TextField
-            label="Città di rilascio*"
-            fullWidth
-            {...register('cittaRilascio', {
-              required: 'Inserisci la città di rilascio del documento',
-            })}
+          <ComuneAutocomplete
+            label="Città di rilascio"
+            value={cittaRilascio}
+            onChange={(nome) => setValue('cittaRilascio', nome, { shouldValidate: true })}
+            required
             error={!!errors.cittaRilascio}
             helperText={errors.cittaRilascio?.message as string}
           />
@@ -176,12 +200,13 @@ export default function DocumentoStep() {
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
-              <TextField
-                label="Città di nascita genitore*"
-                fullWidth
-                {...register('luogoNascitaGenitore', {
-                  required: isMinor ? 'Inserisci la città di nascita del genitore' : false,
-                })}
+              <ComuneAutocomplete
+                label="Città di nascita genitore"
+                value={luogoNascitaGenitore}
+                onChange={(nome) =>
+                  setValue('luogoNascitaGenitore', nome, { shouldValidate: true })
+                }
+                required={isMinor}
                 error={!!errors.luogoNascitaGenitore}
                 helperText={errors.luogoNascitaGenitore?.message as string}
               />
@@ -215,6 +240,7 @@ export default function DocumentoStep() {
               <TextField
                 label="Via/Corso/Piazza genitore*"
                 fullWidth
+                InputLabelProps={{ shrink: Boolean(viaResidenzaGenitore) }}
                 {...register('viaResidenzaGenitore', {
                   required: isMinor ? 'Inserisci la via di residenza del genitore' : false,
                 })}
@@ -226,6 +252,7 @@ export default function DocumentoStep() {
               <TextField
                 label="Numero civico genitore*"
                 fullWidth
+                InputLabelProps={{ shrink: Boolean(numeroCivicoGenitore) }}
                 {...register('numeroCivicoGenitore', {
                   required: isMinor ? 'Inserisci il numero civico del genitore' : false,
                 })}
@@ -250,6 +277,7 @@ export default function DocumentoStep() {
                 label="Email genitore*"
                 type="email"
                 fullWidth
+                InputLabelProps={{ shrink: Boolean(emailGenitore) }}
                 inputProps={{ autoComplete: 'email' }}
                 {...register('emailGenitore', {
                   required: isMinor ? 'Inserisci la mail del genitore' : false,
@@ -303,14 +331,13 @@ export default function DocumentoStep() {
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
-              <TextField
-                label="Città di rilascio documento genitore*"
-                fullWidth
-                {...register('cittaRilascioGenitore', {
-                  required: isMinor
-                    ? 'Inserisci la città di rilascio del documento del genitore'
-                    : false,
-                })}
+              <ComuneAutocomplete
+                label="Città di rilascio documento genitore"
+                value={cittaRilascioGenitore}
+                onChange={(nome) =>
+                  setValue('cittaRilascioGenitore', nome, { shouldValidate: true })
+                }
+                required={isMinor}
                 error={!!errors.cittaRilascioGenitore}
                 helperText={errors.cittaRilascioGenitore?.message as string}
               />
