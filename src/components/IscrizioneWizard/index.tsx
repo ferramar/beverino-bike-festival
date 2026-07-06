@@ -14,6 +14,12 @@ import {
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import DataForm from '../dataForm';
+import RegistrationSummary from '../RegistrationSummary';
+import {
+  DATA_SUB_STEP_COUNT,
+  getFieldsForDataSubStep,
+  isMinorFromBirthDate,
+} from '../dataForm/fields';
 import Liberatoria from '../Liberatoria';
 import FinalRegistrationStep from '../FinalRegistrationStep';
 import PaymentStep from '../PaymentStep';
@@ -39,6 +45,7 @@ interface DatiGenitore {
 }
 
 interface WizardData {
+  codiceFiscale: string;
   nome: string;
   cognome: string;
   luogoNascita: string;
@@ -83,7 +90,7 @@ interface SessionData {
   codiceRegistrazione?: string;
 }
 
-const steps = ['Opzioni', 'Dati Personali', 'Liberatoria', 'Pagamento'];
+const steps = ['Opzioni', 'Dati Personali', 'Riepilogo', 'Liberatoria', 'Pagamento'];
 const SESSION_KEY = 'beverino_registration_session';
 const SESSION_TTL = 24 * 60 * 60 * 1000; // 24 ore
 
@@ -99,6 +106,7 @@ export default function IscrizioneWizard() {
   });
   const { watch, trigger, reset, setValue, getValues } = methods;
   const [activeStep, setActiveStep] = useState(0);
+  const [dataSubStep, setDataSubStep] = useState(0);
   const [userAgent, setUserAgent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [registrationId, setRegistrationId] = useState<number | null>(null);
@@ -201,46 +209,76 @@ export default function IscrizioneWizard() {
     return () => subscription.unsubscribe();
   }, [watch, reset]);
 
-  // Validazione per step (0: Opzioni, 1: Dati, 2: Liberatoria, 3: Pagamento)
+  // Validazione per step wizard
   const fieldsPerStep: Record<number, (keyof WizardData)[]> = {
     0: ['tipo_gara'],
-    1: [
-      'nome', 'cognome', 'luogoNascita', 'dataNascita',
-      'comuneResidenza', 'residenza', 'numeroCivico', 'cap', 'email',
-      'tipoDocumento', 'numeroDocumento', 'cittaRilascio', 'dataRilascioDocumento',
-      'nomeGenitore', 'cognomeGenitore', 'luogoNascitaGenitore', 'dataNascitaGenitore',
-      'comuneResidenzaGenitore', 'viaResidenzaGenitore', 'numeroCivicoGenitore', 'capGenitore',
-      'emailGenitore', 'tipoDocumentoGenitore', 'numeroDocumentoGenitore',
-      'cittaRilascioGenitore', 'dataRilascioDocumentoGenitore',
-    ],
-    2: ['liberatoriaAccettata'],
-    3: [],
+    1: [],
+    2: [],
+    3: ['liberatoriaAccettata'],
+    4: [],
+  };
+
+  const handleEditFromSummary = (subStep: number) => {
+    if (subStep === -1) {
+      setActiveStep(0);
+      return;
+    }
+    setDataSubStep(subStep);
+    setActiveStep(1);
   };
 
   const onNext = async () => {
-    const baseToValidate = fieldsPerStep[activeStep];
-    let toValidate = baseToValidate;
-
     if (activeStep === 0) {
+      const baseToValidate = fieldsPerStep[0];
+      let toValidate = baseToValidate;
       const selectedGara = getValues('tipo_gara');
       if (selectedGara === 'ciclistica') {
         toValidate = [...baseToValidate, 'taglia_maglietta'];
       }
+      if (!(await trigger(toValidate))) return;
+      setActiveStep(1);
+      return;
     }
 
-    if (!(await trigger(toValidate))) return;
+    if (activeStep === 1) {
+      const isMinor = isMinorFromBirthDate(getValues('dataNascita'));
+      const subFields = getFieldsForDataSubStep(dataSubStep, isMinor) as (keyof WizardData)[];
+      if (!(await trigger(subFields))) return;
 
-    // Dopo liberatoria accettata: salva su Strapi prima del pagamento
+      if (dataSubStep < DATA_SUB_STEP_COUNT - 1) {
+        setDataSubStep((s) => s + 1);
+        return;
+      }
+
+      setActiveStep(2);
+      return;
+    }
+
     if (activeStep === 2) {
+      setActiveStep(3);
+      return;
+    }
+
+    if (activeStep === 3) {
+      if (!(await trigger(['liberatoriaAccettata']))) return;
       const saved = await saveRegistrationToStrapi();
       if (!saved) return;
+      setActiveStep(4);
+      return;
     }
-
-    setActiveStep((s) => s + 1);
   };
 
   const onBack = () => {
-    setActiveStep(s => s - 1);
+    if (activeStep === 1 && dataSubStep > 0) {
+      setDataSubStep((s) => s - 1);
+      return;
+    }
+    if (activeStep === 2) {
+      setActiveStep(1);
+      setDataSubStep(DATA_SUB_STEP_COUNT - 1);
+      return;
+    }
+    setActiveStep((s) => s - 1);
   };
 
   const saveRegistrationToStrapi = async (): Promise<boolean> => {
@@ -439,9 +477,12 @@ export default function IscrizioneWizard() {
       <FormProvider {...methods}>
         <Box sx={{ mb: 4 }}>
           {activeStep === 0 && <FinalRegistrationStep />}
-          {activeStep === 1 && <DataForm />}
-          {activeStep === 2 && <Liberatoria />}
-          {activeStep === 3 && registrationId && (
+          {activeStep === 1 && <DataForm activeSubStep={dataSubStep} />}
+          {activeStep === 2 && (
+            <RegistrationSummary onEditDataSubStep={handleEditFromSummary} />
+          )}
+          {activeStep === 3 && <Liberatoria />}
+          {activeStep === 4 && registrationId && (
             <PaymentStep
               totalAmount={totalAmount}
               onSuccess={handlePaymentSuccess}
@@ -452,7 +493,7 @@ export default function IscrizioneWizard() {
               userEmail={watch('email')}
             />
           )}
-          {activeStep === 3 && !registrationId && !isSubmitting && (
+          {activeStep === 4 && !registrationId && !isSubmitting && (
             <Alert severity="error" sx={{ mt: 2 }}>
               Impossibile procedere al pagamento: iscrizione non salvata. Torna indietro e riprova.
             </Alert>
@@ -460,7 +501,7 @@ export default function IscrizioneWizard() {
         </Box>
 
         {/* Bottoni navigazione */}
-        {activeStep < 4 && (
+        {activeStep < 5 && (
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Button
               disabled={activeStep === 0 || isLoading}
@@ -472,14 +513,18 @@ export default function IscrizioneWizard() {
 
             {isMobile && <Typography>{activeStep + 1}/{steps.length}</Typography>}
 
-            {activeStep < 3 && (
+            {activeStep < 4 && (
               <Button
                 variant="contained"
                 onClick={onNext}
                 disabled={isLoading}
                 startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : null}
               >
-                {isLoading ? 'Salvataggio...' : 'Avanti'}
+                {isLoading
+                  ? 'Salvataggio...'
+                  : activeStep === 1 && dataSubStep < DATA_SUB_STEP_COUNT - 1
+                    ? 'Continua'
+                    : 'Avanti'}
               </Button>
             )}
           </Box>

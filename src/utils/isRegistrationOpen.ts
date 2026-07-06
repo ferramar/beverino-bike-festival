@@ -1,10 +1,17 @@
 import { EVENT } from '../config/event';
 
+function isBeforeClosing(): boolean {
+  return new Date() <= new Date(EVENT.registrationClosingISO);
+}
+
 export function isRegistrationOpen(): boolean {
   if (typeof window !== 'undefined') {
     const sp = new URLSearchParams(window.location.search);
     if (sp.get('debugClose') === '1') return false;
-    if (sp.get('debugOpen') === '1') return true;
+    if (sp.get('debugOpen') === '1') return isBeforeClosing();
+  }
+  if (process.env.NEXT_PUBLIC_REG_FORCE_OPEN === '1') {
+    return isBeforeClosing();
   }
   const now = new Date();
   const opening = new Date(EVENT.registrationOpeningISO);

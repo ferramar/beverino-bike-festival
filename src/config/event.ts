@@ -29,8 +29,12 @@ export const EVENT = {
   /**
    * Apertura iscrizioni online (ISO). Configurabile via env NEXT_PUBLIC_REG_OPENING_ISO.
    */
+  /**
+   * feat/iscrizione-form-ux: apertura anticipata per test del form.
+   * Al merge su main ripristinare "2026-07-07T00:00:00".
+   */
   registrationOpeningISO:
-    process.env.NEXT_PUBLIC_REG_OPENING_ISO || "2026-07-07T00:00:00",
+    process.env.NEXT_PUBLIC_REG_OPENING_ISO || "2026-01-01T00:00:00",
   /** Località dell'evento. */
   location: "Beverino (SP)",
   /** URL canonico del sito. */

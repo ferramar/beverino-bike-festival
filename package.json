@@ -23,6 +23,8 @@
     "@stripe/stripe-js": "^7.3.1",
     "@vercel/analytics": "^1.5.0",
     "axios": "^1.9.0",
+    "codice-fiscale-js": "^2.3.23",
+    "comuni-json": "^1.0.0",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "framer-motion": "^12.18.1",
