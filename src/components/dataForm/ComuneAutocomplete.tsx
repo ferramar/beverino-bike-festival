@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Autocomplete, TextField } from '@mui/material';
 import { ComuneOption, loadComuni, searchComuni } from '@/utils/comuni';
 
 interface ComuneAutocompleteProps {
   label: string;
   value: string;
-  onChange: (nome: string, cap?: string) => void;
+  onChange: (nome: string) => void;
   error?: boolean;
   helperText?: string;
   required?: boolean;
@@ -37,7 +37,7 @@ export default function ComuneAutocomplete({
     setInputValue(value);
   }, [value]);
 
-  const options = useMemo(() => {
+  const options = React.useMemo(() => {
     if (!comuni.length) return [];
     if (inputValue.length >= 2) return searchComuni(comuni, inputValue, 15);
     if (value) {
@@ -47,7 +47,7 @@ export default function ComuneAutocomplete({
     return [];
   }, [comuni, inputValue, value]);
 
-  const selected = useMemo(
+  const selected = React.useMemo(
     () => comuni.find((c) => c.nome.toLowerCase() === value.toLowerCase()) ?? null,
     [comuni, value]
   );
@@ -68,7 +68,7 @@ export default function ComuneAutocomplete({
           return;
         }
         if (newValue) {
-          onChange(newValue.nome, newValue.cap || undefined);
+          onChange(newValue.nome);
         } else {
           onChange('');
         }
@@ -78,7 +78,7 @@ export default function ComuneAutocomplete({
           {...params}
           label={required ? `${label}*` : label}
           error={error}
-          helperText={helperText}
+          helperText={helperText || 'Cerca e seleziona il comune'}
           InputLabelProps={{
             ...params.InputLabelProps,
             shrink: Boolean(inputValue) || Boolean(selected),
