@@ -13,10 +13,13 @@ export default function AnagraficaStep() {
   const {
     register,
     setValue,
+    watch,
     formState: { errors },
   } = useFormContext();
 
   const [cfHint, setCfHint] = useState<string | null>(null);
+  const luogoNascita = watch('luogoNascita');
+  const dataNascita = watch('dataNascita');
 
   const applyCodiceFiscale = (raw: string) => {
     const normalized = normalizeCodiceFiscale(raw);
@@ -114,6 +117,7 @@ export default function AnagraficaStep() {
           <TextField
             label="Città di nascita*"
             fullWidth
+            InputLabelProps={{ shrink: Boolean(luogoNascita) }}
             inputProps={{ autoComplete: 'off' }}
             {...register('luogoNascita', { required: 'Inserisci la città di nascita' })}
             error={!!errors.luogoNascita}
@@ -125,7 +129,7 @@ export default function AnagraficaStep() {
             label="Data di nascita*"
             type="date"
             fullWidth
-            InputLabelProps={{ shrink: true }}
+            InputLabelProps={{ shrink: Boolean(dataNascita) }}
             inputProps={{ autoComplete: 'bday' }}
             {...register('dataNascita', {
               required: 'Seleziona la data di nascita',

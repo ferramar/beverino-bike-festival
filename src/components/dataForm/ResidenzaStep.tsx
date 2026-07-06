@@ -14,6 +14,7 @@ export default function ResidenzaStep() {
   } = useFormContext();
 
   const comuneResidenza = watch('comuneResidenza') || '';
+  const cap = watch('cap');
 
   const handleComuneChange = (nome: string, cap?: string) => {
     setValue('comuneResidenza', nome, { shouldValidate: true });
@@ -67,6 +68,7 @@ export default function ResidenzaStep() {
           <TextField
             label="CAP*"
             fullWidth
+            InputLabelProps={{ shrink: Boolean(cap) }}
             inputProps={{ autoComplete: 'postal-code' }}
             {...register('cap', { required: 'Inserisci il CAP' })}
             error={!!errors.cap}

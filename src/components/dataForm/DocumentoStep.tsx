@@ -32,6 +32,7 @@ export default function DocumentoStep() {
   const tipoDocumentoValue = watch('tipoDocumento');
   const tipoDocumentoGenitoreValue = watch('tipoDocumentoGenitore');
   const comuneResidenzaGenitore = watch('comuneResidenzaGenitore') || '';
+  const capGenitore = watch('capGenitore');
 
   const isMinor = useMemo(() => {
     if (!birthDateValue) return false;
@@ -236,6 +237,7 @@ export default function DocumentoStep() {
               <TextField
                 label="CAP genitore*"
                 fullWidth
+                InputLabelProps={{ shrink: Boolean(capGenitore) }}
                 {...register('capGenitore', {
                   required: isMinor ? 'Inserisci il CAP del genitore' : false,
                 })}

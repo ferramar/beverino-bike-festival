@@ -79,6 +79,10 @@ export default function ComuneAutocomplete({
           label={required ? `${label}*` : label}
           error={error}
           helperText={helperText}
+          InputLabelProps={{
+            ...params.InputLabelProps,
+            shrink: Boolean(inputValue) || Boolean(selected),
+          }}
           inputProps={{
             ...params.inputProps,
             autoComplete,
