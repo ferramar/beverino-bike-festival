@@ -61,7 +61,6 @@ export default function DocumentoStep() {
       ['residenza', 'viaResidenzaGenitore'],
       ['numeroCivico', 'numeroCivicoGenitore'],
       ['cap', 'capGenitore'],
-      ['email', 'emailGenitore'],
     ] as const;
 
     fields.forEach(([from, to]) => {
