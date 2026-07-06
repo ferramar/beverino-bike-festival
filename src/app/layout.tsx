@@ -87,10 +87,6 @@ export default function RootLayout({
   return (
     <html lang="it" className={inter.variable}>
       <head>
-        <script 
-          src="https://js.stripe.com/v3/" 
-          async
-        />
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-TFB9P00PLK"
           strategy="afterInteractive"
