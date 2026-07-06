@@ -68,7 +68,7 @@ export default function AnagraficaStep() {
       </Typography>
 
       <Grid container spacing={2}>
-        <Grid size={{ xs: 12, sm: 8, lg: 6 }}>
+        <Grid size={12}>
           <TextField
             label="Codice fiscale*"
             fullWidth
@@ -82,7 +82,7 @@ export default function AnagraficaStep() {
             error={!!errors.codiceFiscale}
             helperText={
               (errors.codiceFiscale?.message as string) ||
-              '16 caratteri — compiliamo data e luogo di nascita'
+              'Inizia da qui — 16 caratteri, compiliamo data e luogo di nascita'
             }
           />
         </Grid>
