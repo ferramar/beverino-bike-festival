@@ -38,8 +38,10 @@ export const ConfermaIscrizioneEmail = ({
 }: ConfermaIscrizioneEmailProps) => {
   const previewText = `Conferma iscrizione Beverino Bike Festival - ${nome} ${cognome}`;
   const tipoGaraText = getGaraDisplayName(tipo_gara);
-  const prezzoGara = tipo_gara === 'ciclistica' ? PRICING.ciclistica : PRICING.running;
   const prezzoPastaParty = numeroPartecipantiPastaParty * PRICING.pastaParty;
+  const prezzoGara = includesPastaParty
+    ? importoTotale - prezzoPastaParty
+    : importoTotale;
 
   return (
     <Html>

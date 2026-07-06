@@ -6,11 +6,16 @@ export function isRegistrationOpen(): boolean {
     if (sp.get('debugClose') === '1') return false;
     if (sp.get('debugOpen') === '1') return true;
   }
+  const now = new Date();
+  const opening = new Date(EVENT.registrationOpeningISO);
   const closing = new Date(EVENT.registrationClosingISO);
-  return new Date() <= closing;
+  return now >= opening && now <= closing;
+}
+
+export function getRegistrationOpeningDate(): Date {
+  return new Date(EVENT.registrationOpeningISO);
 }
 
 export function getRegistrationClosingDate(): Date {
   return new Date(EVENT.registrationClosingISO);
 }
-

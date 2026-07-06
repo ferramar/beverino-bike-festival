@@ -26,6 +26,11 @@ export const EVENT = {
    */
   registrationClosingISO:
     process.env.NEXT_PUBLIC_REG_CLOSING_ISO || "2026-09-19T23:59:59",
+  /**
+   * Apertura iscrizioni online (ISO). Configurabile via env NEXT_PUBLIC_REG_OPENING_ISO.
+   */
+  registrationOpeningISO:
+    process.env.NEXT_PUBLIC_REG_OPENING_ISO || "2026-07-07T00:00:00",
   /** Località dell'evento. */
   location: "Beverino (SP)",
   /** URL canonico del sito. */
@@ -34,14 +39,14 @@ export const EVENT = {
 
 /**
  * Prezzi in euro (valori interi). I centesimi richiesti da Stripe si ottengono
- * con {@link toCents} (es. toCents(EVENT_PRICING.ciclistica) === 2500).
+ * con {@link toCents}. Per la ciclistica usare {@link getCiclisticaPrice} (fasce date).
  */
 export const PRICING = {
-  /** Iscrizione raduno ciclistico. */
+  /** Prezzo massimo ciclistica (ultima fascia). Per il prezzo corrente: getCiclisticaPrice(). */
   ciclistica: 25,
-  /** Iscrizione raduno running/podistico. */
+  /** Iscrizione Beverino Walk Festival. */
   running: 10,
-  /** Pasta Party, prezzo per persona. */
+  /** Pasta Party, prezzo per persona (partecipanti e accompagnatori). */
   pastaParty: 13,
 } as const;
 

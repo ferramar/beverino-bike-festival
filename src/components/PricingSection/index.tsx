@@ -28,13 +28,23 @@ import {
 	Security,
 } from '@mui/icons-material';
 import Link from 'next/link';
-import { isRegistrationOpen } from '../../utils/isRegistrationOpen';
+import { isRegistrationOpen, getRegistrationOpeningDate } from '../../utils/isRegistrationOpen';
 import { PRICING } from '../../config/event';
+import {
+  CICLISTICA_INCLUDED,
+  CICLISTICA_TIERS,
+  formatTierPriceLine,
+  formatTierRange,
+  getCiclisticaPrice,
+  PASTA_PARTY_INFO,
+} from '../../config/pricing';
+import { EVENT } from '../../config/event';
 import { motion } from 'framer-motion';
 
 interface PricingCardProps {
 	title: string;
 	price: number;
+	priceSubtitle?: string;
 	description: string;
 	icon: React.ReactNode;
 	features: string[];
@@ -46,6 +56,7 @@ interface PricingCardProps {
 const PricingCard: React.FC<PricingCardProps> = ({
 	title,
 	price,
+	priceSubtitle,
 	description,
 	icon,
 	features,
@@ -163,6 +174,11 @@ const PricingCard: React.FC<PricingCardProps> = ({
 								</Typography>
 							)}
 						</Box>
+						{priceSubtitle && (
+							<Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.5 }}>
+								{priceSubtitle}
+							</Typography>
+						)}
 					</Box>
 
 					<Divider sx={{ mb: 3 }} />
@@ -191,6 +207,10 @@ const PricingCard: React.FC<PricingCardProps> = ({
 };
 
 export default function PricingSection() {
+	const currentCiclisticaPrice = getCiclisticaPrice();
+	const registrationOpen = isRegistrationOpen();
+	const registrationPending = new Date() < getRegistrationOpeningDate();
+
 	const pricingData = [
 		{
 			title: 'Beverino Walk Festival',
@@ -208,15 +228,14 @@ export default function PricingSection() {
 		},
 		{
 			title: 'Beverino Bike Festival',
-			price: PRICING.ciclistica,
+			price: currentCiclisticaPrice,
+			priceSubtitle: `Tariffa attuale · da €20 a €25 con pacco gara`,
 			description: 'L\'esperienza completa per gli amanti del ciclismo',
 			icon: <DirectionsBike sx={{ fontSize: 40 }} />,
 			features: [
-				'3 percorsi: 30km, 35km, 40km',
-				'Pettorale',
-				'Ristori lungo il percorso',
-				'Assistenza meccanica',
-				'Assistenza medica'
+				...CICLISTICA_INCLUDED,
+				'3 percorsi MTB',
+				'Assistenza meccanica e medica',
 			],
 			color: '#A52D0C',
 			popular: true,
@@ -224,7 +243,7 @@ export default function PricingSection() {
 		{
 			title: 'Pasta Party',
 			price: PRICING.pastaParty,
-			description: 'Festeggia con noi dopo la gara con prodotti locali',
+			description: PASTA_PARTY_INFO.description,
 			icon: <Restaurant sx={{ fontSize: 40 }} />,
 			features: [
 				'Pasta con sughi tradizionali',
@@ -300,20 +319,58 @@ export default function PricingSection() {
 								gap: 3,
 								p: 2,
 								borderRadius: 2,
-                                backgroundColor: isRegistrationOpen() ? 'success.lighter' : 'error.lighter',
+                                backgroundColor: registrationOpen ? 'success.lighter' : 'error.lighter',
 								border: '1px solid',
-                                borderColor: isRegistrationOpen() ? 'success.light' : 'error.light',
+                                borderColor: registrationOpen ? 'success.light' : 'error.light',
 							}}
 						>
 							<Stack direction="row" spacing={1} alignItems="center">
-                                <Timer color={isRegistrationOpen() ? 'warning' : 'error'} />
+                                <Timer color={registrationOpen ? 'warning' : 'error'} />
 								<Typography variant="body1">
-                                    {isRegistrationOpen() ? 'Iscrizioni aperte fino al 19 settembre' : 'Iscrizioni chiuse - Iscrizione sul posto il 20 settembre'}
+                                    {registrationPending
+                                      ? `Iscrizioni online dal 7 luglio al 19 settembre ${EVENT.year}`
+                                      : registrationOpen
+                                        ? 'Iscrizioni aperte dal 7 al 19 settembre'
+                                        : 'Iscrizioni chiuse - Iscrizione sul posto il 20 settembre'}
 								</Typography>
 							</Stack>
 						</Box>
 					</Box>
 				</motion.div>
+
+				{/* Fasce ciclistica */}
+				<Box
+					sx={{
+						mb: 6,
+						p: 3,
+						borderRadius: 3,
+						border: '1px solid',
+						borderColor: 'divider',
+						backgroundColor: 'background.paper',
+					}}
+				>
+					<Typography
+						variant="h5"
+						fontWeight={700}
+						sx={{ mb: 2, fontStyle: 'italic', color: 'primary.main' }}
+					>
+						Contributo di partecipazione — Beverino Bike Festival
+					</Typography>
+					<Stack spacing={1.5} sx={{ mb: 2 }}>
+						{CICLISTICA_TIERS.map((tier) => (
+							<Typography key={tier.startISO} variant="body1">
+								Per iscritti {formatTierRange(tier)}:{' '}
+								<strong>{formatTierPriceLine(tier)}</strong>
+							</Typography>
+						))}
+					</Stack>
+					<Typography variant="body2" color="text.secondary">
+						Include: {CICLISTICA_INCLUDED.join(', ').toLowerCase()}.
+					</Typography>
+					<Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+						<strong>{PASTA_PARTY_INFO.label}:</strong> {PASTA_PARTY_INFO.description}
+					</Typography>
+				</Box>
 
 				{/* Pricing Cards */}
 				<Grid container spacing={4} alignItems="stretch">
@@ -354,20 +411,20 @@ export default function PricingSection() {
 						<Grid container spacing={3}>
 							{[
 								{
-									icon: <Security />,
-									title: 'Assicurazione',
-									description: 'Copertura assicurativa completa per tutti i partecipanti',
-								},
-								{
 									icon: <LocalDrink />,
-									title: 'Ristori',
-									description: 'Punti di ristoro con acqua, sali minerali e snack energetici',
+									title: 'Ristori a tema',
+									description: 'Punti di ristoro tematici lungo il percorso',
 								},
 								{
-									icon: <CardGiftcard />,
-									title: 'Pacco Gara (fino ad esaurimento)',
-									description: 'Regalo di benvenuto con gadget e prodotti locali',
-								}
+									icon: <Groups />,
+									title: 'Servizio docce',
+									description: 'Docce disponibili al termine dell\'evento',
+								},
+								{
+									icon: <Security />,
+									title: 'Parcheggio',
+									description: 'Area parcheggio per partecipanti e accompagnatori',
+								},
 							].map((item, index) => (
 								<Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
 									<Box sx={{ textAlign: 'center' }}>

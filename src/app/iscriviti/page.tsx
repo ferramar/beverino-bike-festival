@@ -2,17 +2,24 @@
 import { Container, Typography, Box, Paper, Button } from '@mui/material';
 import Link from 'next/link';
 import IscrizioneWizard from "../../components/IscrizioneWizard";
-import { isRegistrationOpen } from "../../utils/isRegistrationOpen";
+import { isRegistrationOpen, getRegistrationOpeningDate } from "../../utils/isRegistrationOpen";
+import { EVENT } from "../../config/event";
 
 function RegistrationClosed() {
+  const now = new Date();
+  const opening = getRegistrationOpeningDate();
+  const notYetOpen = now < opening;
+
   return (
     <Container maxWidth="md" sx={{ py: 8 }}>
       <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
         <Typography variant="h3" gutterBottom fontWeight={700} color="#A52D0C">
-          Iscrizioni Chiuse
+          {notYetOpen ? 'Iscrizioni in arrivo' : 'Iscrizioni Chiuse'}
         </Typography>
         <Typography variant="h6" color="text.secondary" sx={{ mb: 3 }}>
-          Le iscrizioni online si sono chiuse il 19 settembre 2026
+          {notYetOpen
+            ? `Le iscrizioni online apriranno il 7 luglio ${EVENT.year}`
+            : 'Le iscrizioni online si sono chiuse il 19 settembre 2026'}
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
           <Button component={Link} href="/programma" variant="contained" sx={{ backgroundColor: '#A52D0C' }}>

@@ -24,6 +24,12 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { PRICING } from '../../config/event';
 import { getGaraDisplayName } from '../../config/liberatorie';
+import {
+  calculateOrderTotal,
+  getActiveCiclisticaTier,
+  getCiclisticaPrice,
+  getGaraPrice,
+} from '../../config/pricing';
 
 export default function FinalRegistrationStep() {
   const { watch, setValue, formState: { errors }, register, getValues } = useFormContext();
@@ -77,9 +83,11 @@ export default function FinalRegistrationStep() {
   };
 
   // Calcolo prezzi
-  const prezzoGara = tipoGara === 'ciclistica' ? PRICING.ciclistica : tipoGara === 'running' ? PRICING.running : 0;
+  const prezzoGara = tipoGara ? getGaraPrice(tipoGara) : 0;
   const prezzoPastaParty = pastaPartyEnabled ? pastaCount * PRICING.pastaParty : 0;
-  const prezzoTotale = prezzoGara + prezzoPastaParty;
+  const prezzoTotale = calculateOrderTotal(tipoGara, pastaPartyEnabled ? pastaCount : 0);
+  const activeCiclisticaTier = getActiveCiclisticaTier();
+  const ciclisticaPrice = getCiclisticaPrice();
 
   return (
     <Box sx={{ py: 2 }}>
@@ -123,10 +131,15 @@ export default function FinalRegistrationStep() {
               Beverino Bike Festival
             </Typography>
             <Typography variant="h4" color="primary" gutterBottom>
-              €{PRICING.ciclistica}
+              €{ciclisticaPrice}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Percorsi attraverso paesaggi mozzafiato
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+              {activeCiclisticaTier?.price === 20
+                ? 'Tariffa early bird (con pacco gara)'
+                : 'Con pacco gara'}
+            </Typography>
+            <Typography variant="caption" color="text.secondary" display="block">
+              Da €20 · fino a €25 in base alla data di iscrizione
             </Typography>
             {tipoGara === 'ciclistica' && (
               <CheckCircleIcon 
@@ -250,7 +263,7 @@ export default function FinalRegistrationStep() {
               }
               label={
                 <Typography>
-                  Voglio partecipare al Pasta Party (€{PRICING.pastaParty} a persona)
+                  Voglio partecipare al Pasta Party (€{PRICING.pastaParty} a persona, partecipanti e accompagnatori)
                 </Typography>
               }
             />

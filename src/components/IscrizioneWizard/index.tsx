@@ -20,7 +20,7 @@ import PaymentStep from '../PaymentStep';
 import { customAlphabet } from 'nanoid';
 import { useStripeCheckout } from '../../hooks/useStripeCheckout';
 import { OrangeStepper } from '../CustomStepper';
-import { PRICING } from '../../config/event';
+import { calculateOrderTotal } from '../../config/pricing';
 
 interface DatiGenitore {
   nome: string;
@@ -114,13 +114,7 @@ export default function IscrizioneWizard() {
   useEffect(() => {
     const tipoGara = watch('tipo_gara');
     const pastaPartyCount = watch('conteggio_pastaparty') || 0;
-    
-    let racePrice = 0;
-    if (tipoGara === 'ciclistica') racePrice = PRICING.ciclistica;
-    else if (tipoGara === 'running') racePrice = PRICING.running;
-    
-    const pastaPrice = pastaPartyCount * PRICING.pastaParty;
-    const total = racePrice + pastaPrice;
+    const total = calculateOrderTotal(tipoGara, pastaPartyCount);
     
     setTotalAmount(total);
   }, [watch('tipo_gara'), watch('conteggio_pastaparty')]);

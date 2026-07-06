@@ -19,6 +19,7 @@ import { getStripe } from '../../lib/stripe';
 import LockIcon from '@mui/icons-material/Lock';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { PRICING } from '../../config/event';
+import { getGaraPrice } from '../../config/pricing';
 import { getGaraDisplayName } from '../../config/liberatorie';
 
 // Componente interno che usa gli hooks di Stripe
@@ -28,12 +29,16 @@ function PaymentForm({
   registrationId,
   codiceRegistrazione,
   userEmail,
+  tipoGara,
+  pastaPartyCount = 0,
 }: { 
   totalAmount: number;
   onSuccess: () => void;
   registrationId: number;
   codiceRegistrazione: string;
   userEmail?: string;
+  tipoGara?: string;
+  pastaPartyCount?: number;
 }) {
   const stripe = useStripe();
   const elements = useElements();
@@ -63,7 +68,9 @@ function PaymentForm({
           metadata: {
             registrationId: String(registrationId),
             codice_registrazione: codiceRegistrazione,
-            email: userEmail || '', // Anche nei metadata per reference
+            email: userEmail || '',
+            tipo_gara: tipoGara || '',
+            pasta_party_count: String(pastaPartyCount),
           },
           receipt_email: userEmail, // Email per la ricevuta Stripe
         }),
@@ -347,7 +354,7 @@ export default function PaymentStep({
                 Iscrizione {getGaraDisplayName(tipoGara)}
               </Typography>
               <Typography variant="body2">
-                €{(tipoGara === 'ciclistica' ? PRICING.ciclistica : PRICING.running).toFixed(2)}
+                €{getGaraPrice(tipoGara).toFixed(2)}
               </Typography>
             </Box>
           )}
@@ -388,6 +395,8 @@ export default function PaymentStep({
           registrationId={registrationId}
           codiceRegistrazione={codiceRegistrazione}
           userEmail={userEmail}
+          tipoGara={tipoGara}
+          pastaPartyCount={pastaPartyCount}
         />
       </Elements>
     </Box>

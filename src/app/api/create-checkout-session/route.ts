@@ -1,7 +1,8 @@
 // src/app/api/create-checkout-session/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe-server';
-import { EVENT, PRICING, toCents } from '@/config/event';
+import { EVENT, PRICING } from '@/config/event';
+import { calculateOrderTotalCents } from '@/config/pricing';
 
 interface CheckoutData {
   registrationId: string;
@@ -43,14 +44,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Calcola il prezzo in base al tipo di gara (in centesimi per Stripe)
-    const prezzoGara = tipo_gara === 'ciclistica'
-      ? toCents(PRICING.ciclistica)
-      : toCents(PRICING.running);
-
-    const prezzoTotale = numeroPersoneCena > 0 
-      ? prezzoGara + (toCents(PRICING.pastaParty) * numeroPersoneCena)
-      : prezzoGara;
+    const prezzoTotale = calculateOrderTotalCents(
+      tipo_gara,
+      includeCena ? numeroPersoneCena : 0
+    );
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
