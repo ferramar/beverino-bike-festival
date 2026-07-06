@@ -364,12 +364,6 @@ export default function PricingSection() {
 							</Typography>
 						))}
 					</Stack>
-					<Typography variant="body2" color="text.secondary">
-						Include: {CICLISTICA_INCLUDED.join(', ').toLowerCase()}.
-					</Typography>
-					<Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-						<strong>{PASTA_PARTY_INFO.label}:</strong> {PASTA_PARTY_INFO.description}
-					</Typography>
 				</Box>
 
 				{/* Pricing Cards */}
