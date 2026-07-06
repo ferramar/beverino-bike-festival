@@ -1,15 +1,13 @@
 'use client';
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Box,
   Checkbox,
-  CircularProgress,
   FormControl,
   FormControlLabel,
   FormHelperText,
   Grid,
-  InputAdornment,
   InputLabel,
   MenuItem,
   Select,
@@ -18,9 +16,6 @@ import {
 } from '@mui/material';
 import { useFormContext, useWatch } from 'react-hook-form';
 import ComuneAutocomplete from './ComuneAutocomplete';
-import ViaAutocomplete from './ViaAutocomplete';
-import CivicoAutocomplete from './CivicoAutocomplete';
-import { useCapLookup } from '@/hooks/useCapLookup';
 
 export default function DocumentoStep() {
   const {
@@ -37,8 +32,6 @@ export default function DocumentoStep() {
   const tipoDocumentoValue = watch('tipoDocumento');
   const tipoDocumentoGenitoreValue = watch('tipoDocumentoGenitore');
   const comuneResidenzaGenitore = watch('comuneResidenzaGenitore') || '';
-  const viaResidenzaGenitore = watch('viaResidenzaGenitore') || '';
-  const numeroCivicoGenitore = watch('numeroCivicoGenitore') || '';
   const capGenitore = watch('capGenitore');
 
   const isMinor = useMemo(() => {
@@ -71,38 +64,8 @@ export default function DocumentoStep() {
 
   const handleGenitoreComuneChange = (nome: string) => {
     setValue('comuneResidenzaGenitore', nome, { shouldValidate: true });
-    setValue('viaResidenzaGenitore', '', { shouldValidate: false });
-    setValue('numeroCivicoGenitore', '', { shouldValidate: false });
-    setValue('capGenitore', '', { shouldValidate: false });
     setSameResidenceAsParticipant(false);
   };
-
-  const handleGenitoreViaChange = (via: string) => {
-    setValue('viaResidenzaGenitore', via, { shouldValidate: true });
-    setValue('numeroCivicoGenitore', '', { shouldValidate: false });
-    setValue('capGenitore', '', { shouldValidate: false });
-    setSameResidenceAsParticipant(false);
-  };
-
-  const handleGenitoreCivicoChange = (civico: string) => {
-    setValue('numeroCivicoGenitore', civico, { shouldValidate: true });
-    setSameResidenceAsParticipant(false);
-  };
-
-  const onCapGenitoreFound = useCallback(
-    (foundCap: string) => {
-      setValue('capGenitore', foundCap, { shouldValidate: true });
-    },
-    [setValue]
-  );
-
-  const { loading: capGenitoreLoading, notFound: capGenitoreNotFound } = useCapLookup({
-    comune: comuneResidenzaGenitore,
-    via: viaResidenzaGenitore,
-    civico: numeroCivicoGenitore,
-    onCapFound: onCapGenitoreFound,
-    enabled: isMinor,
-  });
 
   return (
     <>
@@ -249,20 +212,23 @@ export default function DocumentoStep() {
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
-              <ViaAutocomplete
-                comune={comuneResidenzaGenitore}
-                value={viaResidenzaGenitore}
-                onChange={handleGenitoreViaChange}
+              <TextField
+                label="Via/Corso/Piazza genitore*"
+                fullWidth
+                {...register('viaResidenzaGenitore', {
+                  required: isMinor ? 'Inserisci la via di residenza del genitore' : false,
+                })}
                 error={!!errors.viaResidenzaGenitore}
                 helperText={errors.viaResidenzaGenitore?.message as string}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
-              <CivicoAutocomplete
-                comune={comuneResidenzaGenitore}
-                via={viaResidenzaGenitore}
-                value={numeroCivicoGenitore}
-                onChange={handleGenitoreCivicoChange}
+              <TextField
+                label="Numero civico genitore*"
+                fullWidth
+                {...register('numeroCivicoGenitore', {
+                  required: isMinor ? 'Inserisci il numero civico del genitore' : false,
+                })}
                 error={!!errors.numeroCivicoGenitore}
                 helperText={errors.numeroCivicoGenitore?.message as string}
               />
@@ -276,24 +242,7 @@ export default function DocumentoStep() {
                   required: isMinor ? 'Inserisci il CAP del genitore' : false,
                 })}
                 error={!!errors.capGenitore}
-                helperText={
-                  (errors.capGenitore?.message as string) ||
-                  (capGenitoreLoading
-                    ? 'Ricerca CAP in corso...'
-                    : capGenitoreNotFound &&
-                        comuneResidenzaGenitore &&
-                        viaResidenzaGenitore &&
-                        numeroCivicoGenitore
-                      ? 'CAP non trovato — inseriscilo manualmente'
-                      : 'Compilato dal numero civico quando possibile')
-                }
-                InputProps={{
-                  endAdornment: capGenitoreLoading ? (
-                    <InputAdornment position="end">
-                      <CircularProgress size={18} />
-                    </InputAdornment>
-                  ) : undefined,
-                }}
+                helperText={errors.capGenitore?.message as string}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, lg: 4 }}>

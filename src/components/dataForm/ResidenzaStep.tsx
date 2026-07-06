@@ -1,12 +1,9 @@
 'use client';
 
-import React, { useCallback } from 'react';
-import { CircularProgress, Grid, InputAdornment, TextField, Typography } from '@mui/material';
+import React from 'react';
+import { Grid, TextField, Typography } from '@mui/material';
 import { useFormContext } from 'react-hook-form';
 import ComuneAutocomplete from './ComuneAutocomplete';
-import ViaAutocomplete from './ViaAutocomplete';
-import CivicoAutocomplete from './CivicoAutocomplete';
-import { useCapLookup } from '@/hooks/useCapLookup';
 
 export default function ResidenzaStep() {
   const {
@@ -17,49 +14,12 @@ export default function ResidenzaStep() {
   } = useFormContext();
 
   const comuneResidenza = watch('comuneResidenza') || '';
-  const residenza = watch('residenza') || '';
-  const numeroCivico = watch('numeroCivico') || '';
   const cap = watch('cap');
-
-  const handleComuneChange = (nome: string) => {
-    setValue('comuneResidenza', nome, { shouldValidate: true });
-    setValue('residenza', '', { shouldValidate: false });
-    setValue('numeroCivico', '', { shouldValidate: false });
-    setValue('cap', '', { shouldValidate: false });
-  };
-
-  const handleViaChange = (via: string) => {
-    setValue('residenza', via, { shouldValidate: true });
-    setValue('numeroCivico', '', { shouldValidate: false });
-    setValue('cap', '', { shouldValidate: false });
-  };
-
-  const handleCivicoChange = (civico: string) => {
-    setValue('numeroCivico', civico, { shouldValidate: true });
-  };
-
-  const onCapFound = useCallback(
-    (foundCap: string) => {
-      setValue('cap', foundCap, { shouldValidate: true });
-    },
-    [setValue]
-  );
-
-  const { loading: capLoading, notFound: capNotFound } = useCapLookup({
-    comune: comuneResidenza,
-    via: residenza,
-    civico: numeroCivico,
-    onCapFound,
-  });
 
   return (
     <>
       <Typography variant="h6" sx={{ mb: 2 }}>
         Residenza e contatti
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Seleziona comune, via e numero civico: il CAP viene ricavato automaticamente dall&apos;indirizzo
-        completo. Se non lo troviamo, puoi inserirlo manualmente.
       </Typography>
 
       <Grid container spacing={2}>
@@ -67,27 +27,29 @@ export default function ResidenzaStep() {
           <ComuneAutocomplete
             label="Comune di residenza"
             value={comuneResidenza}
-            onChange={handleComuneChange}
+            onChange={(nome) => setValue('comuneResidenza', nome, { shouldValidate: true })}
             required
             error={!!errors.comuneResidenza}
             helperText={errors.comuneResidenza?.message as string}
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
-          <ViaAutocomplete
-            comune={comuneResidenza}
-            value={residenza}
-            onChange={handleViaChange}
+          <TextField
+            label="Via/Corso/Piazza*"
+            placeholder="Via Roma, Corso Italia, ..."
+            fullWidth
+            inputProps={{ autoComplete: 'street-address' }}
+            {...register('residenza', { required: 'Inserisci la via di residenza' })}
             error={!!errors.residenza}
             helperText={errors.residenza?.message as string}
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
-          <CivicoAutocomplete
-            comune={comuneResidenza}
-            via={residenza}
-            value={numeroCivico}
-            onChange={handleCivicoChange}
+          <TextField
+            label="Numero civico*"
+            fullWidth
+            inputProps={{ autoComplete: 'off' }}
+            {...register('numeroCivico', { required: 'Inserisci il numero civico' })}
             error={!!errors.numeroCivico}
             helperText={errors.numeroCivico?.message as string}
           />
@@ -100,21 +62,7 @@ export default function ResidenzaStep() {
             inputProps={{ autoComplete: 'postal-code' }}
             {...register('cap', { required: 'Inserisci il CAP' })}
             error={!!errors.cap}
-            helperText={
-              (errors.cap?.message as string) ||
-              (capLoading
-                ? 'Ricerca CAP in corso...'
-                : capNotFound && comuneResidenza && residenza && numeroCivico
-                  ? 'CAP non trovato automaticamente — inseriscilo manualmente'
-                  : 'Compilato dal numero civico quando possibile')
-            }
-            InputProps={{
-              endAdornment: capLoading ? (
-                <InputAdornment position="end">
-                  <CircularProgress size={18} />
-                </InputAdornment>
-              ) : undefined,
-            }}
+            helperText={errors.cap?.message as string}
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
