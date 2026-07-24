@@ -1,8 +1,9 @@
 /* eslint-disable */
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useWatch, useFormContext } from 'react-hook-form';
-import { Box, FormControl, FormHelperText, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, Typography } from '@mui/material';
+import { Box, FormControl, FormHelperText, Grid, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
+import ComuneAutocomplete from './ComuneAutocomplete';
 // import LiberatoriaOfflineAlert from '../LiberatoriaOfflineAlert';
 
 interface FormData {
@@ -40,9 +41,17 @@ export default function DataForm() {
   const {
     register,
     control,
+    setValue,
     formState: { errors },
     watch,
   } = useFormContext<FormData>();
+
+  const luogoNascita = watch('luogoNascita') || '';
+  const comuneResidenza = watch('comuneResidenza') || '';
+  const cittaRilascio = watch('cittaRilascio') || '';
+  const luogoNascitaGenitore = watch('luogoNascitaGenitore') || '';
+  const comuneResidenzaGenitore = watch('comuneResidenzaGenitore') || '';
+  const cittaRilascioGenitore = watch('cittaRilascioGenitore') || '';
 
   // Watch per i valori dei select
   const tipoDocumentoValue = watch('tipoDocumento');
@@ -60,6 +69,30 @@ export default function DataForm() {
     }
     return age < 18;
   }, [birthDateValue]);
+
+  useEffect(() => {
+    register('luogoNascita', { required: 'Inserisci la città di nascita' });
+    register('comuneResidenza', { required: 'Inserisci il comune di residenza' });
+    register('cittaRilascio', { required: 'Inserisci la città di rilascio del documento' });
+    register('luogoNascitaGenitore', {
+      validate: (v) =>
+        !isMinor ||
+        (typeof v === 'string' && v.trim().length > 0) ||
+        'Inserisci la città di nascita del genitore',
+    });
+    register('comuneResidenzaGenitore', {
+      validate: (v) =>
+        !isMinor ||
+        (typeof v === 'string' && v.trim().length > 0) ||
+        'Inserisci il comune di residenza del genitore',
+    });
+    register('cittaRilascioGenitore', {
+      validate: (v) =>
+        !isMinor ||
+        (typeof v === 'string' && v.trim().length > 0) ||
+        'Inserisci la città di rilascio del documento del genitore',
+    });
+  }, [register, isMinor]);
 
   // Funzione per validare l'età minima di 14 anni
   const validateMinimumAge = (value: string) => {
@@ -116,12 +149,14 @@ export default function DataForm() {
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
-          <TextField
-            label="Città di nascita*"
-            fullWidth
-            {...register('luogoNascita', { required: 'Inserisci la città di nascita' })}
+          <ComuneAutocomplete
+            label="Città di nascita"
+            value={luogoNascita}
+            onChange={(nome) => setValue('luogoNascita', nome, { shouldValidate: true })}
+            required
             error={!!errors.luogoNascita}
-            helperText={errors.luogoNascita?.message}
+            helperText={errors.luogoNascita?.message as string}
+            autoComplete="bday-place"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
@@ -139,12 +174,13 @@ export default function DataForm() {
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
-          <TextField
-            label="Comune di residenza*"
-            fullWidth
-            {...register('comuneResidenza', { required: 'Inserisci il comune di residenza' })}
+          <ComuneAutocomplete
+            label="Comune di residenza"
+            value={comuneResidenza}
+            onChange={(nome) => setValue('comuneResidenza', nome, { shouldValidate: true })}
+            required
             error={!!errors.comuneResidenza}
-            helperText={errors.comuneResidenza?.message}
+            helperText={errors.comuneResidenza?.message as string}
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
@@ -227,12 +263,13 @@ export default function DataForm() {
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
-          <TextField
-            label="Città di rilascio*"
-            fullWidth
-            {...register('cittaRilascio', { required: 'Inserisci la città di rilascio del documento' })}
+          <ComuneAutocomplete
+            label="Città di rilascio"
+            value={cittaRilascio}
+            onChange={(nome) => setValue('cittaRilascio', nome, { shouldValidate: true })}
+            required
             error={!!errors.cittaRilascio}
-            helperText={errors.cittaRilascio?.message}
+            helperText={errors.cittaRilascio?.message as string}
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
@@ -286,14 +323,16 @@ export default function DataForm() {
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
-              <TextField
-                label="Città di nascita genitore*"
-                fullWidth
-                {...register('luogoNascitaGenitore', {
-                  required: isMinor ? 'Inserisci la città di nascita del genitore' : false,
-                })}
+              <ComuneAutocomplete
+                label="Città di nascita genitore"
+                value={luogoNascitaGenitore}
+                onChange={(nome) =>
+                  setValue('luogoNascitaGenitore', nome, { shouldValidate: true })
+                }
+                required={isMinor}
                 error={!!errors.luogoNascitaGenitore}
-                helperText={errors.luogoNascitaGenitore?.message}
+                helperText={errors.luogoNascitaGenitore?.message as string}
+                autoComplete="bday-place"
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
@@ -312,14 +351,15 @@ export default function DataForm() {
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
-              <TextField
-                label="Comune di residenza genitore*"
-                fullWidth
-                {...register('comuneResidenzaGenitore', {
-                  required: isMinor ? 'Inserisci il comune di residenza del genitore' : false,
-                })}
+              <ComuneAutocomplete
+                label="Comune di residenza genitore"
+                value={comuneResidenzaGenitore}
+                onChange={(nome) =>
+                  setValue('comuneResidenzaGenitore', nome, { shouldValidate: true })
+                }
+                required={isMinor}
                 error={!!errors.comuneResidenzaGenitore}
-                helperText={errors.comuneResidenzaGenitore?.message}
+                helperText={errors.comuneResidenzaGenitore?.message as string}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
@@ -411,14 +451,15 @@ export default function DataForm() {
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
-              <TextField
-                label="Città di rilascio documento genitore*"
-                fullWidth
-                {...register('cittaRilascioGenitore', {
-                  required: isMinor ? 'Inserisci la città di rilascio del documento del genitore' : false,
-                })}
+              <ComuneAutocomplete
+                label="Città di rilascio documento genitore"
+                value={cittaRilascioGenitore}
+                onChange={(nome) =>
+                  setValue('cittaRilascioGenitore', nome, { shouldValidate: true })
+                }
+                required={isMinor}
                 error={!!errors.cittaRilascioGenitore}
-                helperText={errors.cittaRilascioGenitore?.message}
+                helperText={errors.cittaRilascioGenitore?.message as string}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
