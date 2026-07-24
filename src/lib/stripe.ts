@@ -13,7 +13,10 @@ export const getStripe = () => {
     }
     
     console.log('Inizializzazione Stripe con chiave:', key.substring(0, 20) + '...');
-    stripePromise = loadStripe(key);
+    stripePromise = loadStripe(key).catch((error) => {
+      console.error('Errore caricamento Stripe:', error);
+      return null;
+    });
   }
   
   return stripePromise;

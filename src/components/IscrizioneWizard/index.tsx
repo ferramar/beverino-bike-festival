@@ -18,7 +18,6 @@ import Liberatoria from '../Liberatoria';
 import FinalRegistrationStep from '../FinalRegistrationStep';
 import PaymentStep from '../PaymentStep';
 import { customAlphabet } from 'nanoid';
-import { useStripeCheckout } from '../../hooks/useStripeCheckout';
 import { OrangeStepper } from '../CustomStepper';
 import { calculateOrderTotal } from '../../config/pricing';
 
@@ -107,8 +106,6 @@ export default function IscrizioneWizard() {
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [showError, setShowError] = useState(false);
   const [totalAmount, setTotalAmount] = useState(0);
-
-  const { createCheckoutSession, loading: stripeLoading } = useStripeCheckout();
 
   // Calcola il totale in base alla gara e pasta party
   useEffect(() => {
@@ -421,7 +418,7 @@ export default function IscrizioneWizard() {
     router.push('/conferma');
   };
 
-  const isLoading = isSubmitting || stripeLoading;
+  const isLoading = isSubmitting;
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
