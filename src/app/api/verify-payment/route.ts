@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { ConfermaIscrizioneEmail } from '@/app/emails/conferma-iscrizione';
 import { stripe } from '@/lib/stripe-server';
+import { generateAndSaveLiberatoriaForRegistration } from '@/lib/liberatoriaStrapi';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -18,6 +19,13 @@ async function processPaymentAndSendEmail(
   const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
   const documentId = registration.documentId;
   const numericId = registration.id;
+
+  let liberatoriaPdfUrl: string | null = registration.liberatoriaPdfUrl || null;
+  try {
+    liberatoriaPdfUrl = await generateAndSaveLiberatoriaForRegistration(registration);
+  } catch (error) {
+    console.error('Errore generazione liberatoria post-pagamento:', error);
+  }
 
   // Prepara i dati per l'email
   const emailData = {
@@ -57,6 +65,7 @@ async function processPaymentAndSendEmail(
           id_email_resend: emailResult?.id,
           stato_pagamento: 'completato',
           id_pagamento: paymentId,
+          ...(liberatoriaPdfUrl ? { liberatoriaPdfUrl } : {}),
         }
       })
     });
@@ -75,6 +84,7 @@ async function processPaymentAndSendEmail(
             id_email_resend: emailResult?.id,
             stato_pagamento: 'completato',
             id_pagamento: paymentId,
+            ...(liberatoriaPdfUrl ? { liberatoriaPdfUrl } : {}),
           }
         })
       });
@@ -99,6 +109,7 @@ async function processPaymentAndSendEmail(
         data: {
           stato_pagamento: 'completato',
           id_pagamento: paymentId,
+          ...(liberatoriaPdfUrl ? { liberatoriaPdfUrl } : {}),
         }
       })
     });

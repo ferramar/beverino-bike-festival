@@ -218,7 +218,8 @@ export default function IscrizioneWizard() {
     }
 
     const subscription = watch((value) => {
-      localStorage.setItem('iscrizione', JSON.stringify(value));
+      const { liberatoriaPdfBlob: _pdf, ...persisted } = value as WizardData;
+      localStorage.setItem('iscrizione', JSON.stringify(persisted));
     });
 
     return () => subscription.unsubscribe();
@@ -290,34 +291,7 @@ export default function IscrizioneWizard() {
         // IP non critico
       }
 
-      // Salva PDF sul server
-      let pdfUrl = null;
-      if (data.liberatoriaPdfBlob) {
-        try {
-          const reader = new FileReader();
-          const base64 = await new Promise<string>((resolve) => {
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.readAsDataURL(data.liberatoriaPdfBlob!);
-          });
-
-          const saveResponse = await fetch('/api/save-pdf', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              pdfBase64: base64,
-              fileName: `liberatoria_${data.nome}_${data.cognome}_${Date.now()}.pdf`,
-            }),
-          });
-
-          if (saveResponse.ok) {
-            const result = await saveResponse.json();
-            pdfUrl = result.url;
-          }
-        } catch (error) {
-          console.error('Errore salvataggio PDF:', error);
-        }
-      }
-
+      // Firma e dati iscrizione su Strapi; PDF liberatoria dopo pagamento (verify-payment)
       const log_firma_liberatoria = {
         orario_firmatario: new Date().toISOString(),
         ip_firmatario: userIp,
@@ -369,7 +343,6 @@ export default function IscrizioneWizard() {
         log_firma_liberatoria,
         pasta_party: data.conteggio_pastaparty > 0,
         stato_pagamento: 'in_attesa',
-        liberatoriaPdfUrl: pdfUrl,
         session_token: sessionToken,
         publishedAt: new Date().toISOString()
       };
