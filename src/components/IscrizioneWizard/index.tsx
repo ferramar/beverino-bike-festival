@@ -79,11 +79,19 @@ interface SessionData {
   ttl: number;
   registrationId?: number;
   codiceRegistrazione?: string;
+  activeStep?: number;
 }
 
 const steps = ['Opzioni', 'Dati Personali', 'Liberatoria', 'Pagamento'];
 const SESSION_KEY = 'beverino_registration_session';
 const SESSION_TTL = 24 * 60 * 60 * 1000; // 24 ore
+const MAX_STEP = steps.length - 1;
+
+function sanitizeRestoredStep(step: number, registrationId: number | null): number {
+  if (!Number.isFinite(step) || step < 0 || step > MAX_STEP) return 0;
+  if (step === MAX_STEP && !registrationId) return MAX_STEP - 1;
+  return step;
+}
 
 export default function IscrizioneWizard() {
   const alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -104,6 +112,7 @@ export default function IscrizioneWizard() {
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [showError, setShowError] = useState(false);
   const [totalAmount, setTotalAmount] = useState(0);
+  const [isSessionReady, setIsSessionReady] = useState(false);
 
   // Calcola il totale in base alla gara e pasta party
   useEffect(() => {
@@ -135,9 +144,13 @@ export default function IscrizioneWizard() {
     }
   }, []);
 
-  // Gestione session token
+  // Ripristina sessione (token, iscrizione Strapi, step corrente)
   useEffect(() => {
     const storedSession = localStorage.getItem(SESSION_KEY);
+    let nextToken = nanoid();
+    let nextRegistrationId: number | null = null;
+    let nextCodice = '';
+    let nextStep = 0;
 
     if (storedSession) {
       try {
@@ -145,37 +158,52 @@ export default function IscrizioneWizard() {
         const now = Date.now();
 
         if (now - session.createdAt < session.ttl) {
-          setSessionToken(session.token);
-          setRegistrationId(session.registrationId || null);
-          setCodiceRegistrazione(session.codiceRegistrazione || '');
+          nextToken = session.token;
+          nextRegistrationId = session.registrationId ?? null;
+          nextCodice = session.codiceRegistrazione || '';
+          nextStep = sanitizeRestoredStep(session.activeStep ?? 0, nextRegistrationId);
         } else {
           localStorage.removeItem(SESSION_KEY);
-          const newToken = nanoid();
-          setSessionToken(newToken);
         }
       } catch {
-        const newToken = nanoid();
-        setSessionToken(newToken);
+        // sessione corrotta: nuovo token
       }
-    } else {
-      const newToken = nanoid();
-      setSessionToken(newToken);
     }
+
+    setSessionToken(nextToken);
+    setRegistrationId(nextRegistrationId);
+    setCodiceRegistrazione(nextCodice);
+    setActiveStep(nextStep);
+    setIsSessionReady(true);
   }, []);
 
-  // Salva sessione quando cambia
+  // Salva sessione quando cambiano token, iscrizione o step
   useEffect(() => {
-    if (sessionToken) {
-      const sessionData: SessionData = {
-        token: sessionToken,
-        createdAt: Date.now(),
-        ttl: SESSION_TTL,
-        registrationId: registrationId || undefined,
-        codiceRegistrazione: codiceRegistrazione || undefined
-      };
-      localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
+    if (!sessionToken) return;
+
+    let createdAt = Date.now();
+    const storedSession = localStorage.getItem(SESSION_KEY);
+    if (storedSession) {
+      try {
+        const prev: SessionData = JSON.parse(storedSession);
+        if (prev.token === sessionToken && prev.createdAt) {
+          createdAt = prev.createdAt;
+        }
+      } catch {
+        // ignora
+      }
     }
-  }, [sessionToken, registrationId, codiceRegistrazione]);
+
+    const sessionData: SessionData = {
+      token: sessionToken,
+      createdAt,
+      ttl: SESSION_TTL,
+      activeStep,
+      ...(registrationId ? { registrationId } : {}),
+      ...(codiceRegistrazione ? { codiceRegistrazione } : {}),
+    };
+    localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
+  }, [sessionToken, registrationId, codiceRegistrazione, activeStep]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -409,6 +437,17 @@ export default function IscrizioneWizard() {
   };
 
   const isLoading = isSubmitting;
+
+  if (!isSessionReady) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 8, textAlign: 'center' }}>
+        <CircularProgress />
+        <Typography sx={{ mt: 2 }} color="text.secondary">
+          Caricamento iscrizione...
+        </Typography>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
