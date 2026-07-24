@@ -22,6 +22,12 @@ import { PRICING } from '../../config/event';
 import { getGaraPrice } from '../../config/pricing';
 import { getGaraDisplayName } from '../../config/liberatorie';
 
+function isLiveStripeOnHttp(): boolean {
+  if (typeof window === 'undefined') return false;
+  const key = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '';
+  return key.startsWith('pk_live') && window.location.protocol === 'http:';
+}
+
 // Componente interno che usa gli hooks di Stripe
 function PaymentForm({ 
   totalAmount, 
@@ -268,15 +274,19 @@ function PaymentForm({
           {!cardReady && !loading && stripe && (
             <Alert severity="info" sx={{ mt: 2 }}>
               <Typography variant="body2" gutterBottom>
-                Il form di pagamento sta impiegando più del previsto a caricarsi.
+                {isLiveStripeOnHttp()
+                  ? 'In locale con chiavi Stripe live serve HTTPS oppure usa le chiavi test (pk_test_) in .env.local.'
+                  : 'Il form di pagamento sta impiegando più del previsto a caricarsi.'}
               </Typography>
-              <Button 
-                size="small" 
-                onClick={() => window.location.reload()}
-                sx={{ mt: 1 }}
-              >
-                Ricarica la pagina
-              </Button>
+              {!isLiveStripeOnHttp() && (
+                <Button
+                  size="small"
+                  onClick={() => window.location.reload()}
+                  sx={{ mt: 1 }}
+                >
+                  Ricarica la pagina
+                </Button>
+              )}
             </Alert>
           )}
         </CardContent>
@@ -304,32 +314,61 @@ export default function PaymentStep({
   userEmail?: string;
 }) {
   const [stripeLoaded, setStripeLoaded] = useState(false);
-  
+  const [liveOnHttp, setLiveOnHttp] = useState(false);
+
   useEffect(() => {
-    // Verifica che Stripe sia caricato
-    if (window.Stripe) {
-      setStripeLoaded(true);
-    } else {
-      // Riprova dopo un po'
-      const timer = setTimeout(() => {
-        if (window.Stripe) {
-          setStripeLoaded(true);
-        }
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
+    setLiveOnHttp(isLiveStripeOnHttp());
   }, []);
 
-  // Debug info
   useEffect(() => {
-    console.log('PaymentStep montato con:', {
-      totalAmount,
-      registrationId,
-      codiceRegistrazione,
-      stripeKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.substring(0, 10) + '...',
-      stripeLoaded
-    });
-  }, [totalAmount, registrationId, codiceRegistrazione, stripeLoaded]);
+    if (liveOnHttp) return;
+
+    let cancelled = false;
+
+    getStripe()
+      .then((stripe) => {
+        if (!cancelled) setStripeLoaded(!!stripe);
+      })
+      .catch(() => {
+        if (!cancelled) setStripeLoaded(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [liveOnHttp]);
+
+  if (liveOnHttp) {
+    return (
+      <Box>
+        {(tipoGara || pastaPartyCount) && (
+          <Card elevation={0} sx={{ mb: 3, p: 2, bgcolor: 'grey.50' }}>
+            <Typography variant="subtitle2" gutterBottom fontWeight={600}>
+              Riepilogo ordine:
+            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography variant="subtitle2" fontWeight={600}>
+                Totale
+              </Typography>
+              <Typography variant="subtitle2" fontWeight={600}>
+                €{totalAmount.toFixed(2)}
+              </Typography>
+            </Box>
+          </Card>
+        )}
+        <Alert severity="warning">
+          <Typography variant="body2" fontWeight={600} gutterBottom>
+            Pagamento non disponibile in locale con chiavi live
+          </Typography>
+          <Typography variant="body2">
+            Stripe richiede HTTPS per le integrazioni live. Su <code>http://localhost</code>{' '}
+            usa le chiavi <strong>test</strong> (<code>pk_test_</code> / <code>sk_test_</code>) in{' '}
+            <code>.env.local</code>, oppure testa il pagamento sul sito in produzione (HTTPS).
+          </Typography>
+        </Alert>
+      </Box>
+    );
+  }
 
   if (!stripeLoaded) {
     return (
@@ -380,15 +419,12 @@ export default function PaymentStep({
         </Card>
       )}
       
-      <Elements stripe={getStripe()} options={{
-        appearance: {
-          theme: 'stripe',
-          variables: {
-            colorPrimary: '#A52D0C',
-          },
-        },
-        locale: 'it',
-      }}>
+      <Elements
+        stripe={getStripe()}
+        options={{
+          locale: 'it',
+        }}
+      >
         <PaymentForm 
           totalAmount={totalAmount}
           onSuccess={onSuccess}
