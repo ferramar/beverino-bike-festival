@@ -12,11 +12,10 @@ import {
   Snackbar,
   Alert,
 } from '@mui/material';
-import { useRouter } from 'next/navigation';
 import DataForm from '../dataForm';
 import Liberatoria from '../Liberatoria';
 import FinalRegistrationStep from '../FinalRegistrationStep';
-import PaymentStep from '../PaymentStep';
+import CheckoutRedirectStep from '../CheckoutRedirectStep';
 import { customAlphabet } from 'nanoid';
 import { OrangeStepper } from '../CustomStepper';
 import { calculateOrderTotal } from '../../config/pricing';
@@ -90,7 +89,6 @@ export default function IscrizioneWizard() {
   const alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const nanoid = customAlphabet(alphabet, 10);
   const theme = useTheme();
-  const router = useRouter();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const methods = useForm<WizardData>({
     mode: 'onTouched',
@@ -410,14 +408,6 @@ export default function IscrizioneWizard() {
     }
   };
 
-  const handlePaymentSuccess = () => {
-    // Pulisci localStorage
-    localStorage.removeItem('iscrizione');
-    localStorage.removeItem(SESSION_KEY);
-    // Redirect alla pagina di conferma
-    router.push('/conferma');
-  };
-
   const isLoading = isSubmitting;
 
   return (
@@ -439,14 +429,12 @@ export default function IscrizioneWizard() {
           {activeStep === 1 && <DataForm />}
           {activeStep === 2 && <Liberatoria />}
           {activeStep === 3 && registrationId && (
-            <PaymentStep
+            <CheckoutRedirectStep
               totalAmount={totalAmount}
-              onSuccess={handlePaymentSuccess}
               registrationId={registrationId}
               codiceRegistrazione={codiceRegistrazione}
               tipoGara={watch('tipo_gara')}
               pastaPartyCount={watch('conteggio_pastaparty')}
-              userEmail={watch('email')}
             />
           )}
           {activeStep === 3 && !registrationId && !isSubmitting && (

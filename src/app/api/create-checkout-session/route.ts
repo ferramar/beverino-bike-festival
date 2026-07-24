@@ -1,8 +1,9 @@
 // src/app/api/create-checkout-session/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe-server';
-import { EVENT, PRICING } from '@/config/event';
+import { EVENT } from '@/config/event';
 import { calculateOrderTotalCents } from '@/config/pricing';
+import { getGaraDisplayName } from '@/config/liberatorie';
 
 interface CheckoutData {
   registrationId: string;
@@ -49,6 +50,13 @@ export async function POST(request: NextRequest) {
       includeCena ? numeroPersoneCena : 0
     );
 
+    const garaLabel = getGaraDisplayName(tipo_gara);
+    const pastaCount = includeCena ? numeroPersoneCena : 0;
+    const productName =
+      pastaCount > 0
+        ? `${garaLabel} + Pasta Party (${pastaCount} ${pastaCount === 1 ? 'persona' : 'persone'})`
+        : garaLabel;
+
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
@@ -58,24 +66,23 @@ export async function POST(request: NextRequest) {
           price_data: {
             currency: 'eur',
             product_data: {
-              name: includeCena 
-                ? `Beverino Bike Festival - Gara + Cena (${numeroPersoneCena} persone)`
-                : 'Beverino Bike Festival - Solo Gara',
-              description: `Iscrizione al Beverino Bike Festival ${EVENT.year}`
+              name: productName,
+              description: `Iscrizione — Beverino Bike Festival ${EVENT.year}`,
             },
-            unit_amount: prezzoTotale, // Stripe usa centesimi
+            unit_amount: prezzoTotale,
           },
           quantity: 1,
         },
       ],
       metadata: {
         registrationId: String(registrationId),
-        ...(codiceRegistrazione && { codice_registrazione: codiceRegistrazione }),
-        includeCena: String(includeCena),
+        codice_registrazione: codiceRegistrazione || '',
+        tipo_gara,
+        includeCena: String(!!includeCena),
         numeroPersoneCena: String(numeroPersoneCena),
       },
       success_url: `${request.nextUrl.origin}/conferma?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${request.nextUrl.origin}/iscriviti?step=3`,
+      cancel_url: `${request.nextUrl.origin}/iscriviti`,
     });
 
     // IMPORTANTE: Restituisci l'URL invece del sessionId
