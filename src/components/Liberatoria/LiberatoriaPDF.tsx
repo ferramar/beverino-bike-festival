@@ -386,19 +386,6 @@ export const createLiberatoriaPDF = (data: LiberatoriaData) => {
                     : '________________________'
               }
             />
-          </FormRow>
-
-          <FormRow>
-            <FormField
-              label="Tipo"
-              value={
-                data.tipoDocumentoGenitore === 'cartaIdentita'
-                  ? "Carta d'identità"
-                  : data.tipoDocumentoGenitore === 'patente'
-                    ? 'Patente'
-                    : '________________________'
-              }
-            />
             <FormField label="N°" value={data.numeroDocumentoGenitore || '________________________'} />
           </FormRow>
 
@@ -499,6 +486,27 @@ export const createLiberatoriaPDF = (data: LiberatoriaData) => {
             <View style={styles.signatureLine} />
             <Text style={styles.signatureLabel}>Documento firmato digitalmente</Text>
           </View>
+        </View>
+
+        <View style={[styles.section, { marginTop: 24 }]}>
+          <Text style={styles.informativaTitle}>
+            Informativa ex art. 13 del D.Lgs n. 196/03
+          </Text>
+          <Text style={styles.informativaText}>
+            I dati personali degli iscritti all&apos;evento sportivo sono trattati in conformità al
+            decreto legislativo 30 giugno 2003, n. 196. I dati personali sono raccolti al momento
+            della iscrizione e sono forniti direttamente dagli interessati. Il mancato conferimento
+            dei dati personali comporta l&apos;impossibilità di accettare l&apos;iscrizione stessa. I
+            dati sono trattati in forma cartacea ed informatica dall&apos;Organizzatore, per tutti
+            gli adempimenti connessi all&apos;organizzazione dell&apos;evento al fine di fornire agli
+            utenti informazioni sui partecipanti e sui risultati della gara. Gli stessi dati possono
+            essere comunicati a dipendenti, collaboratori, ditte e/o società impegnate
+            nell&apos;organizzazione dell&apos;evento e a consulenti dell&apos;Organizzatore per i
+            suddetti fini. In relazione agli eventuali dati sensibili in esso contenuti, gli iscritti
+            sono chiamati ad esprimere espressamente il loro consenso per il trattamento di detti
+            dati sensibili. Non è prevista la comunicazione, diffusione, trasmissione dei dati
+            sensibili.
+          </Text>
         </View>
 
       </Page>
