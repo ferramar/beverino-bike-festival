@@ -1,7 +1,8 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Container, Typography, Box, TextField, Button, Table, TableBody, TableCell, TableHead, TableRow, Paper, Stack, Alert, FormControlLabel, Checkbox, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import * as XLSX from 'xlsx';
+import { EVENT } from '@/config/event';
 
 type Item = {
   id: number;
@@ -45,9 +46,54 @@ function toCsv(rows: Item[]): string {
   return lines.join('\n');
 }
 
+function getRegistrationYear(createdAt: string | undefined): number | null {
+  if (!createdAt) return null;
+  const year = new Date(createdAt).getFullYear();
+  return Number.isFinite(year) ? year : null;
+}
+
+function applyIscrittiFilters(
+  allRows: Item[],
+  opts: {
+    yearFilter: number | 'tutti';
+    tipoGaraFilter: string;
+    onlyPastaParty: boolean;
+    onlyMinors: boolean;
+    searchTerm: string;
+  }
+): Item[] {
+  let rows = allRows;
+
+  if (opts.yearFilter !== 'tutti') {
+    rows = rows.filter((r) => getRegistrationYear(r.createdAt) === opts.yearFilter);
+  }
+
+  if (opts.tipoGaraFilter !== 'tutti') {
+    rows = rows.filter((r) => r.tipo_gara === opts.tipoGaraFilter);
+  }
+
+  if (opts.onlyPastaParty) {
+    rows = rows.filter((r) => !!r.pasta_party || (r.conteggio_pastaparty ?? 0) > 0);
+  }
+
+  if (opts.onlyMinors) {
+    rows = rows.filter((r) => !!r.dati_genitore || !!r.nomeTutore);
+  }
+
+  if (opts.searchTerm.trim()) {
+    const term = opts.searchTerm.toLowerCase().trim();
+    rows = rows.filter(
+      (r) =>
+        r.nome?.toLowerCase().includes(term) || r.cognome?.toLowerCase().includes(term)
+    );
+  }
+
+  return rows;
+}
+
 export default function IscrittiPage() {
   const [password, setPassword] = useState<string>('');
-  const [items, setItems] = useState<Item[]>([]);
+  const [allItems, setAllItems] = useState<Item[]>([]);
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [info, setInfo] = useState<string>('');
@@ -56,6 +102,36 @@ export default function IscrittiPage() {
   const [authorized, setAuthorized] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [tipoGaraFilter, setTipoGaraFilter] = useState<string>('tutti');
+  const [yearFilter, setYearFilter] = useState<number | 'tutti'>(EVENT.year);
+
+  const availableYears = useMemo(() => {
+    const years = new Set<number>([EVENT.year]);
+    for (const row of allItems) {
+      const y = getRegistrationYear(row.createdAt);
+      if (y != null) years.add(y);
+    }
+    return Array.from(years).sort((a, b) => b - a);
+  }, [allItems]);
+
+  const items = useMemo(
+    () =>
+      applyIscrittiFilters(allItems, {
+        yearFilter,
+        tipoGaraFilter,
+        onlyPastaParty,
+        onlyMinors,
+        searchTerm,
+      }),
+    [allItems, yearFilter, tipoGaraFilter, onlyPastaParty, onlyMinors, searchTerm]
+  );
+
+  useEffect(() => {
+    if (allItems.length === 0) return;
+    const yearLabel = yearFilter === 'tutti' ? 'tutti gli anni' : String(yearFilter);
+    setInfo(
+      `Caricati ${allItems.length} record totali, ${items.length} visibili (anno: ${yearLabel})`
+    );
+  }, [allItems.length, items.length, yearFilter]);
 
   useEffect(() => {
   // Auto-login da sessionStorage, se presente
@@ -94,49 +170,21 @@ export default function IscrittiPage() {
         const errorText = await res.text();
         console.error('Errore Strapi:', res.status, res.statusText, errorText);
         setError(`Errore Strapi: ${res.status} ${res.statusText} - ${errorText}`);
-        setItems([]);
+        setAllItems([]);
         setAuthorized(false);
         return;
       }
       
       const data = await res.json();
       const allRows: Item[] = data.data || [];
-      
-      // Applica filtri client-side
-      let rows = allRows;
-      
-      // Filtro per tipo gara
-      if (tipoGaraFilter !== 'tutti') {
-        rows = rows.filter(r => r.tipo_gara === tipoGaraFilter);
-      }
-      
-      // Filtro per pasta party
-      if (onlyPastaParty) {
-        rows = rows.filter(r => !!r.pasta_party || (r.conteggio_pastaparty ?? 0) > 0);
-      }
-      
-      // Filtro per minorenni
-      if (onlyMinors) {
-        rows = rows.filter(r => !!r.dati_genitore || !!r.nomeTutore);
-      }
-      
-      // Filtro per ricerca nome/cognome
-      if (searchTerm.trim()) {
-        const term = searchTerm.toLowerCase().trim();
-        rows = rows.filter(r => 
-          (r.nome?.toLowerCase().includes(term)) || 
-          (r.cognome?.toLowerCase().includes(term))
-        );
-      }
-      
-      setItems(rows);
-      setInfo(`Caricati ${allRows.length} record totali, ${rows.length} dopo filtri`);
+
+      setAllItems(allRows);
       setAuthorized(true);
       try { sessionStorage.setItem('iscritti_password', pass); } catch {}
       
     } catch (e: any) {
       setError(`Errore: ${e?.message || e}`);
-      setItems([]);
+      setAllItems([]);
     } finally {
       setLoading(false);
     }
@@ -223,6 +271,24 @@ export default function IscrittiPage() {
                    sx={{ minWidth: 200 }}
                  />
                  <FormControl size="small" sx={{ minWidth: 120 }}>
+                   <InputLabel>Anno</InputLabel>
+                   <Select
+                     value={yearFilter === 'tutti' ? 'tutti' : String(yearFilter)}
+                     label="Anno"
+                     onChange={(e) => {
+                       const v = e.target.value;
+                       setYearFilter(v === 'tutti' ? 'tutti' : Number(v));
+                     }}
+                   >
+                     {availableYears.map((y) => (
+                       <MenuItem key={y} value={String(y)}>
+                         {y}
+                       </MenuItem>
+                     ))}
+                     <MenuItem value="tutti">Tutti gli anni</MenuItem>
+                   </Select>
+                 </FormControl>
+                 <FormControl size="small" sx={{ minWidth: 120 }}>
                    <InputLabel>Tipo gara</InputLabel>
                    <Select
                      value={tipoGaraFilter}
@@ -236,7 +302,7 @@ export default function IscrittiPage() {
                  </FormControl>
                  <FormControlLabel control={<Checkbox checked={onlyPastaParty} onChange={(e) => setOnlyPastaParty(e.target.checked)} />} label="Solo Pasta Party" />
                  <FormControlLabel control={<Checkbox checked={onlyMinors} onChange={(e) => setOnlyMinors(e.target.checked)} />} label="Solo minorenni" />
-                 <Button size="small" onClick={() => fetchList(password)} disabled={!password || loading}>Aggiorna</Button>
+                 <Button size="small" onClick={() => fetchList(password)} disabled={!password || loading}>Ricarica dati</Button>
                </Stack>
       </Box>
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
