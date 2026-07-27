@@ -15,25 +15,25 @@ export interface CiclisticaTier {
 export const CICLISTICA_TIERS: CiclisticaTier[] = [
   {
     startISO: '2026-07-07T00:00:00',
-    endISO: '2026-07-27T23:59:59',
+    endISO: '2026-08-09T23:59:59',
     startLabel: '07/07/26',
-    endLabel: '27/07/26',
+    endLabel: '09/08/26',
     price: 20,
   },
   {
-    startISO: '2026-07-28T00:00:00',
-    endISO: '2026-08-31T23:59:59',
-    startLabel: '28/07/26',
-    endLabel: '31/08/26',
+    startISO: '2026-08-10T00:00:00',
+    endISO: '2026-09-05T23:59:59',
+    startLabel: '10/08/26',
+    endLabel: '05/09/26',
     price: 25,
   },
   {
-    startISO: '2026-09-01T00:00:00',
+    startISO: '2026-09-06T00:00:00',
     endISO: '2026-09-19T23:59:59',
-    startLabel: '01/09/26',
+    startLabel: '06/09/26',
     endLabel: '19/09/26',
     price: 25,
-    note: 'fino ad esaurimento garantito',
+    note: 'fino ad esaurimento',
   },
 ];
 
