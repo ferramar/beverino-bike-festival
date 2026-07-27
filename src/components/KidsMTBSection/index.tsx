@@ -13,8 +13,8 @@ export default function KidsMTBSection() {
   const handleDownload = () => {
     // Scarica la liberatoria vuota
     const link = document.createElement('a');
-    link.href = '/liberatoria-beverino-bike-festival.pdf';
-    link.download = 'liberatoria-beverino-bike-festival.pdf';
+    link.href = '/modulo-open-day-2026.pdf';
+    link.download = 'modulo-open-day-2026.pdf';
     link.click();
   };
 

@@ -37,7 +37,7 @@ export const LIBERATORIA_COPY: Record<OnlineTipoGara, LiberatoriaCopy> = {
   },
 };
 
-/** Riferimento copy Open Day (solo file statico in public/, non wizard). */
+/** Riferimento copy Open Day (PDF statico public/modulo-open-day-2026.pdf, non wizard). */
 export const OPEN_DAY_LIBERATORIA = {
   displayName: 'Open Day',
   moduleTitle: 'Open Day',
