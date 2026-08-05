@@ -105,22 +105,16 @@ export async function getAllFAQs(): Promise<FAQItem[]> {
 // convenzioni
 export async function getAllConvenzioni(): Promise<ConvenzioneItem[]> {
   try {
-    console.log('Chiamando API convenzioni...');
     const response = await fetcher('/api/convenzionis?populate=*&filters[attiva][$eq]=true&sort=ordine:asc,nome:asc');
-    
-    console.log('Risposta da Strapi:', response);
-    
+
     // In Strapi v5 i dati sono in response.data
     const { data } = response;
-    
+
     if (!data || !Array.isArray(data)) {
-      console.log('Nessun dato trovato');
       return [];
     }
 
     return data.map((item: any) => {
-      console.log('Processando convenzione:', item);
-      
       // Trova il colore della categoria o usa quello custom
       const categoriaColore = CATEGORIE_CONVENZIONI.find(
         cat => cat.value === item.categoria

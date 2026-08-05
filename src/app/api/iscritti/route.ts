@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { timingSafeEqual } from 'crypto';
 
 // Endpoint protetto da chiave per elencare solo iscrizioni con pagamento completato
 // Usa ?key=... in query string. Imposta la chiave in ENV: PUBLIC_LIST_KEY o ISCRITTI_LIST_KEY
@@ -14,6 +15,14 @@ function getAccessSecret(): string | undefined {
   );
 }
 
+// Confronto a tempo costante per evitare timing attack sulla chiave d'accesso
+function safeCompare(provided: string, expected: string): boolean {
+  const providedBuf = Buffer.from(provided);
+  const expectedBuf = Buffer.from(expected);
+  if (providedBuf.length !== expectedBuf.length) return false;
+  return timingSafeEqual(providedBuf, expectedBuf);
+}
+
 function normalizeEmail(email: string | null | undefined): string | null {
   if (!email) return null;
   return email.trim().toLowerCase();
@@ -27,7 +36,7 @@ export async function GET(request: NextRequest) {
   if (!requiredKey) {
     return NextResponse.json({ error: 'Chiave non configurata' }, { status: 500 });
   }
-  if (key !== requiredKey) {
+  if (!safeCompare(key, requiredKey)) {
     return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 });
   }
 
@@ -100,7 +109,7 @@ export async function POST(request: NextRequest) {
   if (!required) {
     return NextResponse.json({ error: 'Password non configurata' }, { status: 500 });
   }
-  if (password !== required) {
+  if (!safeCompare(password, required)) {
     return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 });
   }
 

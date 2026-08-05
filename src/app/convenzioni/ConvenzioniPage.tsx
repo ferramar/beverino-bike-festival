@@ -43,9 +43,7 @@ export default function ConvenzioniPage() {
 
   const fetchConvenzioni = async () => {
     try {
-      console.log('Fetching convenzioni...');
       const data = await getAllConvenzioni();
-      console.log('Convenzioni ricevute:', data);
       setConvenzioni(data);
     } catch (err) {
       console.error('Errore dettagliato:', err);

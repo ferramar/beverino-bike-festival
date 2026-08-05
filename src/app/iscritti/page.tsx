@@ -157,8 +157,7 @@ export default function IscrittiPage() {
       params.set('filters[stato_pagamento][$eq]', 'completato');
       
       const url = `${strapiUrl}/api/iscrizionis?${params.toString()}`;
-      console.log('Chiamata a:', url);
-      
+
       const res = await fetch(url, {
         method: 'GET',
         headers: {

@@ -122,7 +122,6 @@ function PaymentForm({
               setError('Pagamento completato ma email non inviata. Contatta l\'assistenza.');
             }
           } else {
-            console.log('Verifica completata:', verifyData);
             if (!verifyData.email_sent) {
               console.warn('Email non inviata:', verifyData.message || verifyData.error);
             }

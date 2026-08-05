@@ -12,7 +12,6 @@ export const getStripe = () => {
       throw new Error('Stripe key mancante');
     }
     
-    console.log('Inizializzazione Stripe con chiave:', key.substring(0, 20) + '...');
     stripePromise = loadStripe(key).catch((error) => {
       console.error('Errore caricamento Stripe:', error);
       return null;
