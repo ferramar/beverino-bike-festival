@@ -12,6 +12,7 @@ import {
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import HandshakeIcon from '@mui/icons-material/Handshake';
 import LabelIcon from '@mui/icons-material/Label';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 
 type Sezione = {
   titolo: string;
@@ -38,6 +39,12 @@ const SEZIONI: Sezione[] = [
     descrizione: 'Visualizza, aggiungi, modifica o elimina le categorie usate per gli sponsor.',
     href: '/gestisci-contenuti/categorie-sponsor',
     icon: <LabelIcon fontSize="large" />,
+  },
+  {
+    titolo: 'FAQ',
+    descrizione: 'Visualizza, aggiungi, modifica o elimina le domande frequenti del sito.',
+    href: '/gestisci-contenuti/faq',
+    icon: <HelpOutlineIcon fontSize="large" />,
   },
 ];
 
