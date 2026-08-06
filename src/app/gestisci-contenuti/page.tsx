@@ -10,6 +10,7 @@ import {
   Box,
 } from '@mui/material';
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
+import HandshakeIcon from '@mui/icons-material/Handshake';
 
 type Sezione = {
   titolo: string;
@@ -24,6 +25,12 @@ const SEZIONI: Sezione[] = [
     descrizione: "Carica nuove foto nella galleria del sito, assegnandole a un'edizione.",
     href: '/gestisci-contenuti/galleria',
     icon: <PhotoLibraryIcon fontSize="large" />,
+  },
+  {
+    titolo: 'Sponsor',
+    descrizione: 'Visualizza, aggiungi, modifica o elimina gli sponsor del sito.',
+    href: '/gestisci-contenuti/sponsor',
+    icon: <HandshakeIcon fontSize="large" />,
   },
 ];
 
