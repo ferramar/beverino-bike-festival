@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Container, Typography, Box, TextField, Button, Table, TableBody, TableCell, TableHead, TableRow, Paper, Stack, Alert, FormControlLabel, Checkbox, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import * as XLSX from 'xlsx';
 import { EVENT } from '@/config/event';
+import Link from 'next/link';
 
 type Item = {
   id: number;
@@ -259,6 +260,7 @@ export default function IscrittiPage() {
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'stretch', sm: 'center' }}>
           <Button variant="contained" onClick={() => fetchList(password)} disabled={loading}>{loading ? 'Carico…' : 'Ricarica'}</Button>
           <Button variant="outlined" onClick={onExportExcel} disabled={items.length === 0}>Esporta Excel</Button>
+          <Button variant="outlined" component={Link} href="/gestisci-contenuti">Gestisci contenuti</Button>
           {info && <Typography variant="body2" color="text.secondary">{info}</Typography>}
         </Stack>
                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'stretch', sm: 'center' }} sx={{ mt: 2 }}>
