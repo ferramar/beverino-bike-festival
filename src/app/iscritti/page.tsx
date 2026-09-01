@@ -152,31 +152,47 @@ export default function IscrittiPage() {
     try {
       // Chiamata DIRETTA a Strapi dal client
       const strapiUrl = 'https://stylish-flowers-c12f2e4071.strapiapp.com';
-      
-      const params = new URLSearchParams();
-      // Strapi v5 syntax - solo filtro, niente paginazione
-      params.set('filters[stato_pagamento][$eq]', 'completato');
-      
-      const url = `${strapiUrl}/api/iscrizionis?${params.toString()}`;
 
-      const res = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-        },
-      });
-      
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error('Errore Strapi:', res.status, res.statusText, errorText);
-        setError(`Errore Strapi: ${res.status} ${res.statusText} - ${errorText}`);
-        setAllItems([]);
-        setAuthorized(false);
-        return;
+      // Il backend ha maxLimit/defaultLimit=130 per iscrizioni: senza
+      // paginazione esplicita Strapi tronca silenziosamente il risultato
+      // (es. 143 iscritti reali -> solo 130 restituiti). Paginiamo su tutti
+      // i risultati per recuperarli tutti. Questa istanza Strapi accetta
+      // solo paginazione a offset (start/limit): page/pageSize dà 400
+      // "Cannot use both page & offset pagination in the same query".
+      const limit = 100;
+      let start = 0;
+      let total = Infinity;
+      const allRows: Item[] = [];
+
+      while (start < total) {
+        const params = new URLSearchParams();
+        params.set('filters[stato_pagamento][$eq]', 'completato');
+        params.set('pagination[start]', String(start));
+        params.set('pagination[limit]', String(limit));
+
+        const url = `${strapiUrl}/api/iscrizionis?${params.toString()}`;
+
+        const res = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+          },
+        });
+
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error('Errore Strapi:', res.status, res.statusText, errorText);
+          setError(`Errore Strapi: ${res.status} ${res.statusText} - ${errorText}`);
+          setAllItems([]);
+          setAuthorized(false);
+          return;
+        }
+
+        const data = await res.json();
+        allRows.push(...(data.data || []));
+        total = data.meta?.pagination?.total ?? allRows.length;
+        start += limit;
       }
-      
-      const data = await res.json();
-      const allRows: Item[] = data.data || [];
 
       setAllItems(allRows);
       setAuthorized(true);
