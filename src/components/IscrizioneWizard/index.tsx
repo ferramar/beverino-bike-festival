@@ -19,6 +19,14 @@ import CheckoutRedirectStep from '../CheckoutRedirectStep';
 import { customAlphabet } from 'nanoid';
 import { OrangeStepper } from '../CustomStepper';
 import { calculateOrderTotal } from '../../config/pricing';
+import {
+  SESSION_TTL,
+  readStoredSession,
+  writeStoredSession,
+  clearStoredSession,
+  isSessionStillValid,
+  saveRegistration,
+} from '../../lib/registrationSession';
 
 interface DatiGenitore {
   nome: string;
@@ -73,18 +81,7 @@ interface WizardData {
   taglia_maglietta?: string;
 }
 
-interface SessionData {
-  token: string;
-  createdAt: number;
-  ttl: number;
-  registrationId?: number;
-  codiceRegistrazione?: string;
-  activeStep?: number;
-}
-
 const steps = ['Opzioni', 'Dati Personali', 'Liberatoria', 'Pagamento'];
-const SESSION_KEY = 'beverino_registration_session';
-const SESSION_TTL = 24 * 60 * 60 * 1000; // 24 ore
 const MAX_STEP = steps.length - 1;
 
 function sanitizeRestoredStep(step: number, registrationId: number | null): number {
@@ -144,82 +141,81 @@ export default function IscrizioneWizard() {
     }
   }, []);
 
-  // Ripristina sessione (token, iscrizione Strapi, step corrente)
+  // Ripristina sessione (token, iscrizione Strapi, step corrente).
+  // Una sessione con registrationId ma senza riscontro su Strapi è "orfana" (es.
+  // pagamento della iscrizione precedente mai confermato/redirect a /conferma mai
+  // avvenuto): se riusata, il suo codice_registrazione/session_token verrebbe
+  // riproposto per una persona diversa, in collisione con i vincoli unique di Strapi.
+  // Vedi src/lib/registrationSession.ts.
   useEffect(() => {
-    const storedSession = localStorage.getItem(SESSION_KEY);
-    let nextToken = nanoid();
-    let nextRegistrationId: number | null = null;
-    let nextCodice = '';
-    let nextStep = 0;
+    let cancelled = false;
 
-    if (storedSession) {
-      try {
-        const session: SessionData = JSON.parse(storedSession);
-        const now = Date.now();
+    (async () => {
+      const stored = readStoredSession();
+      let nextToken = stored?.token || nanoid();
+      let nextRegistrationId = stored?.registrationId ?? null;
+      let nextCodice = stored?.codiceRegistrazione || '';
+      let nextStep = stored ? sanitizeRestoredStep(stored.activeStep ?? 0, nextRegistrationId) : 0;
 
-        if (now - session.createdAt < session.ttl) {
-          nextToken = session.token;
-          nextRegistrationId = session.registrationId ?? null;
-          nextCodice = session.codiceRegistrazione || '';
-          nextStep = sanitizeRestoredStep(session.activeStep ?? 0, nextRegistrationId);
-        } else {
-          localStorage.removeItem(SESSION_KEY);
+      if (stored && nextRegistrationId) {
+        const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
+        const stillValid = await isSessionStillValid(strapiUrl, nextToken);
+        if (!stillValid) {
+          clearStoredSession();
+          nextToken = nanoid();
+          nextRegistrationId = null;
+          nextCodice = '';
+          nextStep = 0;
+          reset({});
         }
-      } catch {
-        // sessione corrotta: nuovo token
       }
-    }
 
-    setSessionToken(nextToken);
-    setRegistrationId(nextRegistrationId);
-    setCodiceRegistrazione(nextCodice);
-    setActiveStep(nextStep);
-    setIsSessionReady(true);
+      if (cancelled) return;
+      setSessionToken(nextToken);
+      setRegistrationId(nextRegistrationId);
+      setCodiceRegistrazione(nextCodice);
+      setActiveStep(nextStep);
+      setIsSessionReady(true);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Salva sessione quando cambiano token, iscrizione o step
   useEffect(() => {
     if (!sessionToken) return;
 
-    let createdAt = Date.now();
-    const storedSession = localStorage.getItem(SESSION_KEY);
-    if (storedSession) {
-      try {
-        const prev: SessionData = JSON.parse(storedSession);
-        if (prev.token === sessionToken && prev.createdAt) {
-          createdAt = prev.createdAt;
-        }
-      } catch {
-        // ignora
-      }
-    }
+    const prev = readStoredSession();
+    const createdAt = prev?.token === sessionToken && prev.createdAt ? prev.createdAt : Date.now();
 
-    const sessionData: SessionData = {
+    writeStoredSession({
       token: sessionToken,
       createdAt,
       ttl: SESSION_TTL,
       activeStep,
       ...(registrationId ? { registrationId } : {}),
       ...(codiceRegistrazione ? { codiceRegistrazione } : {}),
-    };
-    localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
+    });
   }, [sessionToken, registrationId, codiceRegistrazione, activeStep]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const stored = localStorage.getItem('iscrizione');
+    const stored = sessionStorage.getItem('iscrizione');
     if (stored) {
       try {
         reset(JSON.parse(stored));
       } catch {
-        console.warn('Dati in localStorage non validi');
+        console.warn('Dati in sessionStorage non validi');
       }
     }
 
     const subscription = watch((value) => {
       const { liberatoriaPdfBlob: _pdf, ...persisted } = value as WizardData;
-      localStorage.setItem('iscrizione', JSON.stringify(persisted));
+      sessionStorage.setItem('iscrizione', JSON.stringify(persisted));
     });
 
     return () => subscription.unsubscribe();
@@ -275,9 +271,6 @@ export default function IscrizioneWizard() {
     try {
       const data = getValues();
       const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
-
-      // Usa il codice esistente se c'è, altrimenti genera nuovo
-      let codice_registrazione = codiceRegistrazione || nanoid();
 
       // Ottieni IP utente
       let userIp = 'unknown';
@@ -339,64 +332,31 @@ export default function IscrizioneWizard() {
         liberatoriaAccettata: data.liberatoriaAccettata,
         conteggio_pastaparty: data.conteggio_pastaparty,
         taglia_maglietta: data.taglia_maglietta || null,
-        codice_registrazione,
         log_firma_liberatoria,
         pasta_party: data.conteggio_pastaparty > 0,
         stato_pagamento: 'in_attesa',
-        session_token: sessionToken,
         publishedAt: new Date().toISOString()
       };
 
-      // Controlla se esiste già un'iscrizione con questo token
-      try {
-        const checkResponse = await fetch(
-          `${strapiUrl}/api/iscrizionis?filters[session_token][$eq]=${sessionToken}`,
-          { method: 'GET', headers: { 'Content-Type': 'application/json' } }
-        );
-
-        if (checkResponse.ok) {
-          const checkData = await checkResponse.json();
-
-          if (checkData.data && checkData.data.length > 0) {
-            // Esiste già, aggiorna
-            const existingRegistration = checkData.data[0];
-            const updateId = existingRegistration.documentId || existingRegistration.id;
-            codice_registrazione = existingRegistration.codice_registrazione;
-
-            const updateResponse = await fetch(`${strapiUrl}/api/iscrizionis/${updateId}`, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ data: { ...payload, codice_registrazione } }),
-            });
-
-            if (!updateResponse.ok) {
-              throw new Error('Errore aggiornamento iscrizione');
-            }
-
-            const result = await updateResponse.json();
-            setRegistrationId(result.data.id);
-            setCodiceRegistrazione(codice_registrazione);
-            return true;
-          }
-        }
-      } catch (error) {
-        console.error('Errore check duplicati:', error);
-      }
-
-      // Crea nuova iscrizione
-      const response = await fetch(`${strapiUrl}/api/iscrizionis`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data: { ...payload, codice_registrazione } }),
+      const result = await saveRegistration({
+        strapiUrl,
+        sessionToken,
+        codiceRegistrazione: codiceRegistrazione || nanoid(),
+        payload,
+        // Usato solo se il session_token risulta già associato a un'altra persona
+        // (sessione orfana riproposta): vedi src/lib/registrationSession.ts.
+        generateIdentifiers: () => ({ sessionToken: nanoid(), codiceRegistrazione: nanoid() }),
       });
 
-      if (!response.ok) {
-        throw new Error('Errore salvataggio iscrizione');
+      if (!result.ok) {
+        throw new Error(result.errorDetail || 'Errore salvataggio iscrizione');
       }
 
-      const result = await response.json();
-      setRegistrationId(result.data.id);
-      setCodiceRegistrazione(codice_registrazione);
+      setRegistrationId(result.registrationId!);
+      setCodiceRegistrazione(result.codiceRegistrazione!);
+      if (result.sessionToken && result.sessionToken !== sessionToken) {
+        setSessionToken(result.sessionToken);
+      }
       return true;
 
     } catch (error: unknown) {

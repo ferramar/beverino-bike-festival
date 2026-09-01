@@ -11,6 +11,7 @@ import {
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Link from 'next/link';
+import { clearStoredSession } from '../../lib/registrationSession';
 
 export default function Conferma() {
   const searchParams = useSearchParams();
@@ -20,12 +21,11 @@ export default function Conferma() {
   const [isVerifying, setIsVerifying] = useState(false);
 
   useEffect(() => {
-    // Pulizia localStorage
+    // Pulizia sessione
     try {
-      localStorage.removeItem('iscrizione');
-      localStorage.removeItem('beverino_registration_session');
+      clearStoredSession();
     } catch (error) {
-      console.warn('Errore pulizia localStorage:', error);
+      console.warn('Errore pulizia sessione:', error);
     }
 
     // Verifica pagamento se presente session_id
