@@ -238,7 +238,7 @@ const percorsiData = [
     distanza: "55 km",
     dislivello: "1700 m",
     durata: "4-5 ore",
-    gpxFile: "https://gpx.studio/embed?options=%7B%22token%22%3A%22pk.eyJ1IjoibG9sbG9tYWciLCJhIjoiY21mbzNuNWRlMDFxYjJpcXJjb2Izdnd5MyJ9.FPWeAeSWVuuYwXpmHK71MQ%22%2C%22files%22%3A%5B%22https%3A%2F%2Fstylish-flowers-c12f2e4071.media.strapiapp.com%2Fgiro_lungo_195e8b9353.gpx%22%5D%7D",
+    gpxFile: "",
     descrizione: "La sfida definitiva per i biker più esperti. Tracciato tecnico con single track impegnativi, rocce, radici e discese mozzafiato. Solo per chi ha esperienza e allenamento adeguato. La fatica sarà ripagata da panorami unici e dall'adrenalina pura.",
     puntiInteresse: [
       "Cresta del Diavolo",
