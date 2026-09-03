@@ -138,9 +138,6 @@ export default function FinalRegistrationStep() {
                 ? 'Tariffa early bird (con pacco gara)'
                 : 'Con pacco gara'}
             </Typography>
-            <Typography variant="caption" color="text.secondary" display="block">
-              Da €20 · fino a €25 in base alla data di iscrizione
-            </Typography>
             {tipoGara === 'ciclistica' && (
               <CheckCircleIcon 
                 sx={{ 
