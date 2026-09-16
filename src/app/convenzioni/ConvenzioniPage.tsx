@@ -240,6 +240,7 @@ function ConvenzioneCard({ convenzione }: { convenzione: ConvenzioneItem }) {
                 src={convenzione.immagine}
                 alt={convenzione.nome}
                 fill
+                unoptimized
                 style={{
                   objectFit: 'cover',
                 }}

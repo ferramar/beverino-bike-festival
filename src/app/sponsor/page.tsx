@@ -255,6 +255,7 @@ function SponsorCard({ sponsor, isPrincipal = false }: { sponsor: SponsorItem; i
             alt={sponsor.nome}
             width={isPrincipal ? 250 : 180}
             height={isPrincipal ? 150 : 100}
+            unoptimized
             style={{
               objectFit: 'contain',
               width: 'auto',

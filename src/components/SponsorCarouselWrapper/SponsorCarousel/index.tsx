@@ -214,6 +214,7 @@ function SponsorLogo({ sponsor }: { sponsor: SponsorItem }) {
         alt={sponsor.nome}
         width={150}
         height={80}
+        unoptimized
         style={{
           objectFit: 'contain',
           width: 'auto',
