@@ -44,6 +44,7 @@ export default function GalleryPage() {
     .map(i => ({
       src: i.url,
       thumb: i.thumbnailUrl || i.url,
+      medium: i.mediumUrl,
       alt: i.title || 'Beverino Bike Festival',
       year: i.editionYear
     }));

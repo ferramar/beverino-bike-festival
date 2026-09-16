@@ -11,6 +11,7 @@ type MediaItem = {
   type: 'image' | 'video';
   editionYear: number;
   thumbnailUrl?: string;
+  mediumUrl?: string;
 };
 
 const BASE = process.env.NEXT_PUBLIC_STRAPI_URL;
@@ -32,6 +33,9 @@ export async function getAllMedia(): Promise<MediaItem[]> {
             ? file.formats.thumbnail.url
             : `${BASE}${file.formats.thumbnail.url}`)
         : undefined,
+      mediumUrl: getFullUrl(
+        file.formats?.medium?.url || file.formats?.small?.url
+      ),
     }))
   );
 }

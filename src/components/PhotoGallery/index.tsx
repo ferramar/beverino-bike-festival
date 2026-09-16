@@ -279,12 +279,13 @@ const PhotoCard = React.memo(({
             </Typography>
           </Box>
         ) : (
-          <Image 
+          <Image
             src={item.medium || item.src}
-            alt={item.alt || `Foto ${index + 1}`} 
+            alt={item.alt || `Foto ${index + 1}`}
             width={500}
             height={500}
-            style={{ 
+            unoptimized
+            style={{
               width: '100%',
               height: 'auto',
               objectFit: 'cover',
@@ -292,11 +293,9 @@ const PhotoCard = React.memo(({
               opacity: isLoaded ? 1 : 0,
               display: 'block'
             }}
-            sizes={`(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw`}
             onLoad={onLoad}
             onError={() => setImageError(true)}
             priority={priority}
-            quality={85}
             placeholder="blur"
             blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWEREiMxUf/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
           />
