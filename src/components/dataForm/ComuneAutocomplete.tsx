@@ -55,6 +55,7 @@ export default function ComuneAutocomplete({
   return (
     <Autocomplete
       freeSolo
+      autoSelect
       loading={loading}
       options={options}
       value={selected}
