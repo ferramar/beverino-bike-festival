@@ -1,5 +1,4 @@
 import { Box, Container, Grid, Typography, Button } from '@mui/material';
-import Image from 'next/image';
 import Link from 'next/link';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 

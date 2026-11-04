@@ -1,12 +1,10 @@
 "use client"
 import { Box, Container, Typography, Button, Grid, Card, CardContent, Alert } from '@mui/material';
 import {
-  DirectionsBike,
   Download,
   AccessTime,
   Groups,
   CheckCircle,
-  School
 } from '@mui/icons-material';
 
 export default function KidsMTBSection() {

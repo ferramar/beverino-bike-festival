@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAdminAccessSecret, safeCompareSecret } from '@/lib/adminAuth';
+import { requireAdminPassword } from '@/lib/adminAuth';
 
 // Carica una o più foto su Strapi (plugin Upload) e crea un nuovo record media-edizionis
 // per l'anno scelto. Usa sempre un token API dedicato lato server (mai NEXT_PUBLIC_*,
@@ -17,15 +17,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Richiesta non valida' }, { status: 400 });
   }
 
-  const required = getAdminAccessSecret();
-  if (!required) {
-    return NextResponse.json({ error: 'Password non configurata sul server' }, { status: 500 });
-  }
-
-  const password = (formData.get('password') || '').toString();
-  if (!safeCompareSecret(password, required)) {
-    return NextResponse.json({ error: 'Password errata o mancante' }, { status: 401 });
-  }
+  const authError = requireAdminPassword(formData.get('password'));
+  if (authError) return authError;
 
   const apiToken = process.env.STRAPI_API_TOKEN;
   if (!apiToken) {

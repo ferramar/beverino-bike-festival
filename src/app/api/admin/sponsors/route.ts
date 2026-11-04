@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAdminAccessSecret, safeCompareSecret } from '@/lib/adminAuth';
+import { requireAdminPassword } from '@/lib/adminAuth';
 import { uploadImageToStrapi, StrapiUploadError } from '@/lib/strapiAdminUpload';
 
 function parseCategorie(raw: FormDataEntryValue | null): number[] {
@@ -22,14 +22,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Richiesta non valida' }, { status: 400 });
   }
 
-  const required = getAdminAccessSecret();
-  if (!required) {
-    return NextResponse.json({ error: 'Password non configurata sul server' }, { status: 500 });
-  }
-  const password = (formData.get('password') || '').toString();
-  if (!safeCompareSecret(password, required)) {
-    return NextResponse.json({ error: 'Password errata o mancante' }, { status: 401 });
-  }
+  const authError = requireAdminPassword(formData.get('password'));
+  if (authError) return authError;
 
   const apiToken = process.env.STRAPI_API_TOKEN;
   if (!apiToken) {

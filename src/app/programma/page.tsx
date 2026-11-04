@@ -367,7 +367,7 @@ export default function ProgrammaPage() {
               { 
                 km: 32, 
                 difficulty: 'Medio/facile', 
-                color: 'success',
+                color: 'success' as const,
                 elevation: '800m',
                 description: 'Percorso ideale per principianti e famiglie',
                 highlights: ['MTB: full, front, e-bike']
@@ -375,7 +375,7 @@ export default function ProgrammaPage() {
               { 
                 km: 35, 
                 difficulty: 'Medio', 
-                color: 'warning',
+                color: 'warning' as const,
                 elevation: '1150m',
                 description: 'Per ciclisti con buone capacità',
                 highlights: ['MTB: full, front, e-bike']
@@ -383,7 +383,7 @@ export default function ProgrammaPage() {
               { 
                 km: 50, 
                 difficulty: 'Medio/alta', 
-                color: 'error',
+                color: 'error' as const,
                 elevation: '1750m',
                 description: 'Sfida per ciclisti esperti con ottima preparazione fisica',
                 highlights: ['MTB: full, e-bike']
@@ -435,7 +435,7 @@ export default function ProgrammaPage() {
                         <Box textAlign="center">
                           <Chip 
                             label={route.difficulty} 
-                            color={route.color as any}
+                            color={route.color}
                             size="small"
                             aria-label={`Livello di difficoltà: ${route.difficulty}`}
                           />

@@ -58,12 +58,12 @@ export default function Liberatoria() {
     details?: string;
   } | null>(null);
 
-  const resetAcceptanceState = () => {
+  const resetAcceptanceState = useCallback(() => {
     setCanAccept(false);
     setPdfGenerated(false);
     setValue('liberatoriaAccettata', false, { shouldValidate: false });
     setValue('liberatoriaPdfBlob', undefined, { shouldValidate: false });
-  };
+  }, [setValue]);
 
   const generatePDF = useCallback(
     async (accettazioneDigitale?: string) => {
@@ -143,7 +143,7 @@ export default function Liberatoria() {
         setIsGenerating(false);
       }
     },
-    [getValues, setValue]
+    [getValues, setValue, resetAcceptanceState]
   );
 
   useEffect(() => {

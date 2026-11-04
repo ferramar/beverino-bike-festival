@@ -13,7 +13,6 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Fade,
   Slide,
   useScrollTrigger,
   Typography,
@@ -23,13 +22,9 @@ import {
   Menu as MenuIcon,
   Close as CloseIcon,
   Timeline,
-  CalendarMonth,
   Collections,
   Handshake,
   DirectionsBike,
-  HelpOutline,
-  LocalOffer,
-  CardGiftcard,
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { isRegistrationOpen } from '../../utils/isRegistrationOpen';

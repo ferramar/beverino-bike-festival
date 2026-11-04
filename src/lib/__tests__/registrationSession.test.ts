@@ -10,7 +10,7 @@ import { saveRegistration, isSessionStillValid } from '../registrationSession';
  */
 function createFakeStrapi() {
   let nextId = 1;
-  const records: Array<Record<string, any>> = [];
+  const records: Array<Record<string, unknown>> = [];
 
   const fetchImpl = vi.fn(async (url: string, init?: RequestInit) => {
     const method = init?.method || 'GET';
@@ -205,5 +205,37 @@ describe('isSessionStillValid', () => {
     vi.stubGlobal('fetch', strapi.fetch);
 
     await expect(isSessionStillValid(strapiUrl, 'inesistente')).resolves.toBe(false);
+  });
+});
+
+describe('header di autenticazione verso Strapi', () => {
+  it('saveRegistration() inoltra gli header (token API) sia alla ricerca sia alla create', async () => {
+    const strapi = createFakeStrapi();
+    vi.stubGlobal('fetch', strapi.fetch);
+    const headers = { Authorization: 'Bearer test-token' };
+
+    const result = await saveRegistration({
+      strapiUrl,
+      sessionToken: 'TOKEN-AUTH',
+      codiceRegistrazione: 'CODICE-AUTH',
+      payload: { nome: 'Ada', cognome: 'Lovelace', numeroDocumento: 'X1' },
+      generateIdentifiers: () => ({ sessionToken: 'unused', codiceRegistrazione: 'unused' }),
+      headers,
+    });
+
+    expect(result.ok).toBe(true);
+    expect(strapi.fetch.mock.calls.length).toBeGreaterThan(0);
+    for (const [, init] of strapi.fetch.mock.calls) {
+      expect((init as RequestInit).headers).toMatchObject(headers);
+    }
+  });
+
+  it('isSessionStillValid() inoltra gli header', async () => {
+    const strapi = createFakeStrapi();
+    vi.stubGlobal('fetch', strapi.fetch);
+
+    await isSessionStillValid(strapiUrl, 'abc', { Authorization: 'Bearer test-token' });
+    const [, init] = strapi.fetch.mock.calls[0];
+    expect((init as RequestInit).headers).toMatchObject({ Authorization: 'Bearer test-token' });
   });
 });

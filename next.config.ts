@@ -2,23 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    // Usa remotePatterns invece di domains (più sicuro e flessibile)
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'picsum.photos',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'via.placeholder.com',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'sample-videos.com',
-        pathname: '/**',
-      },
       {
         protocol: 'http',
         hostname: 'localhost',
@@ -34,9 +18,6 @@ const nextConfig: NextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     formats: ['image/webp'],
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
   },
 };
 

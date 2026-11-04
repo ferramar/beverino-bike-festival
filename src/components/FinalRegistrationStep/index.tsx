@@ -16,6 +16,7 @@ import {
   Checkbox,
   IconButton,
   Paper,
+  type SelectChangeEvent,
 } from '@mui/material';
 import DirectionsBikeIcon from '@mui/icons-material/DirectionsBike';
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
@@ -78,7 +79,7 @@ export default function FinalRegistrationStep() {
     setValue('conteggio_pastaparty', Math.max(pastaCount - 1, 1));
   };
 
-  const handleSizeChange = (event: any) => {
+  const handleSizeChange = (event: SelectChangeEvent<string>) => {
     setValue('taglia_maglietta', event.target.value, { shouldValidate: true });
   };
 

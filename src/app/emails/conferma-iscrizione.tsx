@@ -11,7 +11,6 @@ import {
   Preview,
   Section,
   Text,
-  Button,
 } from '@react-email/components';
 import * as React from 'react';
 import { EVENT, PRICING } from '../../config/event';
@@ -168,24 +167,8 @@ export const ConfermaIscrizioneEmail = ({
 
           {/* CTA Buttons */}
           {/* da decommentare */}
-          {/* <Section style={buttonContainer}>
-            <Button
-              style={button}
-              href={`${process.env.NEXT_PUBLIC_SITE_URL}/programma`}
-            >
-              Visualizza Programma Completo
-            </Button>
-          </Section> */}
 
           {/* da decommentare */}
-          {/* <Section style={buttonContainer}>
-            <Button
-              style={buttonSecondary}
-              href={`${process.env.NEXT_PUBLIC_SITE_URL}/faq`}
-            >
-              Domande Frequenti
-            </Button>
-          </Section> */}
 
           {/* Footer */}
           <Hr style={hr} />
@@ -315,36 +298,8 @@ const section = {
   marginBottom: '20px',
 };
 
-const button = {
-  backgroundColor: '#FB6616',
-  borderRadius: '5px',
-  color: '#fff',
-  fontSize: '16px',
-  fontWeight: 'bold',
-  textDecoration: 'none',
-  textAlign: 'center' as const,
-  display: 'block',
-  padding: '12px 20px',
-  margin: '0 20px',
-};
 
-const buttonSecondary = {
-  backgroundColor: '#fff',
-  border: '1px solid #FB6616',
-  borderRadius: '5px',
-  color: '#FB6616',
-  fontSize: '16px',
-  fontWeight: 'bold',
-  textDecoration: 'none',
-  textAlign: 'center' as const,
-  display: 'block',
-  padding: '12px 20px',
-  margin: '0 20px',
-};
 
-const buttonContainer = {
-  marginBottom: '16px',
-};
 
 const hr = {
   borderColor: '#e6ebf1',
@@ -361,11 +316,6 @@ const link = {
   textDecoration: 'underline',
 };
 
-const italic = {
-  fontStyle: 'italic' as const,
-  color: '#666',
-  fontSize: '14px',
-};
 
 const footer = {
   color: '#8898aa',

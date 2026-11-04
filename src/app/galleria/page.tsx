@@ -8,8 +8,6 @@ import {
   Grid,
   Skeleton,
   Fade,
-  useTheme,
-  useMediaQuery,
   CircularProgress
 } from '@mui/material';
 import { getAllMedia } from '../../utils/api';
@@ -25,8 +23,6 @@ export default function GalleryPage() {
   const [selected, setSelected] = useState<VideoItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const { data, error } = useSWR('/api/media-edizionis', getAllMedia);
   const items = data || [];
@@ -58,9 +54,6 @@ export default function GalleryPage() {
     }));
 
   const years = Array.from(new Set(items.map(i => i.editionYear))).sort((a, b) => b - a);
-
-  const photoCount = photoItems.length;
-  const videoCount = videoItems.length;
 
   if (error) {
     return (
@@ -219,8 +212,6 @@ const VideoGalleryWithInfiniteScroll: React.FC<{
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
   const ITEMS_PER_PAGE = 9;
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     if (items.length > 0) {

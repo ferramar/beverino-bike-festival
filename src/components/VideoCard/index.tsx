@@ -29,7 +29,6 @@ export const VideoCard: React.FC<VideoItem & { onClick: () => void }> = ({
 }) => {
   const thumb = useVideoThumbnail(url, 1);
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <motion.div
@@ -59,8 +58,6 @@ export const VideoCard: React.FC<VideoItem & { onClick: () => void }> = ({
             }
           }
         }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
       >
         <CardActionArea onClick={onClick}>
           <Box position="relative" width="100%" sx={{ aspectRatio: '16/9' }}>

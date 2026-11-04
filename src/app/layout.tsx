@@ -116,6 +116,8 @@ export default function RootLayout({
           `}
         </Script>
         <noscript>
+          {/* Pixel di tracciamento Meta: <img> è l'unica opzione dentro <noscript> */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img 
             height="1" 
             width="1" 

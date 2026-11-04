@@ -155,6 +155,7 @@ const LOGO_SRC =
 function PdfPageHeader() {
   return (
     <View fixed style={styles.pageHeaderFixed}>
+      {/* eslint-disable-next-line jsx-a11y/alt-text -- Image di @react-pdf non supporta alt */}
       <Image style={styles.logo} src={LOGO_SRC} />
       <View style={styles.headerTextBlock}>
         <Text style={styles.headerOrgName}>A.S.D. Beverino Bikers</Text>

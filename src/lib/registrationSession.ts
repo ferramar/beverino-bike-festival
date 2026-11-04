@@ -1,3 +1,5 @@
+import { customAlphabet } from 'nanoid';
+
 export interface SessionData {
   token: string;
   createdAt: number;
@@ -6,6 +8,12 @@ export interface SessionData {
   codiceRegistrazione?: string;
   activeStep?: number;
 }
+
+/** Genera session_token e codice_registrazione (10 caratteri alfanumerici). */
+export const newRegistrationId = customAlphabet(
+  '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+  10
+);
 
 export const SESSION_KEY = 'beverino_registration_session';
 export const SESSION_TTL = 24 * 60 * 60 * 1000; // 24 ore
@@ -43,18 +51,22 @@ export function clearStoredSession(): void {
 }
 
 /**
- * Verifica che il session_token di una sessione ripristinata da localStorage corrisponda
+ * Verifica che il session_token di una sessione ripristinata da sessionStorage corrisponda
  * ancora a un'iscrizione realmente presente su Strapi. Una sessione con registrationId ma
  * senza riscontro sul backend è "orfana" (es. pagamento della iscrizione precedente mai
  * confermato/redirect a /conferma mai avvenuto) e non va riusata: altrimenti il
  * codice_registrazione/session_token di quella iscrizione verrebbe riproposto per una
  * persona diversa, in collisione con i vincoli unique di Strapi.
  */
-export async function isSessionStillValid(strapiUrl: string, token: string): Promise<boolean> {
+export async function isSessionStillValid(
+  strapiUrl: string,
+  token: string,
+  headers: Record<string, string> = {}
+): Promise<boolean> {
   try {
     const res = await fetch(
       `${strapiUrl}/api/iscrizionis?filters[session_token][$eq]=${encodeURIComponent(token)}`,
-      { method: 'GET', headers: { 'Content-Type': 'application/json' } }
+      { method: 'GET', headers: { 'Content-Type': 'application/json', ...headers } }
     );
     if (!res.ok) return false;
     const data = await res.json();
@@ -71,6 +83,8 @@ export interface SaveRegistrationParams {
   payload: Record<string, unknown>;
   /** Genera una nuova coppia (session_token, codice_registrazione) in caso di conflitto d'identità. */
   generateIdentifiers: () => { sessionToken: string; codiceRegistrazione: string };
+  /** Header aggiuntivi per Strapi (es. Authorization con il token API lato server). */
+  headers?: Record<string, string>;
 }
 
 export interface SaveRegistrationResult {
@@ -87,10 +101,14 @@ function sameRegistrant(payload: Record<string, unknown>, existing: Record<strin
   return IDENTITY_FIELDS.every((field) => payload[field] === existing[field]);
 }
 
-async function findBySessionToken(strapiUrl: string, sessionToken: string): Promise<Record<string, unknown> | null> {
+async function findBySessionToken(
+  strapiUrl: string,
+  sessionToken: string,
+  headers: Record<string, string>
+): Promise<Record<string, unknown> | null> {
   const res = await fetch(
     `${strapiUrl}/api/iscrizionis?filters[session_token][$eq]=${encodeURIComponent(sessionToken)}`,
-    { method: 'GET', headers: { 'Content-Type': 'application/json' } }
+    { method: 'GET', headers: { 'Content-Type': 'application/json', ...headers } }
   );
   if (!res.ok) return null;
   const data = await res.json();
@@ -101,11 +119,12 @@ async function createRegistration(
   strapiUrl: string,
   sessionToken: string,
   codiceRegistrazione: string,
-  payload: Record<string, unknown>
+  payload: Record<string, unknown>,
+  headers: Record<string, string>
 ): Promise<SaveRegistrationResult> {
   const response = await fetch(`${strapiUrl}/api/iscrizionis`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...headers },
     body: JSON.stringify({
       data: { ...payload, codice_registrazione: codiceRegistrazione, session_token: sessionToken },
     }),
@@ -130,8 +149,8 @@ async function createRegistration(
 /**
  * Salva l'iscrizione su Strapi.
  *
- * Il ruolo pubblico non ha il permesso "update" su iscrizioni (solo find/findOne/create):
- * un'iscrizione con lo stesso session_token già esistente non può quindi mai essere
+ * Eseguito lato server (route /api/iscrizione) con il token API. Le iscrizioni non
+ * vengono mai aggiornate da qui (solo create): un'iscrizione con lo stesso session_token già esistente non può quindi mai essere
  * aggiornata (l'update fallirebbe con 403). Se esiste ed è della STESSA persona (stesso
  * nome/cognome/numeroDocumento) è un retry sicuro: si riusa l'id esistente. Se invece i
  * dati anagrafici sono diversi, il session_token è stato riproposto da una sessione
@@ -145,10 +164,11 @@ export async function saveRegistration({
   codiceRegistrazione,
   payload,
   generateIdentifiers,
+  headers = {},
 }: SaveRegistrationParams): Promise<SaveRegistrationResult> {
   let existing: Record<string, unknown> | null = null;
   try {
-    existing = await findBySessionToken(strapiUrl, sessionToken);
+    existing = await findBySessionToken(strapiUrl, sessionToken, headers);
   } catch (error) {
     console.error('Errore controllo iscrizione esistente:', error);
   }
@@ -165,8 +185,8 @@ export async function saveRegistration({
 
     // session_token orfano riproposto per una persona diversa: ripartiamo da zero
     const fresh = generateIdentifiers();
-    return createRegistration(strapiUrl, fresh.sessionToken, fresh.codiceRegistrazione, payload);
+    return createRegistration(strapiUrl, fresh.sessionToken, fresh.codiceRegistrazione, payload, headers);
   }
 
-  return createRegistration(strapiUrl, sessionToken, codiceRegistrazione, payload);
+  return createRegistration(strapiUrl, sessionToken, codiceRegistrazione, payload, headers);
 }

@@ -32,7 +32,7 @@ export interface StrapiMediaAttributes {
   url: string;                        // URL relativo (o assoluto se è già completo)
   previewUrl: string | null;          // URL di preview, se generato
   provider: string;                   // “local” o nome del provider cloud (es. "strapi-provider-cloudinary")
-  provider_metadata: any | null;      // meta-info specifico del provider (es. public_id, resource_type, ecc.)
+  provider_metadata: Record<string, unknown> | null;     // meta-info specifico del provider (es. public_id, resource_type, ecc.)
   createdAt: string;                  // data di creazione ISO8601
   updatedAt: string;                  // data di ultima modifica ISO8601
 }

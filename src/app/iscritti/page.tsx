@@ -18,34 +18,10 @@ type Item = {
   codice_registrazione?: string;
   createdAt?: string;
   // campi per minorenni
-  dati_genitore?: any;
+  dati_genitore?: { nome?: string; cognome?: string } | null;
   nomeTutore?: string | null;
   cognomeTutore?: string | null;
 };
-
-function toCsv(rows: Item[]): string {
-  const headers = [
-    'id', 'nome', 'cognome', 'email', 'tipo_gara', 'pasta_party', 'conteggio_pastaparty', 'taglia_maglietta', 'stato_pagamento', 'codice_registrazione', 'createdAt'
-  ];
-  const lines = [headers.join(',')];
-  for (const r of rows) {
-    const values = [
-      r.id,
-      (r.nome || ''),
-      (r.cognome || ''),
-      (r.email || ''),
-      (r.tipo_gara || ''),
-      r.pasta_party ? 'true' : 'false',
-      (r.conteggio_pastaparty ?? ''),
-      (r.taglia_maglietta || ''),
-      (r.stato_pagamento || ''),
-      (r.codice_registrazione || ''),
-      (r.createdAt || '')
-    ];
-    lines.push(values.map(v => String(v).replaceAll('"', '""')).map(v => /[,\n]/.test(v) ? `"${v}"` : v).join(','));
-  }
-  return lines.join('\n');
-}
 
 function getRegistrationYear(createdAt: string | undefined): number | null {
   if (!createdAt) return null;
@@ -138,7 +114,7 @@ export default function IscrittiPage() {
   // Auto-login da sessionStorage, se presente
   try {
     const saved = sessionStorage.getItem('iscritti_password');
-    if (saved && !authorized) {
+    if (saved) {
       setPassword(saved);
       void fetchList(saved);
     }
@@ -150,56 +126,30 @@ export default function IscrittiPage() {
     setError('');
     setInfo('');
     try {
-      // Chiamata DIRETTA a Strapi dal client
-      const strapiUrl = 'https://stylish-flowers-c12f2e4071.strapiapp.com';
+      const res = await fetch('/api/iscritti', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pass }),
+      });
+      const data = await res.json().catch(() => ({}));
 
-      // Il backend ha maxLimit/defaultLimit=130 per iscrizioni: senza
-      // paginazione esplicita Strapi tronca silenziosamente il risultato
-      // (es. 143 iscritti reali -> solo 130 restituiti). Paginiamo su tutti
-      // i risultati per recuperarli tutti. Questa istanza Strapi accetta
-      // solo paginazione a offset (start/limit): page/pageSize dà 400
-      // "Cannot use both page & offset pagination in the same query".
-      const limit = 100;
-      let start = 0;
-      let total = Infinity;
-      const allRows: Item[] = [];
-
-      while (start < total) {
-        const params = new URLSearchParams();
-        params.set('filters[stato_pagamento][$eq]', 'completato');
-        params.set('pagination[start]', String(start));
-        params.set('pagination[limit]', String(limit));
-
-        const url = `${strapiUrl}/api/iscrizionis?${params.toString()}`;
-
-        const res = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-          },
-        });
-
-        if (!res.ok) {
-          const errorText = await res.text();
-          console.error('Errore Strapi:', res.status, res.statusText, errorText);
-          setError(`Errore Strapi: ${res.status} ${res.statusText} - ${errorText}`);
-          setAllItems([]);
-          setAuthorized(false);
-          return;
+      if (!res.ok) {
+        if (res.status === 401) {
+          try { sessionStorage.removeItem('iscritti_password'); } catch {}
         }
-
-        const data = await res.json();
-        allRows.push(...(data.data || []));
-        total = data.meta?.pagination?.total ?? allRows.length;
-        start += limit;
+        setError(data.error || `Errore ${res.status}`);
+        setAllItems([]);
+        setAuthorized(false);
+        return;
       }
 
+      const allRows: Item[] = data.data || [];
       setAllItems(allRows);
       setAuthorized(true);
       try { sessionStorage.setItem('iscritti_password', pass); } catch {}
       
-    } catch (e: any) {
-      setError(`Errore: ${e?.message || e}`);
+    } catch (e: unknown) {
+      setError(`Errore: ${e instanceof Error ? e.message : String(e)}`);
       setAllItems([]);
     } finally {
       setLoading(false);

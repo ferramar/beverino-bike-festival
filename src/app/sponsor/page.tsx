@@ -14,7 +14,6 @@ import {
   Stack,
   Skeleton,
   Link as MuiLink,
-  alpha
 } from '@mui/material';
 import Image from 'next/image';
 import StarIcon from '@mui/icons-material/Star';

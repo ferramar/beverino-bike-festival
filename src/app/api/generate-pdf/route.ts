@@ -4,6 +4,11 @@ import { renderToBuffer } from '@react-pdf/renderer';
 import { createLiberatoriaPDF } from '@/components/Liberatoria/LiberatoriaPDF';
 import { isOnlineTipoGara } from '@/config/liberatorie';
 
+// Evita header injection / caratteri non validi nel nome file
+function safeFileName(name: string): string {
+  return name.normalize('NFD').replace(/[^\w-]+/g, '_').slice(0, 80);
+}
+
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
@@ -37,7 +42,7 @@ export async function POST(request: NextRequest) {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="liberatoria_${data.nome}_${data.cognome}.pdf"`,
+        'Content-Disposition': `attachment; filename="${safeFileName(`liberatoria_${data.nome}_${data.cognome}`)}.pdf"`,
       },
     });
   } catch (error) {

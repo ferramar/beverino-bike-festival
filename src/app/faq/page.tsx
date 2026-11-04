@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useEffect, JSX } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Typography,
@@ -7,13 +7,11 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Chip,
   CircularProgress,
   Alert,
   useTheme,
   alpha,
   Paper,
-  Button,
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
@@ -68,7 +66,7 @@ const BlocksRenderer = ({ content }: { content: StrapiBlock[] }) => {
             );
           case 'heading':
             return (
-              <Typography key={index} variant={`h${block.level || 3}` as any} gutterBottom>
+              <Typography key={index} variant={`h${Math.min(Math.max(block.level || 3, 1), 6)}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'} gutterBottom>
                 {block.children[0]?.text}
               </Typography>
             );

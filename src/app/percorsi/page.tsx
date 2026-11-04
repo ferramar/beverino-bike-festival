@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Typography,
@@ -11,9 +11,6 @@ import {
   Button,
   Tabs,
   Tab,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
   Stack,
   Divider,
 } from '@mui/material';
@@ -23,7 +20,6 @@ import {
   Terrain,
   Speed,
   Schedule,
-  ExpandMore,
   DirectionsBike,
   Straighten,
   TrendingUp,
@@ -32,7 +28,6 @@ import {
   StarBorder,
   StarHalf,
 } from '@mui/icons-material';
-import dynamic from 'next/dynamic';
 
 // Componente per visualizzare GPX con GPX Studio
 function GPXMap({ gpxFile, height = 400 }: { gpxFile: string; height?: number }) {
@@ -206,7 +201,7 @@ const percorsiData = [
       "Borgo medievale di Castelnuovo",
       "Area picnic Pian del Lago"
     ],
-    difficoltaColore: "success",
+    difficoltaColore: "success" as const,
     immagine: "/percorso1.jpg"
   },
   {
@@ -226,7 +221,7 @@ const percorsiData = [
       "Cascata del Torrente Chiaro",
       "Rifugio Monte Rosso"
     ],
-    difficoltaColore: "warning",
+    difficoltaColore: "warning" as const,
     immagine: "/percorso2.jpg"
   },
   {
@@ -247,7 +242,7 @@ const percorsiData = [
       "Discesa del Brivido",
       "Passo delle Aquile"
     ],
-    difficoltaColore: "error",
+    difficoltaColore: "error" as const,
     immagine: "/percorso3.jpg"
   }
 ];
@@ -347,7 +342,7 @@ export default function PercorsiPage() {
             },
           }}
         >
-          {percorsiData.map((percorso, index) => (
+          {percorsiData.map((percorso) => (
             <Tab
               key={percorso.id}
               label={
@@ -373,7 +368,7 @@ export default function PercorsiPage() {
                 </Typography>
                 <Chip
                   label={selectedPercorso.difficolta}
-                  color={selectedPercorso.difficoltaColore as any}
+                  color={selectedPercorso.difficoltaColore}
                   size="medium"
                   sx={{ fontWeight: 600 }}
                 />
@@ -437,7 +432,7 @@ export default function PercorsiPage() {
                     </Typography>
                     <Box>
                       {Array.from({ length: 5 }).map((_, i) => {
-                        const rating = (selectedPercorso as any).difficoltaTecnica as number;
+                        const rating = selectedPercorso.difficoltaTecnica;
                         const full = i + 1 <= rating;
                         const half = !full && i + 0.5 <= rating;
                         return full ? (
@@ -463,7 +458,7 @@ export default function PercorsiPage() {
                     </Typography>
                     <Box>
                       {Array.from({ length: 5 }).map((_, i) => {
-                        const rating = (selectedPercorso as any).preparazioneFisica as number;
+                        const rating = selectedPercorso.preparazioneFisica;
                         const full = i + 1 <= rating;
                         const half = !full && i + 0.5 <= rating;
                         return full ? (
@@ -531,7 +526,7 @@ export default function PercorsiPage() {
                           externalGpxHref = parsed.files[0];
                         }
                       }
-                    } catch (_) {
+                    } catch {
                       // Ignora e fallback su file locale se disponibile
                     }
 

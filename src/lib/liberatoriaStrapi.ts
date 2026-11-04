@@ -4,8 +4,9 @@ import {
   type LiberatoriaData,
 } from '@/components/Liberatoria/LiberatoriaPDF';
 import { formatAccettazioneDigitale, type OnlineTipoGara } from '@/config/liberatorie';
+import { getStrapiUrl, strapiAuthHeaders } from '@/lib/strapiServer';
 
-type StrapiRegistration = {
+export type StrapiRegistration = {
   id?: number;
   documentId?: string;
   nome: string;
@@ -30,6 +31,9 @@ type StrapiRegistration = {
   } | null;
   codice_registrazione?: string;
   liberatoriaPdfUrl?: string | null;
+  pasta_party?: boolean;
+  conteggio_pastaparty?: number;
+  email_conferma_inviata?: boolean;
 };
 
 export function registrationToLiberatoriaData(
@@ -78,7 +82,7 @@ export async function uploadPdfToStrapi(
   pdfBuffer: Uint8Array,
   fileName: string
 ): Promise<string | null> {
-  const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
+  const strapiUrl = getStrapiUrl();
   const formData = new FormData();
   const blob = new Blob([new Uint8Array(pdfBuffer)], { type: 'application/pdf' });
   formData.append('files', blob, fileName);
@@ -86,6 +90,7 @@ export async function uploadPdfToStrapi(
 
   const uploadResponse = await fetch(`${strapiUrl}/api/upload`, {
     method: 'POST',
+    headers: strapiAuthHeaders(),
     body: formData,
   });
 

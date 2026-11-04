@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { 
   Container, 
@@ -13,12 +13,18 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Link from 'next/link';
 import { clearStoredSession } from '../../lib/registrationSession';
 
+interface PaymentDetails {
+  payment_intent?: string;
+  amount_total: number;
+}
+
 export default function Conferma() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
   const [paymentStatus, setPaymentStatus] = useState<'loading' | 'success' | 'error'>('loading');
-  const [paymentDetails, setPaymentDetails] = useState<any>(null);
-  const [isVerifying, setIsVerifying] = useState(false);
+  const [paymentDetails, setPaymentDetails] = useState<PaymentDetails | null>(null);
+  // Evita una doppia verifica (StrictMode / re-render) per la stessa sessione
+  const verifiedSessionRef = useRef<string | null>(null);
 
   useEffect(() => {
     // Pulizia sessione
@@ -29,9 +35,10 @@ export default function Conferma() {
     }
 
     // Verifica pagamento se presente session_id
-    if (sessionId && !isVerifying) {
-      setIsVerifying(true); 
-      fetch(`/api/verify-payment?session_id=${sessionId}`)
+    if (sessionId) {
+      if (verifiedSessionRef.current === sessionId) return;
+      verifiedSessionRef.current = sessionId;
+      fetch(`/api/verify-payment?session_id=${encodeURIComponent(sessionId)}`)
         .then(res => res.json())
         .then(data => {
           if (data.status === 'complete' || data.payment_status === 'paid') {

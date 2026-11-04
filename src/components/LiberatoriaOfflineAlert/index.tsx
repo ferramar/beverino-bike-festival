@@ -16,12 +16,10 @@ import {
   Alert,
   AlertTitle,
   Paper,
-  Chip,
 } from '@mui/material';
 import {
   Download as DownloadIcon,
   CheckCircle as CheckCircleIcon,
-  Info as InfoIcon,
   Close as CloseIcon,
   Print as PrintIcon,
   PersonOutline as PersonIcon,

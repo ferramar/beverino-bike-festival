@@ -23,19 +23,18 @@ const fadeIn = keyframes`
   to { opacity: 1; transform: translateY(0); }
 `;
 
-export function Countdown() {
-  const targetDate = EVENT.eventDateISO;
-
-  const calculateTimeLeft = (): TimeLeft => {
+function calculateTimeLeft(): TimeLeft {
     const now = new Date().getTime();
-    const eventTime = new Date(targetDate).getTime();
+    const eventTime = new Date(EVENT.eventDateISO).getTime();
     const diff = Math.max(eventTime - now, 0);
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
     const minutes = Math.floor((diff / (1000 * 60)) % 60);
     const seconds = Math.floor((diff / 1000) % 60);
     return { days, hours, minutes, seconds };
-  };
+}
+
+export function Countdown() {
 
   const [timeLeft, setTimeLeft] = useState<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [mounted, setMounted] = useState(false);

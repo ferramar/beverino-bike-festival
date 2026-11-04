@@ -16,7 +16,6 @@ import DataForm from '../dataForm';
 import Liberatoria from '../Liberatoria';
 import FinalRegistrationStep from '../FinalRegistrationStep';
 import CheckoutRedirectStep from '../CheckoutRedirectStep';
-import { customAlphabet } from 'nanoid';
 import { OrangeStepper } from '../CustomStepper';
 import { calculateOrderTotal } from '../../config/pricing';
 import {
@@ -24,25 +23,8 @@ import {
   readStoredSession,
   writeStoredSession,
   clearStoredSession,
-  isSessionStillValid,
-  saveRegistration,
+  newRegistrationId,
 } from '../../lib/registrationSession';
-
-interface DatiGenitore {
-  nome: string;
-  cognome: string;
-  luogoNascita: string;
-  dataNascita: string;
-  comuneResidenza: string;
-  viaResidenza: string;
-  numeroCivico: string;
-  cap: string;
-  email: string;
-  tipoDocumento: string;
-  numeroDocumento: string;
-  cittaRilascio: string;
-  dataRilascioDocumento: string;
-}
 
 interface WizardData {
   nome: string;
@@ -90,9 +72,22 @@ function sanitizeRestoredStep(step: number, registrationId: number | null): numb
   return step;
 }
 
+async function checkSessionOnServer(sessionToken: string): Promise<boolean> {
+  try {
+    const res = await fetch('/api/iscrizione/sessione', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionToken }),
+    });
+    if (!res.ok) return false;
+    const data = await res.json();
+    return data.valid === true;
+  } catch {
+    return false;
+  }
+}
+
 export default function IscrizioneWizard() {
-  const alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  const nanoid = customAlphabet(alphabet, 10);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const methods = useForm<WizardData>({
@@ -101,7 +96,6 @@ export default function IscrizioneWizard() {
   });
   const { watch, trigger, reset, setValue, getValues } = methods;
   const [activeStep, setActiveStep] = useState(0);
-  const [userAgent, setUserAgent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [registrationId, setRegistrationId] = useState<number | null>(null);
   const [codiceRegistrazione, setCodiceRegistrazione] = useState<string>('');
@@ -111,17 +105,15 @@ export default function IscrizioneWizard() {
   const [totalAmount, setTotalAmount] = useState(0);
   const [isSessionReady, setIsSessionReady] = useState(false);
 
+  const tipoGara = watch('tipo_gara');
+  const pastaPartyCount = watch('conteggio_pastaparty') || 0;
+
   // Calcola il totale in base alla gara e pasta party
   useEffect(() => {
-    const tipoGara = watch('tipo_gara');
-    const pastaPartyCount = watch('conteggio_pastaparty') || 0;
-    const total = calculateOrderTotal(tipoGara, pastaPartyCount);
-    
-    setTotalAmount(total);
-  }, [watch('tipo_gara'), watch('conteggio_pastaparty')]);
+    setTotalAmount(calculateOrderTotal(tipoGara, pastaPartyCount));
+  }, [tipoGara, pastaPartyCount]);
 
   // Invalida liberatoria se l'utente cambia tipo di gara (tornando allo step Opzioni)
-  const tipoGara = watch('tipo_gara');
   const prevTipoGaraRef = useRef<string | undefined>(undefined);
   useEffect(() => {
     if (
@@ -135,12 +127,6 @@ export default function IscrizioneWizard() {
     prevTipoGaraRef.current = tipoGara;
   }, [tipoGara, setValue]);
 
-  useEffect(() => {
-    if (typeof navigator !== 'undefined') {
-      setUserAgent(navigator.userAgent);
-    }
-  }, []);
-
   // Ripristina sessione (token, iscrizione Strapi, step corrente).
   // Una sessione con registrationId ma senza riscontro su Strapi è "orfana" (es.
   // pagamento della iscrizione precedente mai confermato/redirect a /conferma mai
@@ -152,17 +138,16 @@ export default function IscrizioneWizard() {
 
     (async () => {
       const stored = readStoredSession();
-      let nextToken = stored?.token || nanoid();
+      let nextToken = stored?.token || newRegistrationId();
       let nextRegistrationId = stored?.registrationId ?? null;
       let nextCodice = stored?.codiceRegistrazione || '';
       let nextStep = stored ? sanitizeRestoredStep(stored.activeStep ?? 0, nextRegistrationId) : 0;
 
       if (stored && nextRegistrationId) {
-        const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
-        const stillValid = await isSessionStillValid(strapiUrl, nextToken);
+        const stillValid = await checkSessionOnServer(nextToken);
         if (!stillValid) {
           clearStoredSession();
-          nextToken = nanoid();
+          nextToken = newRegistrationId();
           nextRegistrationId = null;
           nextCodice = '';
           nextStep = 0;
@@ -270,28 +255,8 @@ export default function IscrizioneWizard() {
 
     try {
       const data = getValues();
-      const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
 
-      // Ottieni IP utente
-      let userIp = 'unknown';
-      try {
-        const ipRes = await fetch('https://api.ipify.org?format=json');
-        if (ipRes.ok) {
-          const ipData = await ipRes.json();
-          userIp = ipData.ip;
-        }
-      } catch {
-        // IP non critico
-      }
-
-      // Firma e dati iscrizione su Strapi; PDF liberatoria dopo pagamento (verify-payment)
-      const log_firma_liberatoria = {
-        orario_firmatario: new Date().toISOString(),
-        ip_firmatario: userIp,
-        user_agent_firmatario: userAgent
-      };
-
-      // Prepara i dati del genitore
+      // Dati del genitore/tutore (solo per minorenni)
       let dati_genitore = null;
       if (data.nomeGenitore) {
         dati_genitore = {
@@ -332,24 +297,19 @@ export default function IscrizioneWizard() {
         liberatoriaAccettata: data.liberatoriaAccettata,
         conteggio_pastaparty: data.conteggio_pastaparty,
         taglia_maglietta: data.taglia_maglietta || null,
-        log_firma_liberatoria,
-        pasta_party: data.conteggio_pastaparty > 0,
-        stato_pagamento: 'in_attesa',
-        publishedAt: new Date().toISOString()
       };
 
-      const result = await saveRegistration({
-        strapiUrl,
-        sessionToken,
-        codiceRegistrazione: codiceRegistrazione || nanoid(),
-        payload,
-        // Usato solo se il session_token risulta già associato a un'altra persona
-        // (sessione orfana riproposta): vedi src/lib/registrationSession.ts.
-        generateIdentifiers: () => ({ sessionToken: nanoid(), codiceRegistrazione: nanoid() }),
+      // Il salvataggio avviene lato server (/api/iscrizione), che imposta anche stato
+      // del pagamento e log della firma (IP, user agent, orario).
+      const res = await fetch('/api/iscrizione', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionToken, codiceRegistrazione, payload }),
       });
+      const result = await res.json().catch(() => ({}));
 
-      if (!result.ok) {
-        throw new Error(result.errorDetail || 'Errore salvataggio iscrizione');
+      if (!res.ok) {
+        throw new Error(result.error || `Errore salvataggio iscrizione (${res.status})`);
       }
 
       setRegistrationId(result.registrationId!);
