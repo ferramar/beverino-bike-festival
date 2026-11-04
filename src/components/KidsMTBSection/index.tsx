@@ -1,21 +1,11 @@
 "use client"
-import { Box, Container, Typography, Button, Grid, Card, CardContent, Alert } from '@mui/material';
+import { Box, Container, Typography, Grid, Card, CardContent, Alert } from '@mui/material';
 import {
-  Download,
   AccessTime,
   Groups,
-  CheckCircle,
 } from '@mui/icons-material';
 
 export default function KidsMTBSection() {
-  const handleDownload = () => {
-    // Scarica la liberatoria vuota
-    const link = document.createElement('a');
-    link.href = '/modulo-open-day-2026.pdf';
-    link.download = 'modulo-open-day-2026.pdf';
-    link.click();
-  };
-
   return (
     <Box sx={{
       py: 10,
@@ -159,33 +149,10 @@ export default function KidsMTBSection() {
             >
               <CardContent>
                 <Typography variant="h5" fontWeight={700} gutterBottom sx={{ mb: 3 }}>
-                  Come Iscriversi
+                  Dove e quando
                 </Typography>
 
-                <Box sx={{ mb: 3 }}>
-                  <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <CheckCircle color="success" />
-                    È semplicissimo!
-                  </Typography>
-                </Box>
-
-                <Box
-                  component="ol"
-                  sx={{
-                    pl: 3,
-                    '& li': {
-                      mb: 2,
-                      fontSize: '1rem',
-                      lineHeight: 1.6,
-                    }
-                  }}
-                >
-                  <li>Scarica la liberatoria cliccando sul pulsante qui sotto</li>
-                  <li>Compila tutti i campi richiesti</li>
-                  <li>Porta la liberatoria firmata il giorno dell'evento</li>
-                </Box>
-
-                <Alert severity="info" sx={{ mb: 3 }}>
+                <Alert severity="info">
                   <Typography variant="body2" sx={{
                     "& a": {
                       textDecoration: 'underline',
@@ -196,31 +163,6 @@ export default function KidsMTBSection() {
                   </Typography>
                 </Alert>
 
-                <Button
-                  variant="contained"
-                  fullWidth
-                  size="large"
-                  startIcon={<Download />}
-                  onClick={() => handleDownload()}
-                  sx={{
-                    py: 2,
-                    fontSize: '1.125rem',
-                    fontWeight: 600,
-                    backgroundColor: '#A52D0C',
-                    boxShadow: '0 4px 15px rgba(165, 45, 12, 0.3)',
-                    '&:hover': {
-                      backgroundColor: '#8A2C12',
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 6px 20px rgba(165, 45, 12, 0.4)',
-                    }
-                  }}
-                >
-                  Scarica la Liberatoria
-                </Button>
-
-                <Typography variant="caption" display="block" textAlign="center" sx={{ mt: 2 }}>
-                  La liberatoria deve essere firmata da un genitore o tutore legale
-                </Typography>
               </CardContent>
             </Card>
           </Grid>

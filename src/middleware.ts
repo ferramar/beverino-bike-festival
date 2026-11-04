@@ -5,8 +5,8 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   
-  // Lista delle pagine da reindirizzare alla home
-  const pagesUnderConstruction = ['/faq'];
+  // Pagine legate a un'edizione passata (date/iniziative non più valide), reindirizzate alla home
+  const pagesUnderConstruction = ['/faq', '/lotteria'];
   
   // Controlla se il percorso corrente è nella lista
   if (pagesUnderConstruction.includes(pathname)) {

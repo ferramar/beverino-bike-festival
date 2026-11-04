@@ -3,7 +3,6 @@ import { Container, Typography, Box, Paper, Button } from '@mui/material';
 import Link from 'next/link';
 import IscrizioneWizard from "../../components/IscrizioneWizard";
 import { isRegistrationOpen, getRegistrationOpeningDate } from "../../utils/isRegistrationOpen";
-import { EVENT } from "../../config/event";
 
 function RegistrationClosed() {
   const now = new Date();
@@ -18,12 +17,12 @@ function RegistrationClosed() {
         </Typography>
         <Typography variant="h6" color="text.secondary" sx={{ mb: 3 }}>
           {notYetOpen
-            ? `Le iscrizioni online apriranno il 7 luglio ${EVENT.year}`
-            : 'Le iscrizioni online si sono chiuse il 19 settembre 2026'}
+            ? 'Le iscrizioni online apriranno a breve: seguici sui social per gli aggiornamenti.'
+            : 'Le iscrizioni online non sono attive. Seguici sui social per sapere quando apriranno quelle della prossima edizione.'}
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <Button component={Link} href="/programma" variant="contained" sx={{ backgroundColor: '#A52D0C' }}>
-            Programma dell'Evento
+          <Button component={Link} href="/galleria" variant="contained" sx={{ backgroundColor: '#A52D0C' }}>
+            Guarda la Galleria
           </Button>
           <Button component={Link} href="/percorsi" variant="outlined" sx={{ borderColor: '#A52D0C', color: '#A52D0C' }}>
             Vedi i Percorsi

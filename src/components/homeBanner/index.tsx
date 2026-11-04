@@ -2,7 +2,6 @@
 import { Box, Button, Container, Typography } from "@mui/material";
 import Image from "next/image";
 import Link from "next/link";
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { keyframes } from '@mui/system';
 import { isRegistrationOpen } from '../../utils/isRegistrationOpen';
@@ -35,7 +34,7 @@ export default function HomeBanner() {
   return (
     <Box
       component="section"
-      aria-label={`Banner principale - Beverino Bike Festival ${EVENT.year}`}
+      aria-label="Banner principale - Beverino Bike Festival"
       sx={{
         minHeight: "700px",
         height: { xs: "100svh", lg: "90svh" },
@@ -141,7 +140,7 @@ export default function HomeBanner() {
               </Typography>
             </Box>
 
-            {/* Data e Luogo */}
+            {/* Luogo */}
             <Box sx={{
               display: "flex",
               gap: { xs: 2, md: 3 },
@@ -150,21 +149,6 @@ export default function HomeBanner() {
               animation: `${fadeInUp} 0.8s ease-out 0.2s forwards`,
               opacity: 0,
             }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <CalendarMonthIcon sx={{ color: 'white', fontSize: { xs: 20, md: 24 } }} aria-hidden="true" />
-                <Typography
-                  component="time"
-                  dateTime={EVENT.eventDateISO.slice(0, 10)}
-                  variant="h6"
-                  sx={{
-                    fontWeight: 500,
-                    color: 'white',
-                    fontSize: { xs: '0.875rem', md: '1.25rem' },
-                  }}
-                >
-                  {EVENT.eventDateLabel}
-                </Typography>
-              </Box>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <LocationOnIcon sx={{ color: 'white', fontSize: { xs: 20, md: 24 } }} aria-hidden="true" />
                 <Typography

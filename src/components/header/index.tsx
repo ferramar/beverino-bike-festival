@@ -28,7 +28,6 @@ import {
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { isRegistrationOpen } from '../../utils/isRegistrationOpen';
-import { EVENT } from '../../config/event';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 
@@ -113,7 +112,7 @@ export default function ModernHeader() {
             Beverino Bike
           </Typography>
           <Typography variant="body2" sx={{ opacity: 0.9 }}>
-            Festival {EVENT.year}
+            Festival
           </Typography>
         </Box>
       </Box>

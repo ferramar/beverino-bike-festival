@@ -253,25 +253,19 @@ export default function GalleryFilters({
         </Menu>
       </Box>
 
-      {/* Conteggio risultati */}
-      <Box sx={{ mb: 4, textAlign: 'center' }}>
-        <Typography variant="h6" color="text.secondary">
-          {filteredCount > 0 ? (
-            <>
-              <Box component="span" sx={{ color: 'primary.main', fontWeight: 700 }}>
-                {filteredCount}
-              </Box>
-              {' '}
-              {mode === 'photos' ? (filteredCount === 1 ? 'foto trovata' : 'foto trovate') : (filteredCount === 1 ? 'video trovato' : 'video trovati')}
-              {year !== 'all' && (
-                <> per l'edizione {year}</>
-              )}
-            </>
-          ) : (
-            `Nessun ${mode === 'photos' ? 'a foto' : ' video'} trovato${year !== 'all' ? ` per l'edizione ${year}` : ''}`
-          )}
-        </Typography>
-      </Box>
+      {/* Conteggio risultati (con 0 risultati il messaggio lo mostra la galleria) */}
+      {filteredCount > 0 && (
+        <Box sx={{ mb: 4, textAlign: 'center' }}>
+          <Typography variant="h6" color="text.secondary">
+            <Box component="span" sx={{ color: 'primary.main', fontWeight: 700 }}>
+              {filteredCount}
+            </Box>
+            {' '}
+            {mode === 'photos' ? (filteredCount === 1 ? 'foto trovata' : 'foto trovate') : (filteredCount === 1 ? 'video trovato' : 'video trovati')}
+            {year !== 'all' && <> per l'edizione {year}</>}
+          </Typography>
+        </Box>
+      )}
     </>
   );
 }

@@ -18,8 +18,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: `Beverino Bike Festival ${EVENT.year} - Raduno MTB in Liguria`,
-  description: `Partecipa alla ${EVENT.editionLabel} edizione del Beverino Bike Festival. ${EVENT.eventDateLabel}. Tre percorsi attraverso paesaggi mozzafiato: 30km, 35km e 50km. Iscrizioni aperte!`,
+  title: "Beverino Bike Festival - Raduno MTB in Liguria",
+  description: "Il raduno di mountain bike tra le colline di Beverino (SP): tre percorsi per tutti i livelli, open day MTB per bambini, galleria foto e video delle edizioni passate.",
   keywords: "beverino bike festival, raduno ciclistico liguria, ciclismo la spezia, mountain bike liguria, granfondo liguria",
   authors: [{ name: "Beverino Bike Festival" }],
   creator: "Beverino Bike Festival",
@@ -36,8 +36,8 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: `Beverino Bike Festival ${EVENT.year}`,
-    description: `Partecipa alla ${EVENT.editionLabel} edizione del Beverino Bike Festival. ${EVENT.eventDateLabel}.`,
+    title: "Beverino Bike Festival",
+    description: "Il raduno di mountain bike tra le colline di Beverino (SP).",
     url: EVENT.siteUrl,
     siteName: "Beverino Bike Festival",
     images: [
@@ -53,8 +53,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: `Beverino Bike Festival ${EVENT.year}`,
-    description: `${EVENT.eventDateLabel} - Tre percorsi attraverso paesaggi mozzafiato`,
+    title: "Beverino Bike Festival",
+    description: "Tre percorsi di mountain bike attraverso paesaggi mozzafiato",
     images: [`${EVENT.siteUrl}/twitter-image.jpg`],
   },
   viewport: {

@@ -54,6 +54,8 @@ export default function GalleryPage() {
     }));
 
   const years = Array.from(new Set(items.map(i => i.editionYear))).sort((a, b) => b - a);
+  // Nessun contenuto caricato in assoluto: niente filtri, solo un messaggio "in arrivo"
+  const isGalleryEmpty = !isLoading && items.length === 0;
 
   if (error) {
     return (
@@ -107,68 +109,76 @@ export default function GalleryPage() {
             color="text.secondary"
             sx={{ maxWidth: 700, mx: 'auto' }}
           >
-            Rivivi le emozioni delle passate edizioni attraverso foto e video
+            Rivivi le emozioni delle edizioni passate con foto e video
           </Typography>
         </Box>
 
-        {/* Filters Section - con padding su mobile */}
-        <Box sx={{ px: { xs: 2, sm: 0 } }}>
-          <GalleryFilters
-            mode={mode}
-            year={year}
-            years={years}
-            photoCount={photoItems.length}
-            videoCount={videoItems.length}
-            filteredCount={mode === 'photos' ? photoItems.length : videoItems.length}
-            onModeChange={setMode}
-            onYearChange={setYear}
-          />
-        </Box>
-
-        {/* Content Section */}
-        <Box sx={{ px: { xs: 0, sm: 2, md: 0 } }}>
-          <Fade in={!isLoading} timeout={800}>
-            <Box sx={{
-              paddingInline: {xs: "1rem", sm: 0}
-            }}>
-              {isLoading ? (
-                <Grid container spacing={{ xs: 0, sm: 2 }} sx={{ px: { xs: 0, sm: 0 } }}>
-                  {[...Array(8)].map((_, i) => (
-                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={i}>
-                      <Skeleton
-                        variant="rectangular"
-                        height={250}
-                        sx={{
-                          borderRadius: { xs: 0, sm: 2 },
-                          mb: { xs: 0.5, sm: 0 }
-                        }}
-                      />
-                    </Grid>
-                  ))}
-                </Grid>
-              ) : (
-                <>
-                  {mode === 'photos' ? (
-                    photoItems.length > 0 ? (
-                      <PhotoGallery items={photoItems} />
-                    ) : (
-                      <EmptyState type="foto" year={year} />
-                    )
-                  ) : (
-                    videoItems.length > 0 ? (
-                      <VideoGalleryWithInfiniteScroll
-                        items={videoItems}
-                        onVideoClick={setSelected}
-                      />
-                    ) : (
-                      <EmptyState type="video" year={year} />
-                    )
-                  )}
-                </>
-              )}
+        {isGalleryEmpty ? (
+          <Box sx={{ px: { xs: 2, sm: 0 } }}>
+            <ComingSoon />
+          </Box>
+        ) : (
+          <>
+            {/* Filters Section - con padding su mobile */}
+            <Box sx={{ px: { xs: 2, sm: 0 } }}>
+              <GalleryFilters
+                mode={mode}
+                year={year}
+                years={years}
+                photoCount={photoItems.length}
+                videoCount={videoItems.length}
+                filteredCount={mode === 'photos' ? photoItems.length : videoItems.length}
+                onModeChange={setMode}
+                onYearChange={setYear}
+              />
             </Box>
-          </Fade>
-        </Box>
+
+            {/* Content Section */}
+            <Box sx={{ px: { xs: 0, sm: 2, md: 0 } }}>
+              <Fade in={!isLoading} timeout={800}>
+                <Box sx={{
+                  paddingInline: {xs: "1rem", sm: 0}
+                }}>
+                  {isLoading ? (
+                    <Grid container spacing={{ xs: 0, sm: 2 }} sx={{ px: { xs: 0, sm: 0 } }}>
+                      {[...Array(8)].map((_, i) => (
+                        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={i}>
+                          <Skeleton
+                            variant="rectangular"
+                            height={250}
+                            sx={{
+                              borderRadius: { xs: 0, sm: 2 },
+                              mb: { xs: 0.5, sm: 0 }
+                            }}
+                          />
+                        </Grid>
+                      ))}
+                    </Grid>
+                  ) : (
+                    <>
+                      {mode === 'photos' ? (
+                        photoItems.length > 0 ? (
+                          <PhotoGallery items={photoItems} />
+                        ) : (
+                          <EmptyState type="foto" year={year} />
+                        )
+                      ) : (
+                        videoItems.length > 0 ? (
+                          <VideoGalleryWithInfiniteScroll
+                            items={videoItems}
+                            onVideoClick={setSelected}
+                          />
+                        ) : (
+                          <EmptyState type="video" year={year} />
+                        )
+                      )}
+                    </>
+                  )}
+                </Box>
+              </Fade>
+            </Box>
+          </>
+        )}
 
         <VideoDialog
           open={!!selected}
@@ -180,8 +190,32 @@ export default function GalleryPage() {
   );
 }
 
-// Componente per stato vuoto
-const EmptyState: React.FC<{ type: string; year: 'all' | number }> = ({ type, year }) => (
+// Galleria completamente vuota (nessun media caricato su Strapi)
+const ComingSoon: React.FC = () => (
+  <Box
+    sx={{
+      textAlign: 'center',
+      py: 10,
+      px: 3,
+      maxWidth: 720,
+      mx: 'auto',
+      backgroundColor: 'grey.50',
+      borderRadius: 3,
+      border: '2px dashed',
+      borderColor: 'grey.300'
+    }}
+  >
+    <Typography variant="h5" color="text.secondary" gutterBottom>
+      Foto e video in arrivo
+    </Typography>
+    <Typography variant="body1" color="text.secondary">
+      Stiamo raccogliendo le foto e i video del Beverino Bike Festival: li pubblicheremo qui a breve.
+    </Typography>
+  </Box>
+);
+
+// Nessun contenuto per il tipo/edizione selezionati
+const EmptyState: React.FC<{ type: 'foto' | 'video'; year: 'all' | number }> = ({ type, year }) => (
   <Box
     sx={{
       textAlign: 'center',
@@ -194,11 +228,13 @@ const EmptyState: React.FC<{ type: string; year: 'all' | number }> = ({ type, ye
     }}
   >
     <Typography variant="h5" color="text.secondary" gutterBottom>
-      Nessun {type} disponibile
+      {type === 'foto' ? 'Nessuna foto disponibile' : 'Nessun video disponibile'}
       {year !== 'all' && ` per l'edizione ${year}`}
     </Typography>
     <Typography variant="body1" color="text.secondary">
-      Prova a selezionare un anno diverso o torna più tardi
+      {year !== 'all'
+        ? "Prova a selezionare un'altra edizione."
+        : 'Torna a trovarci più tardi.'}
     </Typography>
   </Box>
 );
