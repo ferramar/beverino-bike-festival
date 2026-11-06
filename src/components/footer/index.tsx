@@ -251,7 +251,17 @@ const Footer: React.FC = () => {
             <Typography component="p" sx={{ fontSize: 'inherit', opacity: 0.7, m: 0 }}>
               © {new Date().getFullYear()} Beverino Bike Festival. Tutti i diritti riservati.
             </Typography>
-            <Box component="nav" aria-label="Note legali" sx={{ display: 'flex', columnGap: 2 }}>
+            <Box
+              component="nav"
+              aria-label="Note legali"
+              sx={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                justifyContent: { xs: 'center', md: 'flex-start' },
+                columnGap: 2,
+                rowGap: 0.5,
+              }}
+            >
               <Link
                 href="https://www.iubenda.com/privacy-policy/20393244"
                 target="_blank"
@@ -269,6 +279,29 @@ const Footer: React.FC = () => {
                 sx={bottomLinkSx}
               >
                 Cookie Policy
+              </Link>
+              {/* Link gestiti da iubenda: se presenti, iubenda non inietta il suo widget in fondo alla pagina */}
+              <Link
+                href="https://www.iubenda.com/privacy-policy/20393244/cookie-policy"
+                className="iubenda-cs-uspr-link"
+                color="inherit"
+                sx={bottomLinkSx}
+              >
+                Informativa sulla raccolta
+              </Link>
+              <Link
+                component="button"
+                type="button"
+                className="iubenda-cs-preferences-link"
+                color="inherit"
+                sx={{
+                  ...bottomLinkSx,
+                  font: 'inherit',
+                  lineHeight: 'inherit',
+                  verticalAlign: 'baseline',
+                }}
+              >
+                Preferenze privacy
               </Link>
             </Box>
           </Box>
